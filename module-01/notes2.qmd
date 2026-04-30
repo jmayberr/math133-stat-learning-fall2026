@@ -32,7 +32,9 @@ glimpse(gapminder)
 
 ## Filtering and Selecting
 
-If we want to look at a snapshot of a specific country, we can create a new dataframe^[One comment here: you'll notice that I frequently use `=` instead of the more conventional `<-` for assigning values to variables. In my opinion the extra character isn't worth it and `=` feels more natural coming from other languages. Either will work for all examples in this course so use whichever you prefer.] which contains only its entries using the filter command
+If we want to look at a snapshot of a specific country, we can create a new dataframe[^1] which contains only its entries using the filter command
+
+[^1]: One comment here: you'll notice that I frequently use `=` instead of the more conventional `<-` for assigning values to variables. In my opinion the extra character isn't worth it and `=` feels more natural coming from other languages. Either will work for all examples in this course so use whichever you prefer.
 
 ```{r}
 japan=filter(gapminder,country=="Japan")
@@ -226,3 +228,12 @@ us_v_japan |>
 ```
 
 The addition of the "errorbar" and decrease in width aren't necessary, but make it more pleasing to look at in my opinion.
+
+## Exercise
+
+Import the dataset [Beerwings.csv](https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Beerwings.csv) (Source: [Mathematical Statistics with Resampling and R](https://bcs.wiley.com/he-bcs/Books?action=index&itemId=1119874033&bcsId=12641)) and complete the following steps.
+
+1.  Create a scatterplot of Hotwings (y-axis) vs Beer (x-axis) with nicely labeled axes titles and an added trendline.
+2.  Fit a linear model Hotwings \~ Beer and show the coefficients.
+3.  Compute the RMSE for the linear model.
+4.  Add a color aesthetic of "Gender" to your plot. Compare the trendlines shown in the graph. Do they appear to have different slopes or intercepts?

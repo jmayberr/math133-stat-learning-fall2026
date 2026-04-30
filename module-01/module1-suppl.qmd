@@ -1,0 +1,152 @@
+---
+title: "Module 1 Supplement: A deeper look into the least squares line"
+author: "John Mayberry"
+output: html_document
+format: 
+  html:
+    embed-resources: true
+    self-contained: true
+    math: mathjax
+editor: visual
+---
+
+## Introduction
+
+Gradient descent is an optimization algorithm used to minimize a loss function by iteratively adjusting parameters. The idea is that if your desired trend function $f$ depends on multiple parameters $\beta_i$, $i=1,..,p$, then you can look at the partial derivative of the loss function $\ell = \sum\_{i=1}\^n (y_i - f(x_i))\^2$ with respect to each parameter. Since the gradient vector, whose $i$th component is $$
+\frac{\partial \ell}{\partial \beta_i}
+$$always points in the direction of maximum increase, subtracting a small enough multiple of the gradient vector from your current estimates will move towards the minimum of $\ell$ (which is what we want).
+
+In this tutorial, we'll use gradient descent to fit a line to data by minimizing the sum of squared errors (SSE) for SLM. For convenience, we'll use $m,b$ for the slope and intercept. After, we'll discuss an exact formula for the least squares coefficients as well as a formula for the standard error.
+
+## Problem Setup
+
+Suppose we have collected a dataset of points $(x_i, y_i)$. Our goal is to fit a line $\hat y = \beta_0 + \beta_1 x$ by minimizing the sum of squared errors:
+
+$$
+\ell(\beta_0, \beta_1) = \sum_{i=1}^n (y_i - (\beta_0 + \beta_1 x_i))^2
+$$
+
+We'll start by generating some fake data:
+
+```{r setup}
+set.seed(45)
+n = 100
+x = seq(1, 10, length.out = n)
+b1 = 2
+b0 = 5
+y = b0+b1*x + rnorm(n, mean = 0, sd = 2) # Add noise
+data = data.frame(x = x, y = y)
+```
+
+## Gradient Descent Algorithm
+
+The gradient descent update rules will be:
+
+$$ \beta_i \leftarrow \beta_i - \alpha \frac{\partial \ell}{\partial \beta_i} $$ for $i=1,2$ where $\alpha$ is a hyperparameter called the learning rate or step size.. The partial derivatives of the loss function can be calculated as:
+
+$$ \frac{\partial \ell}{\partial \beta_1} = -2 \sum_{i=1}^n x_i (y_i - (\beta_0 + \beta_1 x_i) $$
+
+$$\frac{\partial \ell }{\partial \beta_0} = -2 \sum_{i=1}^n (y_i - (\beta_0 + \beta_1 x_i) $$
+
+One can implement this in R as follows (epochs is commonly used in machine learning to refer to the number of iterations performed):
+
+```{r}
+gradient_descent = function(x, y, learning_rate = 0.01, epochs = 1000) {
+  m = 0 # Initial slope
+  b = 0 # Initial intercept
+  n = length(y) # Number of data points
+  
+  for (i in 1:epochs) {
+    # Predicted values
+    y_pred = m * x + b
+    
+    # Gradients
+    gradient_m = (-2 / n) * sum(x * (y - y_pred))
+    gradient_b= (-2 / n) * sum(y - y_pred)
+    
+    # Update parameters
+    m = m - learning_rate * gradient_m
+    b = b - learning_rate * gradient_b
+  }
+  
+  return(list(intercept = b, slope = m))
+}
+
+# Run gradient descent
+gd_result <- gradient_descent(data$x, data$y, learning_rate = 0.01, epochs = 1000)
+gd_result
+```
+
+The results should roughly match those obtained by `lm`:
+
+```{r}
+lm(y~x,data=data)
+```
+
+We might be able to get closer by adjusting the learning rate or number of epochs
+
+```{r}
+gradient_descent(data$x, data$y, learning_rate = 0.02, epochs = 2000)
+```
+
+But you have to be careful because using a learning rate too high will cause the solutions to diverge.
+
+```{r}
+gradient_descent(data$x, data$y, learning_rate = 0.1, epochs = 1000)
+```
+
+And too small will be slower to converge
+
+```{r}
+gradient_descent(data$x, data$y, learning_rate = 0.001, epochs = 1000)
+```
+
+Choosing the right learning rate is a complicated problem. Many modern algorithms use adaptive learning rates (eg. Adam, RMSprop, and AdaGrad) that change to match the size of the gradient (larger gradients need smaller learning rates).
+
+## Exact Formulas
+
+For SLM, gradient descent is overkill because we can explicitly solve for the least squares solutions by setting the partial derivatives to 0:
+
+$$ \frac{\partial \ell}{\partial \beta_1} = -2 \sum_{i=1}^n x_i (y_i - (\beta_0 + \beta_1 x_i)=0 $$
+
+$$\frac{\partial \ell }{\partial \beta_0} = -2 \sum_{i=1}^n (y_i - (\beta_0 + \beta_1 x_i)=0 $$
+
+and solving for $\beta_0, \beta_1$. Doing so[^1] yields the explicit formulas
+
+[^1]: I recommend working through the algebra to feel good about yourself.
+
+$$\hat \beta_1 = \frac{n \sum_{i=1}^n x_i y_i - \sum_{i=1}^n x_i \sum_{i=1}^n y_i}{n \sum_{i=1}^n x_i^2 - \left(\sum_{i=1}^n x_i\right)^2} $$
+
+$$ \hat \beta_0 = \frac{\sum_{i=1}^n y_i - \hat \beta_1 \sum_{i=1}^n x_i}{n} $$
+
+that one often sees in stats textbooks. These formulas are used by `lm`, but you can hardcode them easily enough:
+
+```{r}
+sx=sum(x)
+sy=sum(y)
+sxx=sum(x^2)
+sxy=sum(x*y)
+n=nrow(data)
+
+slope= (n*sxy - sx*sy)/(n*sxx-sx^2)
+intercept=(sy-slope*sx)/n
+cat("slope =", slope, "\nintercept =", intercept)
+```
+
+## Standard Error
+
+If we subtitute $Y_i = \beta_0 + \beta_1 x_i + \epsilon_i$ and $\bar{y} = \beta_0 + \beta_1 \bar{x}$ into our formual for $\hat \beta_1$ , we get: $$ \hat{\beta_1} = \frac{\sum (x_i - \bar{x})(\beta_1(x_i - \bar{x})+\epsilon_i)}{\sum (x_i - \bar{x})^2} $$ which simplifies to $$
+\hat{\beta_1} = \beta_1 + \frac{\sum (x_i - \bar{x}) \epsilon_i}{\sum (x_i - \bar{x})^2}
+$$ The variance is then: $$
+\text{Var}(\hat{\beta_1}) = \text{Var} \left( \frac{\sum (x_i - \bar{x}) \epsilon_i}{\sum (x_i - \bar{x})^2} \right)
+$$ Since the noise terms $\epsilon_i$ are independent with variance $\sigma^2$, standard properties of variance imply: $$
+\text{Var}\left(\sum (x_i - \bar{x}) \epsilon_i\right) = \sigma^2 \sum (x_i - \bar{x})^2
+$$ Therefore, $$
+\text{Var}(\hat{\beta_1}) = \frac{\sigma^2 \sum (x_i - \bar{x})^2}{\left(\sum (x_i - \bar{x})^2\right)^2} = \frac{\sigma^2}{\sum (x_i - \bar{x})^2}
+$$ The standard error is the square root of this quantity.
+
+The predicted mean of $Y$ at a given $x_i$ is: $$
+\hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 x_i 
+$$ so by general variance of a sum of random variables formula, the variance of $\hat{Y}$ is: $$
+\text{Var}(\hat{Y}) = \text{Var}(\hat{\beta}_0) + x_i^{2} \text{Var}(\hat{\beta}_1) + 2x_i \text{Cov}(\hat{\beta}_0, \hat{\beta}_1) ]
+$$ Hmm, now I am realizing this is getting nasty as you have to calculate $\text{Var}(\hat{\beta}_0)$ and $\text{Cov}(\hat{\beta}_0, \hat{\beta}_1)$. It can be done, but who has time for such algebra in today's day and age? Hopefully, this at least gives you an idea about why $x_i$ enters the equation. The textbook [Mathematical Statistics with Resampling and R](https://bcs.wiley.com/he-bcs/Books?action=index&itemId=1119874033&bcsId=12641)) covers the details of these calculations. There are also some more general proofs of formulas for multiple regression models and we'll discuss those in the next Module.
