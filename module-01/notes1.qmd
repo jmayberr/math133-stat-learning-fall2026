@@ -92,10 +92,12 @@ We'll close out our Day 1 notes with a real life example to further demonstrate 
 
 ## Predicting Election Results
 
-The dataset election2016.csv in the shared folder contains the results of the 2016 presidential election by state along with key demographic information (taken from a FiveThirtyEight Blog back in 2017). You can load it into Rstudio and look at the first few rows using the following commands (you will have to replace the file location with the appropriate location on your computer):
+The dataset election2016.csv in the shared folder contains the results of the 2016 presidential election by state along with key demographic information (Source: [FiveThirtyEight](https://fivethirtyeight.com/features/higher-rates-of-hate-crimes-are-tied-to-income-inequality/)). You can load it into Rstudio and look at the first few rows using the following commands which pulls the dataset form the course github repository:
 
 ```{r}
-election2016=read.csv('../Datasets/election2016.csv')
+library(readr)
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016=read.csv(df_url)
 head(election2016)
 ```
 
@@ -106,16 +108,17 @@ If we wanted to predict the outcome of the election, we have two choices
 
 The first would be a regression problem and the second classification. We'll start with the first and choose the single predictor non.white (the proportion of non-white residents of the state) to use in our preliminary analysis.
 
-The most common package we will use in this course is tidyverse. If you haven't already, install it with the command install.packages('tidyverse'). Then get in the habit of loading it to start each session with the following command.
+The most common package we will use in this course is tidyverse. If you haven't already, install it with the command `install.packages('tidyverse')`. Then get in the habit of loading it to start each session with the following command.
 
 ```{r}
 library(tidyverse)
 ```
 
-The tidyverse package contains ggplot2 which you would have used in Math 37. Its the premier plotting package in R and dare I say any data science software? The following set of commands creates a scatterplot of trump.vote vs non.white
+The tidyverse package contains ggplot2, the premier plotting package in R and dare I say any data science software? It is based on Hadley Wickham's [Layered Grammar of Graphics](https://byrneslab.net/classes/biol607/readings/wickham_layered-grammar.pdf) in which you build a plot in layers starting with a dataset, mapping variables to "aesthetics" (such as the x- and y-axes or shape/color), and then adding a specific geometry to the graph (like a scatterplot, line plot, histogram or boxplot). The following set of commands gives an example that creates a scatterplot of trump.vote vs non.white
 
 ```{r}
-ggplot(election2016,aes(x=non.white,y=trump.vote))+
+ggplot(election2016,
+       aes(x=non.white,y=trump.vote))+
   geom_point(shape=1)+
   labs(x="Proportion Non-White Residents",y="Proportion of Trump Vote")+
   geom_smooth(method="lm",se=FALSE,col="darkorange")+
@@ -123,7 +126,7 @@ ggplot(election2016,aes(x=non.white,y=trump.vote))+
 
 ```
 
-The geom_smooth commands adds a trendline to the data. It seems like a line with negative slope provids a rough estimate of the relationship so we'll look to fit a model of the form $$
+The geom_smooth commands adds the "trendline" to the data. It seems like a line with negative slope provids a rough estimate of the relationship so we'll look to fit a model of the form $$
 Y = \beta_0 + \beta_1 X + \varepsilon
 $$ where $Y$ = trump.vote, $X$ = non.white, and $\varepsilon$ is the random noise. In this case, $$
 f(X)= \beta_0 + \beta_1 X
@@ -151,15 +154,18 @@ mse
 
 If someone chooses a different $\hat{f}$ that gives predictions with a better MSE, they can claim a better model. But wait a minute, instead of just guessing, can't we start with our goal of minimizing MSE and find the coefficients which make it as small as possible? In other words, we should start with the "loss" function\footnote{Sometimes called a cost function}: $$
 \ell(\beta_0,\beta_1) = \frac{1}{n} \sum_{i=1}^n (y_i - (\beta_0 + \beta_1 x_i))^2
-$$ and choose estimates $\hat{\beta}_0,\hat{\beta}_1$ to make this quantity as small as possible. This becomes a calculus or linear algebra problem and solving it gives the least squares estimates of $\beta_0, \beta_1$. The R function lm will compute them by
+$$ and choose estimates $\hat{\beta}_0,\hat{\beta}_1$ to make this quantity as small as possible. This becomes a calculus or linear algebra problem\^\[See Module 1 Supplementary Materials for details of the calculation\] and solving it gives the least squares estimates of $\beta_0, \beta_1$. The R function lm will compute them by
 
 ```{r}
 lm(y~x)
 ```
 
+The number under "Intercept" is the estimate $\hat \beta_0$ and the number under $x$ is $\hat \beta_1$.
+
 Before we show this is better than our eyeball model, a note on R syntax. The part of the above command $$
 y \sim x
-$$ is called a model formula. It means that we are going to be using the variable y as our outcome and variable x as a feature. If you place a function $f$ around a model formula, then what you are doing is fitting a model $$
+$$\
+is called a model formula. It means that we are going to be using the variable y as our outcome and variable x as a feature. If you place a function $f$ around a model formula, then what you are doing is fitting a model $$
 Y = f(X) + \varepsilon
 $$ based on our data. The "lm" stands for linear model which means $f(x) = \beta_0 + \beta_1 x$ is the trend function being used in this example, but we will replace lm with more complicated functions as the course goes on.
 
@@ -183,19 +189,19 @@ yhat_lm=predict(trump_lm)
 mean((y-yhat_lm)^2)
 ```
 
-As our model formulae get more complicated, this becomes an increasingly important tool.
+As our model formulas get more complicated, this becomes an increasingly important tool.
 
-Second, MSE on its own has meaningless units (variance anyone?) so it is more common to look at its square root the R(oot)MSE:
+Second, MSE on its own has meaningless units (variance anyone?) so it is more common to look at its square root, the R(oot)MSE:
 
 ```{r}
-rmse_lm=sqrt(mean((y-yhat_lm)^2))
+rmse_lm <- sqrt(mean((y - yhat_lm)^2))
 rmse_lm
 ```
 
-This says that on average our predictions are off by about 0.09 per state although not quite because it is different from the Mean Absolute Deviation (with the best acronym of MAD):
+This says that our predictions are off by about 0.09 per state on average, although not exactly, since squaring the errors before taking the square root is not the same as simply averaging the absolute errors which instead leads to the Mean Absolute Deviation (best acronym in statistics: MAD):
 
 ```{r}
-mean(abs(y-yhat_lm))
+mean(abs(y - yhat_lm))
 ```
 
-Its kind of like the difference between the L2 and L1 norms (more on that later). Both are validate ways of measuring the accuracy of the model; the RMSE has more theoretical value but the MAD is easier to explain to your friends.
+The difference comes down to how each metric penalizes errors. RMSE squares the errors before averaging, which gives extra weight to large mistakes, while MAD treats all errors equally regardless of size. This is similar to the difference between the $\ell_2$ and $\ell_1$ norms if you know about such things (if not, they will appear later in the course). Both are valid ways of measuring model accuracy; RMSE has more theoretical appeal but MAD is much easier to explain to your friends.
