@@ -98,12 +98,13 @@ $$
 
 [^4]: See supplement below for details.
 
-where $\sigma$ is the standard deviation of the noise. This formula is baked into lm as well[^5] and can be viewed using summary. Let's look at it for our Beerwings data
+where $\sigma$ is the standard deviation of the noise. This formula is baked into lm as well[^5] and can be viewed using summary. Let's look at it for the Beerwings data from tehe exercise at the end of the last notes.
 
 [^5]: Although since $\sigma$ is generally unknown, it uses the estimate $\sqrt{SSE/(n-2)}$ which is based on an unbiased estimator of $\sigma$ - take Math 132 if you want to learn more about that.
 
 ```{r}
-Beerwings <- read.csv("../Datasets/Beerwings.csv")
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Beerwings.csv"
+Beerwings <- read_csv(df_url)
 bw_lm=lm(Hotwings~Beer,data=Beerwings)
 summary(bw_lm)
 ```
@@ -118,9 +119,18 @@ The p-value is the probability of obtaining a slope of magnitude as large as the
 sum(abs(slopes)>0.5)/1000
 ```
 
-of all our our slopes are as big as 0.5 so the p-value of 0.5 would be about 0.008. That means 0.5 would be a "significantly nonzero" slope in this scenario.
+of all our our slopes are as big as 0.5 so the p-value of 0.5 would be about 0.008. Since this number is small 0.5 would be a "significantly nonzero" slope in this scenario. On the other hand
 
-The smaller the p-value, the more surprising it would be to get a slope as large as we did due to chance, providing more evidence of a significant linear relationship (or "correlation"). In scientific literature, a p-value of less than 0.05 is usually considered "statistically significant". p-values \< 0.001 are considered highly significant. p-values between 0.05 and 0.1 are sometimes allowed as moderately significant. In the Beerwings output above, our p-value was \< 0.001 so we can say that there is a significant correlation between hotwings and beer consumption.
+```{r}
+sum(abs(slopes)>0.1)/1000
+```
+
+of all slopes were greater than 0.1 so the p-value of 0.1 would be 0.608 . This number is pretty high (there's a 60% change of generating a slope this large by chance) so 0.1 is not a significantly nonzero slope.
+
+The smaller the p-value, the more surprising it would be to get a slope as extreme as we observed due to chance, providing more evidence of a significant linear relationship. By convention, a p-value below 0.05 is considered statistically significant, below 0.001 is considered highly significant, and between 0.05 and 0.1 is considered moderately significant, though these are guidelines rather than hard rules.
+
+Looking back at the output of Beerwings above, our p-value was $2.95*10^{-7}< 0.001$\
+so we can say that beer consumption is a significant predictor of hotwings consumption (more beer typically means more wings and less beer typically means less wings).
 
 ## Type I and Type II Errors
 
@@ -139,9 +149,9 @@ That's an error rate of 43/1000=0.043. Using a 2SE rule, the answer will usually
 
 ```{r}
 set.seed(44)
-x <- rnorm(30)
-y <- 0.1*x+rnorm(30)
-model <- lm(y ~ x)
+x = rnorm(30)
+y = 0.1*x+rnorm(30)
+model = lm(y ~ x)
 coef(model)[2]
 
 ```
@@ -150,24 +160,22 @@ is within 2SE of 0.
 
 ## What are those grey areas that appear in geom_smooth?
 
-The astute observer will have noticed that geom_smooth plots a gray area around a trendline and that is has unequal width depending on where we are at on the $x$-axis. For example, if we take out se=FALSE in our Beerwings plot:
+The astute observer will have noticed that geom_smooth plots a gray area around a trendline and perhaps questioned why it is has unequal width depending on where we are at on the $x$-axis. For example, using our Beerwings data:
 
 ```{r}
-Beerwings %>% ggplot(aes(x=Beer,y=Hotwings))+
+Beerwings |> ggplot(aes(x=Beer,y=Hotwings))+
   geom_point() +
   labs(x="Beer (oz)",y="Hotwings")+
   geom_smooth(method="lm")
 ```
 
-The grey area shows 95% confidence intervals for the predicted means of our outcome. If we assume that the $x_i$ are fixed and that When are estimated the coefficients $\beta_0, \beta_1$ in a linear model $$
-Y_i = \beta_0 + \beta_1 x_i + \varepsilon 
-$$ the standard errors of $\beta_1$ and $\beta_0$ tell us our level of confidence in the predictions of those parameters. But when we estimate the mean value of $Y$ for a given $x$ as $$
+The grey area shows 95% confidence intervals for the predicted means of our outcome. If we assume that the $x_i$ are fixed and that we have estimates $\hat \beta_0, \hat \beta_1$ for the coefficients in an SLM, then the standard errors of $\hat \beta_1$ and $\hat \beta_0$ tell us our level of confidence in the predictions of those parameters. But when we estimate the mean value of $Y$ for a given $x$ as $$
 \hat{y}_i = \hat{\beta}_0+\hat{\beta}_1 x_i
-$$ the error we make depends on an interaction of errors in our estimates of $\beta_0, \beta_1$ and in the value of $x_i$. In fact, a formula for the standard error is $$
+$$the error we make depends on an interaction of errors in our estimates of $\beta_0, \beta_1$ and in the value of $x_i$. In fact, a formula for the standard error is $$
 SE(\hat{y}_i) = \sigma \sqrt{\frac{1}{n} + \frac{(x_i - \bar{x})^2}{\sum (x_j - \bar{x})^2}}
-$$ where again, we typically use an estimate of $\sigma$ from our data. If $x_i$ is close to $\bar{x}$, then the numerator of the second term under the square root is close to 0. As we move further from $\bar{x}$, the SE gets bigger.
+$$which is usually calculated by using an estimate of $\sigma$ from our data. If $x_i$ is close to $\bar{x}$, then the numerator of the second term under the square root is close to 0. As we move further from $\bar{x}$, the SE gets bigger.
 
-One can get such confidence intervals using the predict function. Here are the first six in our Beerwings model. "fit" gives the estimate $\hat{y}$ for the corresponding $x$ in our data. The lwr and upr give the endpoints for a 95% confidence interval of our estimate:
+One can get such confidence intervals using the `predict` function. Here are the first six in our Beerwings model. The "fit" term gives the estimate $\hat{y}$ for the corresponding $x$ in our data while "lwr" and "upr" give the endpoints for a 95% confidence interval of our estimate:
 
 ```{r}
 head(predict(bw_lm,Beerwings,interval = "confidence"))
@@ -188,8 +196,10 @@ Beerwings[1,]
 1.  (Confidence Interval) Based on our model, we are 95% confident that the true mean number of hotwings consumed by all individuals who drink 24 ounces of beer lies between 10.08 and 12.39 wings per person
 2.  (Prediction Interval) Based on our model, we predict with 95% confidence that a randomly selected individual who drinks 24 ounces of beer will consume between 4.94 and 17.53 wings (or about 5-18 wings).
 
-## Supplement: Formulas for the standard errors
+To summarize the difference:
 
-Suppose that $Y_i = \beta_0 + \beta_1 x_i + \epsilon_i$ where $\epsilon_i$ are normal random variables with standard deviation $\sigma$. From the last supplement, the least squares estimate of the slope is \[ \hat{\beta_1} = \frac{\sum (x_i - \bar{x})(Y_i - \bar{y})}{\sum (x_i - \bar{x})^2} \] Substituting $Y_i = \beta_0 + \beta_1 x_i + \epsilon_i$ and $\bar{y} = \beta_0 + \beta_1 \bar{x}$, we get: \[ \hat{\beta_1} = \frac{\sum (x_i - \bar{x})(\beta_1(x_i - \bar{x})+\epsilon_i)}{\sum (x_i - \bar{x})^2} \] which simplifies to \[ \hat{\beta_1} = \beta\_1 + \frac{\sum (x_i - \bar{x}) \epsilon_i}{\sum (x_i - \bar{x})^2} \] The variance is then: \[ \text{Var}(\hat{\beta_1}) = \text{Var} \left( \frac{\sum (x_i - \bar{x}) \epsilon_i}{\sum (x_i - \bar{x})^2} \right) \] Since the noise terms $\epsilon_i$ are independent with variance $\sigma^2$, standard properties of variance imply: \[ \text{Var}\left(\sum (x_i - \bar{x}) \epsilon\_i\right) = \sigma\^2 \sum (x_i - \bar{x})\^2 \] Therefore, \[ \text{Var}(\hat{\beta_1}) = \frac{\sigma^2 \sum (x_i - \bar{x})^2}{\left(\sum (x_i - \bar{x})^2\right)^2} = \frac{\sigma^2}{\sum (x_i - \bar{x})^2} \] The standard error is the square root of this quantity.
+-   \*\*Confidence interval for the mean\*\* at $x_i$: how uncertain are we about the \*average\* value of $Y$ at this $x_i$? This only accounts for uncertainty in estimating the line.
 
-The predicted mean of $Y$ at a given $x_i$ is: \[ \hat{Y} = \hat{\beta}\_0 + \hat{\beta}\_1 x_i \] so by general variance of a sum of random variables formula, the variance of $\hat{Y}$ is: \[ \text{Var}(\hat{Y}) = \text{Var}(\hat{\beta}\_0) + x_i\^{2} \text{Var}(\hat{\beta}\_1) + 2x_i \text{Cov}(\hat{\beta}\_0, \hat{\beta}\_1) \] Hmm, now I am realizing this is getting nasty as you have to calculate $\text{Var}(\hat{\beta}_0)$ and $\text{Cov}(\hat{\beta}_0, \hat{\beta}_1)$. It can be done, but who has time for such algebra in today's day and age? Hopefully this at least gives you an idea about why $x_i$ enters the equation. The textbook Mathematical Statistics with Resampling and R has a decent coverage of the full calculations. There are also some more general proofs of formulas for multiple regression models and if time permits, I'll include some in future supplements.
+<!-- -->
+
+-   \*\*Prediction interval\*\* at $x_i$​: how uncertain are we about a \*single new observation\* $Y$ at this $x_i$​? This accounts for uncertainty in estimating the line \*plus\* the irreducible noise $\sigma$ of any individual observation.

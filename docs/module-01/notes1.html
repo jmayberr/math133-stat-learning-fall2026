@@ -5124,13 +5124,13 @@ f(X) \approx X.
 4   Arkansas         44922      0.052  0.69       0.824        0.04      0.12
 5 California         60487      0.059  0.97       0.806        0.13      0.09
 6   Colorado         60940      0.040  0.80       0.893        0.06      0.07
-  income.ineq non.white trump.vote post_hate.crimes pre_hate.crimes outcome
-1       0.472      0.35       0.63       0.12583893       1.8064105     Red
-2       0.422      0.42       0.53       0.14374012       1.6567001     Red
-3       0.455      0.49       0.50       0.22531995       3.4139280     Red
-4       0.458      0.26       0.60       0.06906077       0.8692089     Red
-5       0.471      0.61       0.33       0.25580536       2.3979859    Blue
-6       0.457      0.31       0.44       0.39052330       2.8046888    Blue</code></pre>
+  income.ineq non.white trump.vote outcome
+1       0.472      0.35       0.63     Red
+2       0.422      0.42       0.53     Red
+3       0.455      0.49       0.50     Red
+4       0.458      0.26       0.60     Red
+5       0.471      0.61       0.33    Blue
+6       0.457      0.31       0.44    Blue</code></pre>
 </div>
 </div>
 <p>If we wanted to predict the outcome of the election, we have two choices</p>
@@ -5157,7 +5157,7 @@ f(X) \approx X.
 ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 </div>
 </div>
-<p>The tidyverse package contains ggplot2, the premier plotting package in R and dare I say any data science software? It is based on Hadley Wickham’s <a href="https://byrneslab.net/classes/biol607/readings/wickham_layered-grammar.pdf">Layered Grammar of Graphics</a> in which you build a plot in layers starting with a dataset, mapping variables to “aesthetics” (such as the x- and y-axes or shape/color), and then adding a specific geometry to the graph (like a scatterplot, line plot, histogram or boxplot). The following set of commands gives an example that creates a scatterplot of <em>trump.vote</em> vs <em>non.white</em></p>
+<p>The tidyverse package contains ggplot2, the premier plotting package in R and dare I say any data science software? We’ll talk more about it in the next notes, but for now use the following set of commands to creates a scatterplot of <em>trump.vote</em> vs <em>non.white</em></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(election2016,</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x=</span>non.white,<span class="at">y=</span>trump.vote))<span class="sc">+</span></span>
@@ -5176,7 +5176,7 @@ f(X) \approx X.
 </div>
 </div>
 </div>
-<p>The geom_smooth commands adds the “trendline” to the data. It seems like a line with negative slope provids a rough estimate of the relationship so we’ll look to fit a model of the form <span class="math display">\[
+<p>The geom_smooth command adds the “trendline” which has a negative slope in this example and seems to capture the overall “flow” of data. This suggests we might fit a model of the form <span class="math display">\[
 Y = \beta_0 + \beta_1 X + \varepsilon
 \]</span> where <span class="math inline">\(Y\)</span> = trump.vote, <span class="math inline">\(X\)</span> = non.white, and <span class="math inline">\(\varepsilon\)</span> is the random noise. In this case, <span class="math display">\[
 f(X)= \beta_0 + \beta_1 X
@@ -5327,7 +5327,7 @@ Y = f(X) + \varepsilon
 <ol>
 <li id="fn1"><p>We are getting away from using <span class="math inline">\(mx+b\)</span> because as we add more variables, we need an easy way to index coefficients.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>Sometimes called a cost function<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>See the Module 1.3 Notes Supplement for Details<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>See the Module 1 Supplement for further details.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
