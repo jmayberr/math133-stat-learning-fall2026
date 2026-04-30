@@ -11,5 +11,10 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: modules.qmd
-        text: Modules
+      - text: "Module 1"
+        menu:
+          - href: module-01/notes1.qmd
+            text: "Notes 1: Introduction to Statistical Models"
+      - text: "Module 2"
+        menu:
+          - text: "Notes 1: ..."
