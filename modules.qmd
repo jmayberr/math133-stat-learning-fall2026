@@ -1,0 +1,8 @@
+---
+title: "Modules"
+listing:
+  contents: "module-*/*.qmd"
+  type: grid
+  sort: "date"
+  fields: [title, description, date]
+---

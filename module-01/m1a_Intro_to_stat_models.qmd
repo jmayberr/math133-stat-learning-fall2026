@@ -1,0 +1,201 @@
+---
+title: "Introduction to Statistical Models"
+author: "Mayberry"
+date: "`r Sys.Date()`"
+format: 
+  html:
+    embed-resources: true
+    self-contained: true
+    math: mathjax
+editor: visual
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Prediction
+
+Close your eyes and think of a time you tried to predict something. What was it it that you were trying to predict? Was it a number? Was it a binary outcome (like win/lose)? What information did you use to make your prediction? In this class, prediction will be our goal and we'll develop a toolbox of methods for predicting one variable (called an outcome, response or dependent variable) from others (called features, predictors, explanatory or independent variables).
+
+A deterministic model for prediction is of the following form: $$
+Y = f(X_1,X_2,..X_p)
+$$ where $Y$ is the outcome, $X_1,...,X_p$ are the features, and $f$ is a function which relates the two. A statistical or probabilistic model allows us to add some random noise into the model and say $$
+Y = f(X_1,X_2,..X_p) + \varepsilon
+$$ where $\varepsilon$ is a random variable with mean zero (so the noise acts in an unbiased manner) and nonzero variance $\sigma$. In this framework, the function $f$ represents the trend and the error term $\varepsilon$ represents random fluctuations around the trend that are not captured by the features in your model. Because of Central Limit Theorem arguments, we often assume that $\varepsilon$ is a Normal random variable.
+
+To demonstrate, here is an example of data that is generated according to the statistical model $$
+Y = X + Z
+$$ where $Z$ is a standard normal random variable and $X$ can be either 0, 1, or 2:
+
+```{r}
+set.seed(45) # Sets random number generator seed for reproducibility. 
+X=rep(c(0,1,2),300) # Generates 300 copies of the list 0,1,2
+n=length(X)  # Could set n = 900 but this is better in case we change X
+Y=X+rnorm(n) # Adds random noise
+plot(X,Y)   # R basic plotting function
+```
+
+Notice that for each possible value of $X=x$, the corresponding $Y$ values are normally distributed around $x$. For example, here are all $Y$ values corresponding to $X=0$.
+
+```{r}
+hist(Y[X==0],main="Histogram of Y values for X=0",xlab="Y")
+```
+
+This is what we call fake data. We started with a mathematical model and used it to create observations. Its cheating, but sometimes necessary to pull back the mathematical curtain and get some intuition. In the real world, the opposite happens: we get data and need to guess the model. Assuming we have a single feature $X$ and outcome $Y$, then data means collecting $n$ pairs of points $(x_i,y_i)$, $i=1,2...,n$, where each $x_i$ is a measurement of the feature and $y_i$ is a corresponding measurement on the outcome. In our fake data, this would be all 900 pairs of X,Y values. For example, the first is
+
+```{r}
+c(X[1],Y[1])
+```
+
+The goal is then to find a predicted trend function $\hat{f}$ (yes, we like to put hats on things in statistics and it always means something that is predicted) so that the predicted values $$
+\hat{y}_i = \hat{f}(x_i)
+$$ are as close to the collected $y_i$ as possible. If the outcome variable $y_i$ is numeric, we call the process of finding a suitable $\hat{f}$ a regression problem. If the outcome $y_i$ is categorical, we call it a classification problem. It is also often of interest to find an estimate $\hat{\sigma}$ for the standard deviation of the noise so we can form confidence or prediction intervals but more on that to come.
+
+Suppose now that we did not know the original model that had been used to generate the X and Y values above. How would we go about developing a model of the form $$
+Y = f(X) + \varepsilon ?
+$$ Well, since we assumed that $\varepsilon$ has mean zero, the trend function $f(X)$ should capture how the mean of $Y$ depends on the values of $X$. From the scatterplot above, it looks like the mean of Y increases as X increases in a linear fashion so we might guess $$
+f(X) \approx m X + b
+$$
+
+In fact, we could compute the mean of Y for each value of X as follows\footnote{We'll learn a quicker way of getting the mean for different groups next class.} to estimate $m,b$:
+
+```{r}
+c(mean(Y[X==0]),mean(Y[X==1]),mean(Y[X==2]))
+```
+
+Here it looks like the mean of Y is roughly 0 when X is 0 and goes up by about 1 for each increase of 1 in X. This would suggest that for any value of $X = 0,1,2$, $$
+f(X) \approx X.
+$$ To estimate the standard deviation of the noise, we can also compute the standard deviation for each X value
+
+```{r}
+c(sd(Y[X==0]),sd(Y[X==1]),sd(Y[X==2]))
+
+```
+
+They are all pretty close to 1 so we might estimate $\hat{\sigma} \approx 1$. Of course, we know that this model is accurate because this was fake data.
+
+As mentioned above, once you have an estimate of the model, you can use the trend function to calculate predictions. $$
+\hat{y} = \hat{f}(x)
+$$
+
+In our fake example, $\hat{f}(x) = x$ so our predictions would just be $$
+\hat{y} = x
+$$ for $x=0,1,2$. Notice that these predictions will be far from perfect since the actual $y_i$ values are randomly distributed around $x_i$. Instead think of $\hat{y}$ as capturing the expected value of $Y$ for a given value of $X=x$. Here is what it looks like plotted alongside our original data
+
+```{r}
+plot(X,Y)
+lines(X,X,col='red')
+```
+
+We'll close out our Day 1 notes with a real life example to further demonstrate these concepts.
+
+## Predicting Election Results
+
+The dataset election2016.csv in the shared folder contains the results of the 2016 presidential election by state along with key demographic information (taken from a FiveThirtyEight Blog back in 2017). You can load it into Rstudio and look at the first few rows using the following commands (you will have to replace the file location with the appropriate location on your computer):
+
+```{r}
+election2016=read.csv('../Datasets/election2016.csv')
+head(election2016)
+```
+
+If we wanted to predict the outcome of the election, we have two choices
+
+1.  Try to predict the actual proportion of Trump vote
+2.  Try to predict whether the state was red (for Trump) or blue (for Clinton)
+
+The first would be a regression problem and the second classification. We'll start with the first and choose the single predictor non.white (the proportion of non-white residents of the state) to use in our preliminary analysis.
+
+The most common package we will use in this course is tidyverse. If you haven't already, install it with the command install.packages('tidyverse'). Then get in the habit of loading it to start each session with the following command.
+
+```{r}
+library(tidyverse)
+```
+
+The tidyverse package contains ggplot2 which you would have used in Math 37. Its the premier plotting package in R and dare I say any data science software? The following set of commands creates a scatterplot of trump.vote vs non.white
+
+```{r}
+ggplot(election2016,aes(x=non.white,y=trump.vote))+
+  geom_point(shape=1)+
+  labs(x="Proportion Non-White Residents",y="Proportion of Trump Vote")+
+  geom_smooth(method="lm",se=FALSE,col="darkorange")+
+  theme_bw()
+
+```
+
+The geom_smooth commands adds a trendline to the data. It seems like a line with negative slope provids a rough estimate of the relationship so we'll look to fit a model of the form $$
+Y = \beta_0 + \beta_1 X + \varepsilon
+$$ where $Y$ = trump.vote, $X$ = non.white, and $\varepsilon$ is the random noise. In this case, $$
+f(X)= \beta_0 + \beta_1 X
+$$ is a linear function\footnote{We are getting away from using $mx+b$ because as we add more variables, we need an easy way to index coefficients.} and so estimating it is equivalent to estimating the two parameters $\beta_0, \beta_1$ with some $\hat{\beta}_0, \hat{\beta}_1$. The predicted outcomes would then be $$
+\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i
+$$ For example, if we look at the line in the graph above, it looks like it has a slope of about $-0.05/0.2 = -0.25$ and an intercept of around 0.57 so we might guess $$
+\hat{\beta}_0 =0.57, \,  \hat{\beta}_1 = -0.25
+$$ Then the actual and predicted values would be as follows
+
+```{r}
+y=election2016$trump.vote
+x=election2016$non.white
+yhat=0.57-0.25*x
+data.frame(state=election2016$state,actual=y,predicted=yhat)
+```
+
+The Mean Squared Error (MSE) of a model is the average error made per observation: $$
+MSE = \frac{1}{n} \sum_{i=1}^n (y_i- \hat{y}_i)^2
+$$ We can compute MSE for our model as follows
+
+```{r}
+mse=mean((y-yhat)^2)
+mse
+```
+
+If someone chooses a different $\hat{f}$ that gives predictions with a better MSE, they can claim a better model. But wait a minute, instead of just guessing, can't we start with our goal of minimizing MSE and find the coefficients which make it as small as possible? In other words, we should start with the "loss" function\footnote{Sometimes called a cost function}: $$
+\ell(\beta_0,\beta_1) = \frac{1}{n} \sum_{i=1}^n (y_i - (\beta_0 + \beta_1 x_i))^2
+$$ and choose estimates $\hat{\beta}_0,\hat{\beta}_1$ to make this quantity as small as possible. This becomes a calculus or linear algebra problem and solving it gives the least squares estimates of $\beta_0, \beta_1$. The R function lm will compute them by
+
+```{r}
+lm(y~x)
+```
+
+Before we show this is better than our eyeball model, a note on R syntax. The part of the above command $$
+y \sim x
+$$ is called a model formula. It means that we are going to be using the variable y as our outcome and variable x as a feature. If you place a function $f$ around a model formula, then what you are doing is fitting a model $$
+Y = f(X) + \varepsilon
+$$ based on our data. The "lm" stands for linear model which means $f(x) = \beta_0 + \beta_1 x$ is the trend function being used in this example, but we will replace lm with more complicated functions as the course goes on.
+
+Now let's check that our model is better than the eyeball one
+
+```{r}
+yhat_lm=0.5811-0.2655*x
+mse_lm=mean((y-yhat_lm)^2)
+c(mse,mse_lm)
+```
+
+Just a little bit smaller!
+
+## The Predict Function and RMSE
+
+Before we close out the first day of notes, it is worth mentioning that the predict function will compute yhat's from the output of R commands
+
+```{r}
+trump_lm=lm(y~x)
+yhat_lm=predict(trump_lm)
+mean((y-yhat_lm)^2)
+```
+
+As our model formulae get more complicated, this becomes an increasingly important tool.
+
+Second, MSE on its own has meaningless units (variance anyone?) so it is more common to look at its square root the R(oot)MSE:
+
+```{r}
+rmse_lm=sqrt(mean((y-yhat_lm)^2))
+rmse_lm
+```
+
+This says that on average our predictions are off by about 0.09 per state although not quite because it is different from the Mean Absolute Deviation (with the best acronym of MAD):
+
+```{r}
+mean(abs(y-yhat_lm))
+```
+
+Its kind of like the difference between the L2 and L1 norms (more on that later). Both are validate ways of measuring the accuracy of the model; the RMSE has more theoretical value but the MAD is easier to explain to your friends.
