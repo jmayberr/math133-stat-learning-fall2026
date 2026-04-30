@@ -9,23 +9,30 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Homepage",
+    "title": "Course page for Math 133: Statistical Learning Methods",
     "section": "",
-    "text": "Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see https://quarto.org."
+    "text": "In this course you’ll learn how to build and evaluate statistical models — essentially, how to use data to make predictions and uncover patterns. We’ll cover two main types of problems: regression (predicting a number, like a house price) and classification (predicting a category, like whether an email is spam or not).\nAlong the way you’ll get hands-on experience with a wide range of popular modeling techniques, from foundational methods like linear and logistic regression to more modern approaches like random forests and neural networks. You’ll also learn how to figure out which model is actually the best fit for a given problem, a skill that’s just as important as building the models themselves!\nAll of this will be done in R, a widely used programming language in statistics and data science, so you’ll leave the course with both the conceptual understanding and the practical coding skills that are valued in industry and graduate school."
   },
   {
-    "objectID": "index.html#quarto",
-    "href": "index.html#quarto",
-    "title": "Homepage",
+    "objectID": "index.html#about-this-course",
+    "href": "index.html#about-this-course",
+    "title": "Course page for Math 133: Statistical Learning Methods",
     "section": "",
-    "text": "Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see https://quarto.org."
+    "text": "In this course you’ll learn how to build and evaluate statistical models — essentially, how to use data to make predictions and uncover patterns. We’ll cover two main types of problems: regression (predicting a number, like a house price) and classification (predicting a category, like whether an email is spam or not).\nAlong the way you’ll get hands-on experience with a wide range of popular modeling techniques, from foundational methods like linear and logistic regression to more modern approaches like random forests and neural networks. You’ll also learn how to figure out which model is actually the best fit for a given problem, a skill that’s just as important as building the models themselves!\nAll of this will be done in R, a widely used programming language in statistics and data science, so you’ll leave the course with both the conceptual understanding and the practical coding skills that are valued in industry and graduate school."
   },
   {
-    "objectID": "index.html#running-code",
-    "href": "index.html#running-code",
-    "title": "Homepage",
-    "section": "Running Code",
-    "text": "Running Code\nWhen you click the Render button a document will be generated that includes both content and the output of embedded code. You can embed code like this:\n\n1 + 1\n\n[1] 2\n\n\nYou can add options to executable code like this\n\n\n[1] 4\n\n\nThe echo: false option disables the printing of code (only output is displayed)."
+    "objectID": "index.html#what-will-we-cover",
+    "href": "index.html#what-will-we-cover",
+    "title": "Course page for Math 133: Statistical Learning Methods",
+    "section": "What Will We Cover?",
+    "text": "What Will We Cover?\n\nRegression and classification models (linear regression, logistic regression, K-nearest neighbors, decision trees, random forests, neural networks, and more)\nDimension reduction and clustering (principal component analysis, clustering algorithms)\nTime series methods (random walks, autoregressive and moving average models)\nModel selection and validation (cross-validation, training/testing sets, stepwise selection)\nData visualization and exploratory analysis"
+  },
+  {
+    "objectID": "index.html#where-to-find-course-materials",
+    "href": "index.html#where-to-find-course-materials",
+    "title": "Course page for Math 133: Statistical Learning Methods",
+    "section": "Where to find course materials",
+    "text": "Where to find course materials\nAll course notes will be posted here while all course assignments will be posted on Canvas. For additional resources, please click on the links below\n\nDatasets\nModule 1 Code Files"
   },
   {
     "objectID": "module-01/notes1.html",
