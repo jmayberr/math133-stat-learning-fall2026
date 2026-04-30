@@ -1,7 +1,6 @@
 ---
 title: "Module 1.2: R Tools"
 author: "John Mayberry"
-date: "`r Sys.Date()`"
 format: 
   html:
     embed-resources: true
@@ -33,7 +32,7 @@ glimpse(gapminder)
 
 ## Filtering and Selecting
 
-If we want to look at a snapshot of a specific country, we can create a new dataframe which contains only its entries using the filter command
+If we want to look at a snapshot of a specific country, we can create a new dataframe^[One comment here: you'll notice that I frequently use `=` instead of the more conventional `<-` for assigning values to variables. In my opinion the extra character isn't worth it and `=` feels more natural coming from other languages. Either will work for all examples in this course so use whichever you prefer.] which contains only its entries using the filter command
 
 ```{r}
 japan=filter(gapminder,country=="Japan")

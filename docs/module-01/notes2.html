@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="John Mayberry">
-<meta name="dcterms.date" content="2026-04-30">
 
 <title>Module 1.2: R Tools – Statistical Learning Methods</title>
 <style>
@@ -5005,12 +5004,6 @@ window.Quarto = {
           </div>
   </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">April 30, 2026</p>
-    </div>
-  </div>
   
     
   </div>
@@ -5046,7 +5039,7 @@ $ gdpPercap &lt;dbl&gt; 779.4453, 820.8530, 853.1007, 836.1971, 739.9811, 786.11
 </section>
 <section id="filtering-and-selecting" class="level2">
 <h2 class="anchored" data-anchor-id="filtering-and-selecting">Filtering and Selecting</h2>
-<p>If we want to look at a snapshot of a specific country, we can create a new dataframe which contains only its entries using the filter command</p>
+<p>If we want to look at a snapshot of a specific country, we can create a new dataframe<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> which contains only its entries using the filter command</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>japan<span class="ot">=</span><span class="fu">filter</span>(gapminder,country<span class="sc">==</span><span class="st">&quot;Japan&quot;</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(japan)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -5342,7 +5335,13 @@ $ pop_mil   &lt;dbl&gt; 86.45902, 91.56301, 95.83176, 100.82528, 107.18827, 113.
 
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>One comment here: you’ll notice that I frequently use <code>=</code> instead of the more conventional <code>&lt;-</code> for assigning values to variables. In my opinion the extra character isn’t worth it and <code>=</code> feels more natural coming from other languages. Either will work for all examples in this course so use whichever you prefer.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
