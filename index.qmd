@@ -1,8 +1,6 @@
 ---
 title: "Course page for Math 133: Statistical Learning Methods"
 author: "John Mayberry"
-format: html
-editor: visual
 ---
 
 ## About This Course
@@ -21,9 +19,18 @@ All of this will be done in **R**, a widely used programming language in statist
 -   Model selection and validation (cross-validation, training/testing sets, stepwise selection)
 -   Data visualization and exploratory analysis
 
+## Who Is This Course For?
+
+This course is designed for an audience with some basic background in both coding and statistics, but you don't need to be an expert in either. Specifically we assume:
+
+-   **Coding:** You are familiar with fundamental programming concepts like variables, lists, and functions. Some prior experience with R is helpful but not required.
+-   **Statistics:** You have some introductory statistics knowledge, such as familiarity with measures of center and dispersion (eg. mean, standard deviation), the normal distribution, and basic graphical displays (eg. histograms, scatterplots). We won't be starting from scratch on the statistical side but we also won't assume anything beyond the basics.
+
+If that sounds like you, you're in the right place!
+
 ## Where to find course materials
 
-All course notes will be posted here while all course assignments will be posted on Canvas. For additional resources, please click on the links below
+All course notes will be posted here while all course assignments will be posted on Canvas. For additional resources, please click on the links below.
 
 -   [Datasets](https://github.com/jmayberr/math133-stat-learning-fall2026/tree/main/Datasets)
 -   [Module 1 Code Files](https://github.com/jmayberr/math133-stat-learning-fall2026/tree/main/module-01)

@@ -18,3 +18,21 @@ website:
       - text: "Module 2"
         menu:
           - text: "Notes 1: ..."
+      - text: "Module 3"
+        menu:
+          - text: "Notes 1: ..."
+      - text: "Module 4"
+        menu:
+          - text: "Notes 1: ..."
+      - text: "Module 5"
+        menu:
+          - text: "Notes 1: ..."
+      - text: "Module 6"
+        menu:
+          - text: "Notes 1: ..."
+      - text: "Module 7"
+        menu:
+          - text: "Notes 1: ..."
+      - text: "Module 8"
+        menu:
+          - text: "Notes 1: ..."
