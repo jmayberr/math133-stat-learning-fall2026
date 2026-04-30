@@ -15,6 +15,8 @@ website:
         menu:
           - href: module-01/notes1.qmd
             text: "Notes 1: Introduction to Statistical Models"
+          - href: module-01/notes2.qmd
+            text: "Notes 2: R Tools"
       - text: "Module 2"
         menu:
           - text: "Notes 1: ..."

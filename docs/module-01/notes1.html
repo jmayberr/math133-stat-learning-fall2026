@@ -7,7 +7,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Mayberry">
-<meta name="dcterms.date" content="2026-04-30">
 
 <title>Module 1.1: Introduction to Statistical Models – Statistical Learning Methods</title>
 <style>
@@ -4916,6 +4915,10 @@ window.Quarto = {
     <a class="dropdown-item" href="../module-01/notes1.html">
  <span class="dropdown-text">Notes 1: Introduction to Statistical Models</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes2.html">
+ <span class="dropdown-text">Notes 2: R Tools</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -5005,12 +5008,6 @@ window.Quarto = {
           </div>
   </div>
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">April 30, 2026</p>
-    </div>
-  </div>
   
     
   </div>
@@ -5134,10 +5131,10 @@ f(X) \approx X.
 </div>
 <p>If we wanted to predict the outcome of the election, we have two choices</p>
 <ol type="1">
-<li>Try to predict the actual proportion of Trump vote</li>
-<li>Try to predict whether the state was red (for Trump) or blue (for Clinton)</li>
+<li>Try to predict the actual proportion of Trump vote (<em>trump.vote</em>)</li>
+<li>Try to predict whether the state was red (for Trump) or blue (for Clinton) (<em>outcome</em>)</li>
 </ol>
-<p>The first would be a regression problem and the second classification. We’ll start with the first and choose the single predictor non.white (the proportion of non-white residents of the state) to use in our preliminary analysis.</p>
+<p>The first would be a regression problem and the second classification. We’ll start with the first and choose the single predictor <em>non.white</em> (the proportion of non-white residents of the state) to use in our preliminary analysis.</p>
 <p>The most common package we will use in this course is tidyverse. If you haven’t already, install it with the command <code>install.packages(&#39;tidyverse&#39;)</code>. Then get in the habit of loading it to start each session with the following command.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -5156,7 +5153,7 @@ f(X) \approx X.
 ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 </div>
 </div>
-<p>The tidyverse package contains ggplot2, the premier plotting package in R and dare I say any data science software? It is based on Hadley Wickham’s <a href="https://byrneslab.net/classes/biol607/readings/wickham_layered-grammar.pdf">Layered Grammar of Graphics</a> in which you build a plot in layers starting with a dataset, mapping variables to “aesthetics” (such as the x- and y-axes or shape/color), and then adding a specific geometry to the graph (like a scatterplot, line plot, histogram or boxplot). The following set of commands gives an example that creates a scatterplot of trump.vote vs non.white</p>
+<p>The tidyverse package contains ggplot2, the premier plotting package in R and dare I say any data science software? It is based on Hadley Wickham’s <a href="https://byrneslab.net/classes/biol607/readings/wickham_layered-grammar.pdf">Layered Grammar of Graphics</a> in which you build a plot in layers starting with a dataset, mapping variables to “aesthetics” (such as the x- and y-axes or shape/color), and then adding a specific geometry to the graph (like a scatterplot, line plot, histogram or boxplot). The following set of commands gives an example that creates a scatterplot of <em>trump.vote</em> vs <em>non.white</em></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(election2016,</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x=</span>non.white,<span class="at">y=</span>trump.vote))<span class="sc">+</span></span>
@@ -5179,7 +5176,7 @@ f(X) \approx X.
 Y = \beta_0 + \beta_1 X + \varepsilon
 \]</span> where <span class="math inline">\(Y\)</span> = trump.vote, <span class="math inline">\(X\)</span> = non.white, and <span class="math inline">\(\varepsilon\)</span> is the random noise. In this case, <span class="math display">\[
 f(X)= \beta_0 + \beta_1 X
-\]</span> is a linear function and so estimating it is equivalent to estimating the two parameters <span class="math inline">\(\beta_0, \beta_1\)</span> with some <span class="math inline">\(\hat{\beta}_0, \hat{\beta}_1\)</span>. The predicted outcomes would then be <span class="math display">\[
+\]</span> is a linear function<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> and so estimating it is equivalent to estimating the two parameters <span class="math inline">\(\beta_0, \beta_1\)</span> with some <span class="math inline">\(\hat{\beta}_0, \hat{\beta}_1\)</span>. The predicted outcomes would then be <span class="math display">\[
 \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i
 \]</span> For example, if we look at the line in the graph above, it looks like it has a slope of about <span class="math inline">\(-0.05/0.2 = -0.25\)</span> and an intercept of around 0.57 so we might guess <span class="math display">\[
 \hat{\beta}_0 =0.57, \,  \hat{\beta}_1 = -0.25
@@ -5253,9 +5250,10 @@ MSE = \frac{1}{n} \sum_{i=1}^n (y_i- \hat{y}_i)^2
 <pre><code>[1] 0.008232875</code></pre>
 </div>
 </div>
-<p>If someone chooses a different <span class="math inline">\(\hat{f}\)</span> that gives predictions with a better MSE, they can claim a better model. But wait a minute, instead of just guessing, can’t we start with our goal of minimizing MSE and find the coefficients which make it as small as possible? In other words, we should start with the “loss” function: <span class="math display">\[
+<p>If someone chooses a different <span class="math inline">\(\hat{f}\)</span> that gives predictions with a better MSE, they can claim a better model. But wait a minute, instead of just guessing, can’t we start with our goal of minimizing MSE and find the coefficients which make it as small as possible? In other words, we should start with a “loss” function<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> given by the sum of squared errors (SSE): <span class="math display">\[
 \ell(\beta_0,\beta_1) = \frac{1}{n} \sum_{i=1}^n (y_i - (\beta_0 + \beta_1 x_i))^2
-\]</span> and choose estimates <span class="math inline">\(\hat{\beta}_0,\hat{\beta}_1\)</span> to make this quantity as small as possible. This becomes a calculus or linear algebra problem^[See Module 1 Supplementary Materials for details of the calculation] and solving it gives the least squares estimates of <span class="math inline">\(\beta_0, \beta_1\)</span>. The R function lm will compute them by</p>
+\]</span><br>
+and choose estimates <span class="math inline">\(\hat{\beta}_0,\hat{\beta}_1\)</span> to make this quantity as small as possible. This becomes a calculus or linear algebra problem<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> and solving it gives the least squares estimates of <span class="math inline">\(\beta_0, \beta_1\)</span>. The R function lm will compute them by</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y<span class="sc">~</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -5319,7 +5317,15 @@ Y = f(X) + \varepsilon
 
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>We are getting away from using <span class="math inline">\(mx+b\)</span> because as we add more variables, we need an easy way to index coefficients.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Sometimes called a cost function<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>See the Module 1.3 Notes Supplement for Details<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
