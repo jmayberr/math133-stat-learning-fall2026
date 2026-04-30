@@ -1,5 +1,5 @@
 ---
-title: "Introduction to Statistical Models"
+title: "Module 1.1: Introduction to Statistical Models"
 author: "Mayberry"
 date: "`r Sys.Date()`"
 format: 
