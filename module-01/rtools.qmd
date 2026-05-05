@@ -1,5 +1,5 @@
 ---
-title: "Module 1.2: R Tools"
+title: "Module 1 R Tools"
 author: "John Mayberry"
 format: 
   html:
@@ -229,7 +229,7 @@ us_v_japan |>
 
 The addition of the "errorbar" and decrease in width aren't necessary, but make it more pleasing to look at in my opinion.
 
-## Exercise
+## Practice
 
 Import the dataset [Beerwings.csv](https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Beerwings.csv) (Source: [Mathematical Statistics with Resampling and R](https://bcs.wiley.com/he-bcs/Books?action=index&itemId=1119874033&bcsId=12641)) and complete the following steps. Note that _Beer_ measures beer consumed in ounces and _Hotwings_ measures number of hotwings consumed per individual. 
 

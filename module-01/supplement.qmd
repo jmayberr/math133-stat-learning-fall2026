@@ -42,7 +42,7 @@ data = data.frame(x = x, y = y)
 
 The gradient descent update rules will be:
 
-$$ \beta_i \leftarrow \beta_i - \alpha \frac{\partial \ell}{\partial \beta_i} $$ for $i=1,2$ where $\alpha$ is a hyperparameter called the learning rate or step size.. The partial derivatives of the loss function can be calculated as:
+$$ \beta_i \leftarrow \beta_i - \alpha \frac{\partial \ell}{\partial \beta_i} $$ for $i=1,2$ where $\alpha$ is a *hyperparameter* called the learning rate or step size.. The partial derivatives of the loss function can be calculated as:
 
 $$ \frac{\partial \ell}{\partial \beta_1} = -2 \sum_{i=1}^n x_i (y_i - (\beta_0 + \beta_1 x_i) $$
 
@@ -119,7 +119,7 @@ $$\hat \beta_1 = \frac{n \sum_{i=1}^n x_i y_i - \sum_{i=1}^n x_i \sum_{i=1}^n y_
 
 $$ \hat \beta_0 = \frac{\sum_{i=1}^n y_i - \hat \beta_1 \sum_{i=1}^n x_i}{n} $$
 
-that one often sees in stats textbooks. These formulas are used by `lm`, but you can hardcode them easily enough:
+that one often sees in stats textbooks. These formulas are used by `lm`, but you can hard-code them easily enough:
 
 ```{r}
 sx=sum(x)
@@ -130,7 +130,7 @@ n=nrow(data)
 
 slope= (n*sxy - sx*sy)/(n*sxx-sx^2)
 intercept=(sy-slope*sx)/n
-cat("slope =", slope, "\nintercept =", intercept)
+cat("slope =", slope, "\n intercept =", intercept)
 ```
 
 ## Standard Error
@@ -149,4 +149,4 @@ The predicted mean of $Y$ at a given $x_i$ is: $$
 \hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 x_i 
 $$ so by general variance of a sum of random variables formula, the variance of $\hat{Y}$ is: $$
 \text{Var}(\hat{Y}) = \text{Var}(\hat{\beta}_0) + x_i^{2} \text{Var}(\hat{\beta}_1) + 2x_i \text{Cov}(\hat{\beta}_0, \hat{\beta}_1) ]
-$$ Hmm, now I am realizing this is getting nasty as you have to calculate $\text{Var}(\hat{\beta}_0)$ and $\text{Cov}(\hat{\beta}_0, \hat{\beta}_1)$. It can be done, but who has time for such algebra in today's day and age? Hopefully, this at least gives you an idea about why $x_i$ enters the equation. The textbook [Mathematical Statistics with Resampling and R](https://bcs.wiley.com/he-bcs/Books?action=index&itemId=1119874033&bcsId=12641)) covers the details of these calculations. There are also some more general proofs of formulas for multiple regression models and we'll discuss those in the next Module.
+$$ Hmm, now I am realizing this is getting nasty as you have to calculate $\text{Var}(\hat{\beta}_0)$ and $\text{Cov}(\hat{\beta}_0, \hat{\beta}_1)$. It can be done, but who has time for such algebra in today's day and age? Hopefully, this at least gives you an idea about why $x_i$ enters the equation. The textbook [Mathematical Statistics with Resampling and R](https://bcs.wiley.com/he-bcs/Books?action=index&itemId=1119874033&bcsId=12641) covers the details of these calculations. There are also some more general proofs of formulas for multiple regression models that utilize linear algebra and we'll discuss those in the Module 2 Theory Supplement.

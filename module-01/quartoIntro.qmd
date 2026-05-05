@@ -1,0 +1,48 @@
+---
+title: "Practice Problems 1: Hello Quarto"
+author: "Enter Your Name"
+format:
+  html:
+    embed-resources: true
+editor: visual
+---
+
+Note that you must have the `tidyverse` package installed to run this document. If you have not installed this package, please type the command `install.packages("tidyverse")` into the RStudio console before continuing.
+
+## Exercise 1
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>. In this first assignment, we'll be working through the basics of how to render an html with a few simple commands.
+
+First, modify the "preamble" code above so that your name is in between the quotes where it currently says "Enter Your Name".
+
+## Exercise 2
+
+Executable R code is entered in code chunks. Click the play button to see load the election2016 dataset and see the first six rows of observations. Once the document is rendered, it will show both the code and the output.
+
+```{r}
+library(tidyverse)
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016=read.csv(df_url)
+head(election2016)
+```
+
+## Exercise 3
+
+The code chunk below will create a scatterplot of *trump.vote* vs *non.white*. Change the x-aesthetic to a different variable in the dataset and modify the x-axis label accordingly.
+
+```{r}
+ggplot(election2016,
+       aes(x=non.white,y=trump.vote))+
+  geom_point(shape=1)+
+  labs(x="Proportion Non-White Residents",y="Proportion of Trump Vote")+
+  geom_smooth(method="lm",se=FALSE,col="darkorange")+
+  theme_bw()
+```
+
+## Exercise 4
+
+Enter your own code chunk by either going to Insert –\> Executable Cell –\> R or typing / and selecting "R Code Chunk" or typing CTRL+ALT+I. Inside the cell type `print("One goal I have for this course is...")` and replace the ... with a personal goal.
+
+## Exercise 5
+
+Now save this document as Practice1\_*yourname*.qmd and click Render(or type CTRL+SHIFT+K) to create an html document of your solutions. Submit the html document to Canvas under the Week 1 Assignment and enjoy the rest of your first week of classes :)

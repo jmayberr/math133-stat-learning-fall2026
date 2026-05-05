@@ -5056,7 +5056,7 @@ window.Quarto = {
 <section id="gradient-descent-algorithm" class="level2">
 <h2 class="anchored" data-anchor-id="gradient-descent-algorithm">Gradient Descent Algorithm</h2>
 <p>The gradient descent update rules will be:</p>
-<p><span class="math display">\[ \beta_i \leftarrow \beta_i - \alpha \frac{\partial \ell}{\partial \beta_i} \]</span> for <span class="math inline">\(i=1,2\)</span> where <span class="math inline">\(\alpha\)</span> is a hyperparameter called the learning rate or step size.. The partial derivatives of the loss function can be calculated as:</p>
+<p><span class="math display">\[ \beta_i \leftarrow \beta_i - \alpha \frac{\partial \ell}{\partial \beta_i} \]</span> for <span class="math inline">\(i=1,2\)</span> where <span class="math inline">\(\alpha\)</span> is a <em>hyperparameter</em> called the learning rate or step size.. The partial derivatives of the loss function can be calculated as:</p>
 <p><span class="math display">\[ \frac{\partial \ell}{\partial \beta_1} = -2 \sum_{i=1}^n x_i (y_i - (\beta_0 + \beta_1 x_i) \]</span></p>
 <p><span class="math display">\[\frac{\partial \ell }{\partial \beta_0} = -2 \sum_{i=1}^n (y_i - (\beta_0 + \beta_1 x_i) \]</span></p>
 <p>One can implement this in R as follows (epochs is commonly used in machine learning to refer to the number of iterations performed):</p>
@@ -5149,7 +5149,7 @@ $slope
 <p>and solving for <span class="math inline">\(\beta_0, \beta_1\)</span>. Doing so<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> yields the explicit formulas</p>
 <p><span class="math display">\[\hat \beta_1 = \frac{n \sum_{i=1}^n x_i y_i - \sum_{i=1}^n x_i \sum_{i=1}^n y_i}{n \sum_{i=1}^n x_i^2 - \left(\sum_{i=1}^n x_i\right)^2} \]</span></p>
 <p><span class="math display">\[ \hat \beta_0 = \frac{\sum_{i=1}^n y_i - \hat \beta_1 \sum_{i=1}^n x_i}{n} \]</span></p>
-<p>that one often sees in stats textbooks. These formulas are used by <code>lm</code>, but you can hardcode them easily enough:</p>
+<p>that one often sees in stats textbooks. These formulas are used by <code>lm</code>, but you can hard-code them easily enough:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>sx<span class="ot">=</span><span class="fu">sum</span>(x)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>sy<span class="ot">=</span><span class="fu">sum</span>(y)</span>
@@ -5159,10 +5159,10 @@ $slope
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>slope<span class="ot">=</span> (n<span class="sc">*</span>sxy <span class="sc">-</span> sx<span class="sc">*</span>sy)<span class="sc">/</span>(n<span class="sc">*</span>sxx<span class="sc">-</span>sx<span class="sc">^</span><span class="dv">2</span>)</span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>intercept<span class="ot">=</span>(sy<span class="sc">-</span>slope<span class="sc">*</span>sx)<span class="sc">/</span>n</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;slope =&quot;</span>, slope, <span class="st">&quot;</span><span class="sc">\n</span><span class="st">intercept =&quot;</span>, intercept)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;slope =&quot;</span>, slope, <span class="st">&quot;</span><span class="sc">\n</span><span class="st"> intercept =&quot;</span>, intercept)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>slope = 2.005098 
-intercept = 5.13433</code></pre>
+ intercept = 5.13433</code></pre>
 </div>
 </div>
 </section>
@@ -5181,7 +5181,7 @@ intercept = 5.13433</code></pre>
 \hat{Y} = \hat{\beta}_0 + \hat{\beta}_1 x_i
 \]</span> so by general variance of a sum of random variables formula, the variance of <span class="math inline">\(\hat{Y}\)</span> is: <span class="math display">\[
 \text{Var}(\hat{Y}) = \text{Var}(\hat{\beta}_0) + x_i^{2} \text{Var}(\hat{\beta}_1) + 2x_i \text{Cov}(\hat{\beta}_0, \hat{\beta}_1) ]
-\]</span> Hmm, now I am realizing this is getting nasty as you have to calculate <span class="math inline">\(\text{Var}(\hat{\beta}_0)\)</span> and <span class="math inline">\(\text{Cov}(\hat{\beta}_0, \hat{\beta}_1)\)</span>. It can be done, but who has time for such algebra in today’s day and age? Hopefully, this at least gives you an idea about why <span class="math inline">\(x_i\)</span> enters the equation. The textbook <a href="https://bcs.wiley.com/he-bcs/Books?action=index&amp;itemId=1119874033&amp;bcsId=12641">Mathematical Statistics with Resampling and R</a>) covers the details of these calculations. There are also some more general proofs of formulas for multiple regression models and we’ll discuss those in the next Module.</p>
+\]</span> Hmm, now I am realizing this is getting nasty as you have to calculate <span class="math inline">\(\text{Var}(\hat{\beta}_0)\)</span> and <span class="math inline">\(\text{Cov}(\hat{\beta}_0, \hat{\beta}_1)\)</span>. It can be done, but who has time for such algebra in today’s day and age? Hopefully, this at least gives you an idea about why <span class="math inline">\(x_i\)</span> enters the equation. The textbook <a href="https://bcs.wiley.com/he-bcs/Books?action=index&amp;itemId=1119874033&amp;bcsId=12641">Mathematical Statistics with Resampling and R</a> covers the details of these calculations. There are also some more general proofs of formulas for multiple regression models that utilize linear algebra and we’ll discuss those in the Module 2 Theory Supplement.</p>
 
 
 

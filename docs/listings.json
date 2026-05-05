@@ -2,9 +2,11 @@
   {
     "listing": "/modules.html",
     "items": [
+      "/module-01/module1_assess.html",
       "/module-01/notes1.html",
       "/module-01/notes2.html",
       "/module-01/notes3.html",
+      "/module-01/quartoIntro.html",
       "/module-01/rtools.html",
       "/module-01/supplement.html"
     ]

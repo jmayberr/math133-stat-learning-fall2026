@@ -1,0 +1,56 @@
+---
+title: "Module 1 Assignment"
+author: "Your Name Here"
+format: 
+  html:
+    embed-resources: true
+    self-contained: true
+    math: mathjax
+editor: visual
+---
+
+## Introduction
+
+This assignment will be working with the [survey_fall2025.csv](http://github.com/jmayberr/math133-stat-learning-fall2026/blob/main/Datasets/survey_fall2025.csv) which contains the results of a survey of Math 37 students in fall 2025. The problems below will involve fitting models of the form
+
+$$
+Y = \beta_0 + \beta_1 X +\varepsilon
+$$
+
+where the outcome \$Y = \$ stress_score and $X$ is one of the following numeric features: steps, fastest_speed, maximum_alcohol_consumed, travel_time, age, gpa, screen_time, units, or number_of_fears. Choose three of these features which you find interesting to use in the following problems.
+
+Each problem will be graded on a 2-point scale with
+
+2 = solution is fully correct with proper coding and explanations
+
+1= solution is at least half correct with mostly proper coding and explanations
+
+0 = solution is less than half correct
+
+If you submit the assignment before the due date (not the accept until date), I will provide feedback and give you a chance to resubmit.
+
+## Problem 1
+
+Load the dataset into R and print the first six rows using `head`
+
+## Problem 2
+
+Create scatterplots of the outcome vs each of the three features separately. Include the following in your plot: - axis labels - fitted regression line - color of your choosing
+
+## Problem 3
+
+Fit simple linear models based on each feature separately and display the outputs using `summary`.
+
+## Problem 4
+
+Split the data into training and testing sets according to a 70-30 split (or as close as you can get to these proportions). Be sure to set a random seed for reproducibility! Refit linear models for each predictor to the training set and calculate their RMSEs on the testing set.
+
+## Problem 5
+
+Summarize your findings from Problems 1–4. In your response, address the following:
+
+-   Which predictors showed statistically significant relationships with stress_score?
+-   Which predictor had the highest $R^2$?
+-   Which predictor performed best in terms of test RMSE?
+
+Based on this evidence, recommend the best single predictor of stress_score and briefly justify your choice.

@@ -1,0 +1,26 @@
+---
+title: "Quarto Template"
+author: "Your Name Here"
+format: 
+  html:
+    embed-resources: true
+    self-contained: true
+    math: mathjax
+editor: visual
+---
+
+## Problem 1
+
+Insert problem 1 solution here...
+
+```{r}
+
+```
+
+Enter additional code chunks by either going to Insert –\> Executable Cell –\> R or typing / and selecting "R Code Chunk" or typing CTRL+ALT+I.
+
+Enter equations in mathfont by enclosing them in dollar signs, for example $\hat y = \beta_0 + \beta_1 x$.
+
+## Problem 2
+
+Add additional problems by starting a new line and typing `## Problem Number` . Type enter and begin typing solutions.
