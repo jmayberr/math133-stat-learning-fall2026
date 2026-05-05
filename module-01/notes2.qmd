@@ -1,6 +1,7 @@
 ---
-title: "Module 1.2: R Tools"
+title: "Module 1.2: Prediction for SLM"
 author: "John Mayberry"
+output: html_document
 format: 
   html:
     embed-resources: true
@@ -10,230 +11,210 @@ editor: visual
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,warning=F,message=F)
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
 
 ## Introduction
 
 Last class, we discussed the concept of a statistical model and introduced our first model in R: a simple linear model $$
 Y = \beta_0 + \beta_1 X + \varepsilon
-$$ where $\varepsilon$ is a normal random variable with standard deviation $\sigma$. We shall henceforth call this model a simple linear model (SLM). Before we progress to a further analysis of what it tells us about data, we'll spend this class reviewing (or for some of you learning) some important R functions that will be helpful along the way. We'll be using the famous [gapminder](https://www.gapminder.org/) dataset which can be downloaded from the shared dataset folder or by installing and loading the gapminder package (which is the route I'll take below). Please also load the tidyverse package before proceeding as well.
+$$ where $\varepsilon$ is a normal random variable with standard deviation $\sigma$. We shall henceforth call this model a simple linear model (SLM).
+
+We introduced the function `lm` to estimate coefficients in an SLM from a given set of observations and used it to start exploring the relationship between *trump.vote* and *non.white* in the election2016 dataset:
 
 ```{r}
-library(tidyverse)
-library(gapminder)
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016=read.csv(df_url)
+y=election2016$trump.vote
+x=election2016$non.white
+lm(y~x)
 ```
 
-The gapminder set contains information on population, life expectancy and gdp for many different countries over time. Here is a glimpse of what it looks like. Note that the "\$" is what R uses to indicate columns within the dataset. The datatype for each is displayed next to the column name as well as the first few values in each column.
+The output tells us that the best linear equation for predicting $y=trump.vote$ from $x=non.white$ is $\hat y = 0.5811 - 0.2655x$. For example, if I have a state that is 50% white, than the predicted trump vote (as a proportion) would be
 
 ```{r}
-glimpse(gapminder)
+0.5811-0.2655*0.5
 ```
 
-## Filtering and Selecting
+The real test of a model then is how well it predicts new data, but that often first involves assessing how it fits the data used to estimate model paramaters in the first place (called the training data). Before we get into that, a couple comments on R.
 
-If we want to look at a snapshot of a specific country, we can create a new dataframe[^1] which contains only its entries using the filter command
-
-[^1]: One comment here: you'll notice that I frequently use `=` instead of the more conventional `<-` for assigning values to variables. In my opinion the extra character isn't worth it and `=` feels more natural coming from other languages. Either will work for all examples in this course so use whichever you prefer.
+The most efficient way to use `lm` and other modeling functions is to pass the formula and data directly as inputs:
 
 ```{r}
-japan=filter(gapminder,country=="Japan")
-glimpse(japan)
+lm(trump.vote ~ non.white,data=election2016)
 ```
 
-If the first line says "country not found", that means R is prioritizing a different filter function than the one we want from the dplyr package. In that case, try including the package name in the following way:
+However, if you want use the model to predict new values it is helpful to first save the output of `lm` to a variable and then refer to that variable in future calls:
 
 ```{r}
-japan=dplyr::filter(gapminder,country=="Japan")
-glimpse(japan)
+fit_lm=lm(trump.vote ~ non.white,data=election2016)
+print(fit_lm)
 ```
 
-One could also use the subset command from the base package, but one advantage of using tidyverse commands is piping which allows you to pass the output of one command to another using the pipe command `|>` (or alternatively `%>%`)
+One advantage of this approach is that instead of manually calculating the predicted values $\hat y = \hat \beta_0 + \hat \beta_1x$ for new or old observations, we can use the `predict` function. For example, to predict the Trump vote when the non-white proportion is 0.5, we do
 
 ```{r}
-japan = gapminder |> 
-  filter(country=="Japan")
-glimpse(japan)
+new_df=data.frame(non.white=0.5)
+predict(fit_lm,new_df)
 ```
 
-The advantage of piping is that you can apply multiple commands in sucessesion. For example, if we want t filter for Japan, but then only select the four variables year, lifeExp, pop, and gdpPercap, we can do:
+That may seem more tedious than just using the formula, but it won't when the formulas get more complicated. The `predict` function is also helpful becaue we can pass multiple $x$ values and get all the predictions at once:
 
 ```{r}
-japan2=gapminder |>
-  filter(country=="Japan") |>
-  select(c("year","lifeExp","pop","gdpPercap"))
-glimpse(japan2)
+new_df=data.frame(non.white=seq(0,1,0.1))
+predict(fit_lm,new_df)
 ```
 
-One call also engineer new variables using mutate (and add this to the end of pipes)
+Or if you want to determine the predicted values for all points in the original dataset, leave the second input blank and this is done by default (first six shown below):
 
 ```{r}
-japan2=japan2 |>
-  mutate(pop_mil=pop/10^6)
-glimpse(japan2)
+yhat_lm=predict(fit_lm)
+head(yhat_lm)
 ```
 
-## Visualization
+This will be useful in the next section!
 
-Suppose we want to look at how life expectancy in Japan has changed over time using a simple line plot. The ggplot2 package within tidyverse is the best for customizability. It works off the [grammar of graphics](https://towardsdatascience.com/a-comprehensive-guide-to-the-grammar-of-graphics-for-effective-visualization-of-multi-dimensional-1f92b4ed4149), the idea that every plot contains layers. You start with data and then map certain variables in your dataset to attributes called aesthetics. After, you can add scales, geometry and other characteristic changes. For a lineplot, there are two aesthetics (an x- and a y- variable) and a simple line geometry.
+## Prediction Metrics on Training Set
+
+The data we use to fit the model is called the training set. There are numerous metrics we could introduce to measure how well our model fits the training set. We introduced one in the first notes, namely
+
+$$
+SSE = \sum_{i=1}^n (y_i - \hat y_i)^2
+$$
+
+For scaling purposes, it is more common to use the Mean Squared Error (MSE) defined as the average squared error per observation:
+
+$$
+MSE = SSE/n
+$$
+
+This can be calculated using the predicted outputs as follows
 
 ```{r}
-japan2 |> 
-  ggplot(aes(x=year,y=lifeExp))+
-  geom_line()
+y = election2016$trump.vote
+yhat_lm = predict(fit_lm)
+mse = mean((y-yhat_lm)^2)
+print(mse)
 ```
 
-Notice that we first passed the dataset to ggplot using a pipe, defined the aesthetics and then added the geometry (lines in this case). One could also add points as follows
+Unfortunately, the MSE on its own has the meaningless units of $(y\; units)^2$ (variance anyone?) so it is more common to look at its square root, the R(oot)MSE:
 
 ```{r}
-japan2 |> 
-  ggplot(aes(x=year,y=lifeExp))+
-  geom_line()+
-  geom_point()
+rmse <- sqrt(mse)
+print(rmse)
 ```
 
-Axes labels and titles are added with the labs command
+This says that our predictions are off by about 0.09 per state on average, although not exactly, since squaring the errors before taking the square root is not the same as simply averaging the absolute errors which instead leads to the Mean Absolute Deviation (best acronym in statistics: MAD):
 
 ```{r}
-japan2 |> 
-  ggplot(aes(x=year,y=lifeExp))+
-  geom_line()+
-  geom_point()+
-  labs(x="Year",y="Life Expectancy",
-       title="Life Expectancy vs Time (Japan)")
-
+mad=mean(abs(y - yhat_lm))
+print(mad)
 ```
 
-You can also change colors and background; see [Data Carpentry](https://datacarpentry.github.io/R-genomics/05-data-visualization.html) for additional details. The textbook [R Cookbook](http://www.cookbook-r.com/) also has great examples.
+The difference comes down to how each metric penalizes errors. RMSE squares the errors before averaging, which gives extra weight to large mistakes, while MAD treats all errors equally regardless of size. This is similar to the difference between the $\ell_2$ and $\ell_1$ norms if you know about such things (if not, they will appear later in the course). Both are valid ways of measuring model accuracy; RMSE has more theoretical appeal but MAD is much easier to explain to your friends.
 
-Two other aesthetics commonly used in graphs are color and size. For example, suppose we wanted to incorporate population and gdp into the above graph.
+The final, and perhaps most commonly used metric for simple linear models, is $R^2$ (sometimes called the Coefficient of Determination but usually just R-squared). We'll first give the calculation and then the explanation:
 
 ```{r}
-japan2 |>
-  ggplot(aes(x=year,y=lifeExp,col=gdpPercap,size=pop))+
-  geom_point()+
-  labs(x="Year",y="Life Expectancy",
-       title="Life Expectancy vs Time (Japan)")
-
+ybar=mean(y)
+sst=sum((y-ybar)^2)
+sse=sum((y-yhat_lm)^2)
+r2=1-sse/sst
+print(r2)
 ```
 
-This default color palette isn't great and there are many ways to change it. This also gives us an excuse to talk about the scale layer. You can apply scale to any of your aesthetics in order to change their attributes. Here is an example of how to change color with the popular viridis package:
+$R^2$ gives the *proportion of variance* explained by the model. To explain this phrase, SST (Sum of Squares Total) represents the overall variance in $y$ values. It is the inherent variability in outcomes and the goal is to explain as much of that variance as possible with our models. SSE is the overall error in our model predictions or the variance left after we account for the relationship with our predictor. SSE/SST is therefore the fraction of the overall variance in outcomes that is NOT explained by the model and 1 - SSE/SST is the fraction that IS explained by our model. A perfect model would have an SSE of 0 and hence, an $R^2$ value of 1. Here is a function you can use to compute the $R^2$ for a model given an outcome $y$ and predicted values $\hat y$:
 
 ```{r}
-library("viridis") 
-japan2 |> 
-  ggplot(aes(x=year,y=lifeExp,col=gdpPercap,size=pop))+
-  geom_point()+
-  labs(x="Year",y="Life Expectancy",
-       title="Life Expectancy vs Time (Japan)")+
-  scale_color_viridis(name="GDP (per Capita)",option = "A")
+get_r2=function(y,yhat){
+  ybar=mean(y)       
+  sst=sum((y-ybar)^2) # total variance in y
+  sse=sum((y-yhat)^2) # variance unexplained by model
+  r2=1-sse/sst    # proportion of variance explained by model
+  r2
+}
+
+#Example usage from scratch
+y=election2016$trump.vote
+fit_lm=lm(trump.vote~non.white,data=election2016)
+yhat=predict(fit_lm)
+r2=get_r2(y,yhat)
+print(r2)
 ```
 
-Using diverging color schemes (like going from blue to red) is also a popular choice:
+We'll need this in the next section. You can also get the $R^2$ value for the training data using the summary function:
 
 ```{r}
-japan2 |> 
-  ggplot(aes(x=year,y=lifeExp,col=gdpPercap,size=pop))+
-  geom_point()+
-  labs(x="Year",y="Life Expectancy",
-       title="Life Expectancy vs Time (Japan)")+
-  scale_color_distiller(palette = "RdBu", direction = -1)
+sum_lm=summary(fit_lm)
+print(sum_lm$r.squared)
 ```
 
-The Wes Anderson Palettes are fun too although they require using color gradients instead:
+Note that $R^2$ is just another way of looking at SSE/MSE/RMSE. Any one of these four is sufficient when comparing models. The advantage of $R^2$ is that it is dimensionless so it could be interpreted more universally. Here are some general guidelines for deciding what is "large" (generated with the help of AI, but complemented with my experience in statistical consulting):
+
+### Guidelines for Interpreting $R^2$
+
+-   **Large** ($R^2 \geq 0.7$): The model explains a large proportion of variance. Common in fields like physics or engineering where relationships tend to be more deterministic (e.g., natural sciences[^1] often see $R^2 > 0.8$).
+
+-   **Moderate** ($0.3 \leq R^2 < 0.7$): The model explains a moderate proportion of variance. Frequently seen in fields like economics or other social sciences, where real-world data involve many unobserved factors.
+
+-   **Small** ($R^2 < 0.3$): The model explains a small proportion of variance, but can still be meaningful. In fields like psychology, sociology, or behavioral sciences, an $R^2$ of 0.1--0.2 may actually be considered quite good since human behavior is complex and influenced by many factors.
+
+[^1]: In some areas of biology, such as ecology, smaller $R^2$ values of 0.3--0.7 can also be meaningful)
+
+## Training-Testing Validation
+
+Testing set validation means to split off some fraction of your data (usually 20-30%) for testing how well the model predicts "new data". The observations used for testing are called the *hold-out set* or sometimes just *testing* data. Splitting the data into training and testing sets is called *partitioning* the data. In R, this can be done by deciding on the fraction $p$ to use for your training set and then sampling $n*p$ random rows from the dataset as the training set, using the excluded rows for testing:
 
 ```{r}
-library(wesanderson) 
-pal <- wes_palette("Darjeeling1", 100, type = "continuous")
-japan2 |> 
-  ggplot(aes(x=year,y=lifeExp,col=gdpPercap,size=pop))+
-  geom_point()+
-  labs(x="Year",y="Life Expectancy",
-       title="Life Expectancy vs Time (Japan)")+
-  scale_color_gradientn(colours=pal)
+set.seed(45)
+n=nrow(election2016)
+p=0.7 # Decide on fraction to keep for training, in this case 70%
+train_rows=sample(n,round(n*0.7,0)) # Choose training row; round to ensure integer
+train_df=election2016[train_rows,] # Extract training data
+test_df= election2016[-train_rows,] # Extract testing data
 ```
 
-There are too many options to get into them all but the site [Top R Color Palettes](https://www.datanovia.com/en/blog/top-r-color-palettes-to-know-for-great-data-visualization/) has a pretty good list for those who like wasting time messing around with such things (I can relate).
-
-## Discrete vs Continuous Aesthetics
-
-In the above example, all of the aesthetics used were continuous variables. Suppose we want to compare Year vs Life Expectancy for the United States vs Japan. Then we would need to include the the discrete variable *country* as an aesthetic. First, let's create a new dataset that has only those two the US and Japan. The `droplevels` command drops all unused values of *country* (since we are only selecting US and Japan - try running the commands without this line to see the difference).
+This would be called a "70-30 split" because we used 70% for training and 30% for testing. We fit our model to the training set
 
 ```{r}
-us_v_japan=gapminder |> 
-  filter(country %in% c("Japan","United States")) |>
-  select(c('country','year','lifeExp')) |>
-  droplevels()
-table(us_v_japan$country)
+fit_lm_train=lm(trump.vote~non.white,data=train_df)
 ```
 
-Now we can create a scatterplot colored by country. You can use the viridis color schemes or you can manually define the values by name or hex code (the one below gives Pacific orange):
+And calculate any validation metrics like R2 on the testing set
 
 ```{r}
-us_v_japan |>
-  ggplot(aes(x=year,y=lifeExp,col=country))+
-  geom_point()+
-  geom_line()+
-  labs(x="Year",y="Life Expectancy",
-       title="Life Expectancy vs Time")+
-  scale_color_manual(values=c("black","#E35205"), name="Country")
+y_test=test_df$trump.vote
+yhat_test=predict(fit_lm_train,test_df)
+r2_test=get_r2(y_test,yhat_test)
+print(r2_test)
 ```
 
-You can also create separate plots for values of a discrete variable using facets.
+Validation metrics will generally be smaller on the test set BUT less likely to be misleadingly large due to overfitting (more on this topic to come). We can see in this example that $R^2$ came out negative on the testing set which means that our model did terrible at predicting new data (it would have been better to just guess the mean of $y$ for all our observations).
+
+Every time we do the training-testing set split we will get a different value for $R^2$ on the testing set due to the randomness of our partition. For example, running the same code again yields
 
 ```{r}
-us_v_japan %>% ggplot(aes(x=year,y=lifeExp))+
-  geom_point()+
-  geom_line()+
-  labs(x="Year",y="Life Expectancy",title="Life Expectancy vs Time")+
-  facet_wrap(~country)
+n=nrow(election2016)
+p=0.7 
+train_rows=sample(n,round(n*0.7,0))  
+train_df=election2016[train_rows,] 
+test_df= election2016[-train_rows,] 
+fit_lm_train=lm(trump.vote~non.white,data=train_df)
+y_test=test_df$trump.vote
+yhat_test=predict(fit_lm_train,test_df)
+r2_test=get_r2(y_test,yhat_test)
+print(r2_test)
 ```
 
-## Histograms and Boxplots
+Well, the answer was still negative. Overall, this repetition seems to be a sign that despite passing the visual test and (as we'll see in the next section) the inference test, *non.white* is not a very good predictor of *trump.vote*. Later we'll discuss cross-validation, a method for repeatedly performing training-testing splits in a systematic way. For now, get some practice trying creating these splits.
 
-We'll conclude with two additional visualizations that you will find helpful as we progress through the course.
+## Practice
 
-First, histograms. This is a useful tool for displaying the overall distribution of a single numeric variable like life expectancy:
+Import the [Advertising.csv](https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Advertising.csv) file into R (Source: [Introduction to Statistical Learning with R](https://www.statlearning.com/)). This simulated dataset contains sales (in terms of thousands of units sold) for a number of different stores in a chain as well as money spent (in thousands of dollars) on on advertising in TV, radio, and newspaper (clearly an outdated marketing scheme).  
 
-```{r}
-japan2 |>
-  ggplot(aes(x=lifeExp))+
-  geom_histogram(fill="#009E73",col="black",breaks=seq(60,85,5))+
-  theme_bw()+
-  labs(x="Life Expectancy",y="Year")
-```
+1.  Fit separate SLM for the three different predictors of sales (TV, radio, and newspaper). Calculate $R^2$ for each of the three and compare. 
 
-Note the use of the breaks command to manually define where the bins start and end. Choosing the appropriate bins is one of the most challenging parts of creating a good histogram as you want to balance bias (too few bins will oversmooth the distribution) with variance (too many bins will make the distribution look too jagged). In this case, the shape of the distribution is fairly robust since doubling the number of bins leads to roughly the same unimodal, left skewed shape:
+2.  Split the data into training and testing sets using an 80-20 split.  Refit models for TV and radio to the training data and compute $R^2$ on the testing data for both. 
 
-```{r}
-japan2 |>
-  ggplot(aes(x=lifeExp))+
-  geom_histogram(fill="#009E73",col="black",breaks=seq(60,85,2.5))+
-  theme_bw()+
-  labs(x="Life Expectancy",y="Year")
-```
-
-You can google Sturges' Rule to find out more about R's default choice (which I think rarely looks good).
-
-The second visualization to mention is boxplots. This is a useful tool for comparing the distribution of a numeric variable between two different groups (like US vs Japan):
-
-```{r}
-us_v_japan |>
-  ggplot(aes(x=country,y=lifeExp,fill=country))+
-      stat_boxplot(geom = "errorbar", width = 0.1) +
-      geom_boxplot(color = "black", width = 0.3)+
-      scale_fill_manual(values=c("#F0E442","#E69F00")) +
-      labs(x="Country",y="Life Expectancy of Different Years") +
-      theme(legend.position = "none")
-```
-
-The addition of the "errorbar" and decrease in width aren't necessary, but make it more pleasing to look at in my opinion.
-
-## Exercise
-
-Import the dataset [Beerwings.csv](https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Beerwings.csv) (Source: [Mathematical Statistics with Resampling and R](https://bcs.wiley.com/he-bcs/Books?action=index&itemId=1119874033&bcsId=12641)) and complete the following steps.
-
-1.  Create a scatterplot of Hotwings (y-axis) vs Beer (x-axis) with nicely labeled axes titles and an added trendline.
-2.  Fit a linear model Hotwings \~ Beer and show the coefficients.
-3.  Compute the RMSE for the linear model.
-4.  Add a color aesthetic of "Gender" to your plot. Compare the trendlines shown in the graph. Do they appear to have different slopes or intercepts?
+3.  Create a scatterplot of sales vs x where x was the better of the two predictors in Step 2.

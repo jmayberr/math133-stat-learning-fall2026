@@ -4917,7 +4917,7 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../module-01/notes2.html">
- <span class="dropdown-text">Module 1.2: R Tools</span></a>
+ <span class="dropdown-text">Module 1.2: Prediction for Simple Linear Models</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../module-01/notes3.html">
@@ -4925,7 +4925,11 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../module-01/supplement.html">
- <span class="dropdown-text">Module 1 Supplement: A deeper look at finding coefficients</span></a>
+ <span class="dropdown-text">Module 1 Theory: A deeper look at finding coefficients</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/rtools.html">
+ <span class="dropdown-text">Module 1 R Tools: Introduction to ggplot2 and tidyverse</span></a>
   </li>  
     </ul>
   </li>
@@ -5161,7 +5165,7 @@ f(X) \approx X.
 ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 </div>
 </div>
-<p>The tidyverse package contains ggplot2, the premier plotting package in R and dare I say any data science software? We’ll talk more about it in the next notes, but for now use the following set of commands to creates a scatterplot of <em>trump.vote</em> vs <em>non.white</em></p>
+<p>The tidyverse package contains ggplot2, the premier plotting package<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> in R and dare I say any data science software? The following set of commands to creates a scatterplot of <em>trump.vote</em> vs <em>non.white</em></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(election2016,</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x=</span>non.white,<span class="at">y=</span>trump.vote))<span class="sc">+</span></span>
@@ -5184,7 +5188,7 @@ f(X) \approx X.
 Y = \beta_0 + \beta_1 X + \varepsilon
 \]</span> where <span class="math inline">\(Y\)</span> = trump.vote, <span class="math inline">\(X\)</span> = non.white, and <span class="math inline">\(\varepsilon\)</span> is the random noise. In this case, <span class="math display">\[
 f(X)= \beta_0 + \beta_1 X
-\]</span> is a linear function<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> and so estimating it is equivalent to estimating the two parameters <span class="math inline">\(\beta_0, \beta_1\)</span> with some <span class="math inline">\(\hat{\beta}_0, \hat{\beta}_1\)</span>. The predicted outcomes would then be <span class="math display">\[
+\]</span> is a linear function<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> and so estimating it is equivalent to estimating the two parameters <span class="math inline">\(\beta_0, \beta_1\)</span> with some <span class="math inline">\(\hat{\beta}_0, \hat{\beta}_1\)</span>. The predicted outcomes would then be <span class="math display">\[
 \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i
 \]</span> For example, if we look at the line in the graph above, it looks like it has a slope of about <span class="math inline">\(-0.05/0.2 = -0.25\)</span> and an intercept of around 0.57 so we might guess <span class="math display">\[
 \hat{\beta}_0 =0.57, \,  \hat{\beta}_1 = -0.25
@@ -5248,20 +5252,20 @@ f(X)= \beta_0 + \beta_1 X
 50        Wyoming   0.70    0.5325</code></pre>
 </div>
 </div>
-<p>The Mean Squared Error (MSE) of a model is the average error made per observation: <span class="math display">\[
-MSE = \frac{1}{n} \sum_{i=1}^n (y_i- \hat{y}_i)^2
-\]</span> We can compute MSE for our model as follows</p>
+<p>The Sum of Squared Errors (SSE) of a model is (as it sounds) the sum of squared errors made by replacing the outcome values <span class="math inline">\(y_i\)</span> with their predictions <span class="math display">\[
+SSE = \sum_{i=1}^n (y_i- \hat{y}_i)^2
+\]</span> We can compute SSE for our model as follows</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mse<span class="ot">=</span><span class="fu">mean</span>((y<span class="sc">-</span>yhat)<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>mse</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>sse<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>yhat)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;SSE = &quot;</span>, sse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.008232875</code></pre>
+<pre><code>SSE =  0.4116437</code></pre>
 </div>
 </div>
-<p>If someone chooses a different <span class="math inline">\(\hat{f}\)</span> that gives predictions with a better MSE, they can claim a better model. But wait a minute, instead of just guessing, can’t we start with our goal of minimizing MSE and find the coefficients which make it as small as possible? In other words, we should start with a “loss” function<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> given by the sum of squared errors (SSE): <span class="math display">\[
-\ell(\beta_0,\beta_1) = \frac{1}{n} \sum_{i=1}^n (y_i - (\beta_0 + \beta_1 x_i))^2
+<p>If someone chooses a different <span class="math inline">\(\hat{f}\)</span> that gives predictions with a better SSE, they can claim a better model. But wait a minute, instead of just guessing, can’t we start with our goal of minimizing SSE and find the coefficients which make it as small as possible? In other words, we should think of the SSE as a function of <span class="math inline">\(\beta_0, \beta_1\)</span> (different lines gives a different error) and try to minimize the “loss” function<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>): <span class="math display">\[
+\ell(\beta_0,\beta_1) = SSE = \sum_{i=1}^n (y_i - (\beta_0 + \beta_1 x_i))^2
 \]</span><br>
-and choose estimates <span class="math inline">\(\hat{\beta}_0,\hat{\beta}_1\)</span> to make this quantity as small as possible. This becomes a calculus or linear algebra problem<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> and solving it gives the least squares estimates of <span class="math inline">\(\beta_0, \beta_1\)</span>. The R function lm will compute them by</p>
+Minimize means choosing estimates <span class="math inline">\(\hat{\beta}_0,\hat{\beta}_1\)</span> to make this quantity as small as possible. This becomes a calculus or linear algebra problem<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> and solving it gives the least squares estimates of <span class="math inline">\(\beta_0, \beta_1\)</span>. The R function lm will compute them by</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y<span class="sc">~</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -5284,42 +5288,58 @@ Y = f(X) + \varepsilon
 <p>Now let’s check that our model is better than the eyeball one</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>yhat_lm<span class="ot">=</span><span class="fl">0.5811-0.2655</span><span class="sc">*</span>x</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>mse_lm<span class="ot">=</span><span class="fu">mean</span>((y<span class="sc">-</span>yhat_lm)<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(mse,mse_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>sse_lm<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>yhat_lm)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">&quot;SSE eyeball =&quot;</span>,sse,<span class="st">&quot; Best SSE = &quot;</span>, sse_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.008232875 0.008186540</code></pre>
+<pre><code>SSE eyeball = 0.4116437  Best SSE =  0.409327</code></pre>
 </div>
 </div>
 <p>Just a little bit smaller!</p>
 </section>
-<section id="the-predict-function-and-rmse" class="level2">
-<h2 class="anchored" data-anchor-id="the-predict-function-and-rmse">The Predict Function and RMSE</h2>
-<p>Before we close out the first day of notes, it is worth mentioning that the predict function will compute yhat’s from the output of R commands</p>
+<section id="assessing-model-fit" class="level2">
+<h2 class="anchored" data-anchor-id="assessing-model-fit">Assessing Model Fit</h2>
+<p>The mathematician George Box once said that “all models are wrong, some models are useful.” The goal of statistical modeling is not a perfect description of real world phenomena but rather a helpful approximation that is “good enough” for the purpose at hand. Once we have fit a model <span class="math inline">\(\hat y = \hat f (x)\)</span> to a dataset, there are two types of questions we want to ask:</p>
+<ol type="1">
+<li>Does the model yield accurate predictions for new observations?</li>
+<li>Does the model allow us to infer generalizable relationships between variables?</li>
+</ol>
+<p>These two types of questions fall under the categories of prediction and inference, respectively. The latter is the classical domain of mathematical statistics and probably what you are more familiar with if you’ve taken an introduction to statistics course (confidence intervals and hypothesis testing fall under this category). The former is of more concern in the age of machine learning where we often don’t care as much about how our model makes predictions (although maybe we should) so much as the strength of such predictions. The next two sections will delve more into each topic with respect to the linear model considered in this section. If you want to dig even deeper, the Module 1 Theory supplement covers the mathematics behind least squares estimation (calculus background recommended), and the Module 1 R Tools supplement is a helpful primer if you are new to R or ggplot2.</p>
+</section>
+<section id="practice" class="level2">
+<h2 class="anchored" data-anchor-id="practice">Practice</h2>
+<p>Choose another numeric variable from the election2016 dataset. You can get a quick glimpse of the options using <code>glimpse</code>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>trump_lm<span class="ot">=</span><span class="fu">lm</span>(y<span class="sc">~</span>x)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>yhat_lm<span class="ot">=</span><span class="fu">predict</span>(trump_lm)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>((y<span class="sc">-</span>yhat_lm)<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(election2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.008186537</code></pre>
+<pre><code>Rows: 50
+Columns: 11
+$ state         &lt;chr&gt; &quot;Alabama&quot;, &quot;Alaska&quot;, &quot;Arizona&quot;, &quot;Arkansas&quot;, &quot;California&quot;…
+$ median.income &lt;int&gt; 42278, 67629, 49254, 44922, 60487, 60940, 70161, 57522, …
+$ unemployed    &lt;dbl&gt; 0.060, 0.064, 0.063, 0.052, 0.059, 0.040, 0.052, 0.049, …
+$ metro         &lt;dbl&gt; 0.64, 0.63, 0.90, 0.69, 0.97, 0.80, 0.94, 0.90, 0.96, 0.…
+$ high.school   &lt;dbl&gt; 0.821, 0.914, 0.842, 0.824, 0.806, 0.893, 0.886, 0.874, …
+$ non.citizen   &lt;dbl&gt; 0.02, 0.04, 0.10, 0.04, 0.13, 0.06, 0.06, 0.05, 0.09, 0.…
+$ white.pov     &lt;dbl&gt; 0.12, 0.06, 0.09, 0.12, 0.09, 0.07, 0.06, 0.08, 0.11, 0.…
+$ income.ineq   &lt;dbl&gt; 0.472, 0.422, 0.455, 0.458, 0.471, 0.457, 0.486, 0.440, …
+$ non.white     &lt;dbl&gt; 0.35, 0.42, 0.49, 0.26, 0.61, 0.31, 0.30, 0.37, 0.46, 0.…
+$ trump.vote    &lt;dbl&gt; 0.63, 0.53, 0.50, 0.60, 0.33, 0.44, 0.41, 0.42, 0.49, 0.…
+$ outcome       &lt;chr&gt; &quot;Red&quot;, &quot;Red&quot;, &quot;Red&quot;, &quot;Red&quot;, &quot;Blue&quot;, &quot;Blue&quot;, &quot;Blue&quot;, &quot;Blu…</code></pre>
 </div>
 </div>
-<p>As our model formulas get more complicated, this becomes an increasingly important tool.</p>
-<p>Second, MSE on its own has meaningless units (variance anyone?) so it is more common to look at its square root, the R(oot)MSE:</p>
+<p>or simply list the variables using <code>names</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>rmse_lm <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((y <span class="sc">-</span> yhat_lm)<span class="sc">^</span><span class="dv">2</span>))</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>rmse_lm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(election2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.09047949</code></pre>
+<pre><code> [1] &quot;state&quot;         &quot;median.income&quot; &quot;unemployed&quot;    &quot;metro&quot;        
+ [5] &quot;high.school&quot;   &quot;non.citizen&quot;   &quot;white.pov&quot;     &quot;income.ineq&quot;  
+ [9] &quot;non.white&quot;     &quot;trump.vote&quot;    &quot;outcome&quot;      </code></pre>
 </div>
 </div>
-<p>This says that our predictions are off by about 0.09 per state on average, although not exactly, since squaring the errors before taking the square root is not the same as simply averaging the absolute errors which instead leads to the Mean Absolute Deviation (best acronym in statistics: MAD):</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">abs</span>(y <span class="sc">-</span> yhat_lm))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.07823563</code></pre>
-</div>
-</div>
-<p>The difference comes down to how each metric penalizes errors. RMSE squares the errors before averaging, which gives extra weight to large mistakes, while MAD treats all errors equally regardless of size. This is similar to the difference between the <span class="math inline">\(\ell_2\)</span> and <span class="math inline">\(\ell_1\)</span> norms if you know about such things (if not, they will appear later in the course). Both are valid ways of measuring model accuracy; RMSE has more theoretical appeal but MAD is much easier to explain to your friends.</p>
+<ol type="1">
+<li>Create a scatterplot of <em>trump.vote</em> vs your chosen variable along with a trendline</li>
+<li>Calculate the coefficients of the best fitting line for predicting <em>trump.vote</em> using your chosen variable.</li>
+<li>Calculate SSE for the best fitting line.</li>
+</ol>
 
 
 
@@ -5329,9 +5349,10 @@ Y = f(X) + \varepsilon
 <div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>We are getting away from using <span class="math inline">\(mx+b\)</span> because as we add more variables, we need an easy way to index coefficients.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Sometimes called a cost function<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>See the Module 1 Supplement for further details.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>Details on how to use this package are covered in the Module 1 R Tools Supplement.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>We are getting away from using <span class="math inline">\(mx+b\)</span> because as we add more variables, we need an easy way to index coefficients.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Sometimes called a cost function<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>See the Module 1 Theory Supplement for further details.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
