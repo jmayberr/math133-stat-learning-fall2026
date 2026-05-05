@@ -1,5 +1,5 @@
 ---
-title: "Module 1 Supplement: A deeper look into the least squares line"
+title: "Module 1 Theory: A deeper look into the least squares line"
 author: "John Mayberry"
 output: html_document
 format: 
@@ -113,7 +113,7 @@ $$\frac{\partial \ell }{\partial \beta_0} = -2 \sum_{i=1}^n (y_i - (\beta_0 + \b
 
 and solving for $\beta_0, \beta_1$. Doing so[^1] yields the explicit formulas
 
-[^1]: I recommend working through the algebra to feel good about yourself.
+[^1]: I recommend working through the algebra because its good for the soul.
 
 $$\hat \beta_1 = \frac{n \sum_{i=1}^n x_i y_i - \sum_{i=1}^n x_i \sum_{i=1}^n y_i}{n \sum_{i=1}^n x_i^2 - \left(\sum_{i=1}^n x_i\right)^2} $$
 
@@ -135,7 +135,7 @@ cat("slope =", slope, "\nintercept =", intercept)
 
 ## Standard Error
 
-If we subtitute $Y_i = \beta_0 + \beta_1 x_i + \epsilon_i$ and $\bar{y} = \beta_0 + \beta_1 \bar{x}$ into our formual for $\hat \beta_1$ , we get: $$ \hat{\beta_1} = \frac{\sum (x_i - \bar{x})(\beta_1(x_i - \bar{x})+\epsilon_i)}{\sum (x_i - \bar{x})^2} $$ which simplifies to $$
+If we substitute $Y_i = \beta_0 + \beta_1 x_i + \epsilon_i$ and $\bar{y} = \beta_0 + \beta_1 \bar{x}$ into our formula for $\hat \beta_1$ , we get: $$ \hat{\beta_1} = \frac{\sum (x_i - \bar{x})(\beta_1(x_i - \bar{x})+\epsilon_i)}{\sum (x_i - \bar{x})^2} $$ which simplifies to $$
 \hat{\beta_1} = \beta_1 + \frac{\sum (x_i - \bar{x}) \epsilon_i}{\sum (x_i - \bar{x})^2}
 $$ The variance is then: $$
 \text{Var}(\hat{\beta_1}) = \text{Var} \left( \frac{\sum (x_i - \bar{x}) \epsilon_i}{\sum (x_i - \bar{x})^2} \right)

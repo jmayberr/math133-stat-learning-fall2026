@@ -8,7 +8,7 @@
 
 <meta name="author" content="John Mayberry">
 
-<title>Module 1 Supplement: A deeper look into the least squares line – Statistical Learning Methods</title>
+<title>Module 1 Theory: A deeper look into the least squares line – Statistical Learning Methods</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -4917,7 +4917,7 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../module-01/notes2.html">
- <span class="dropdown-text">Module 1.2: R Tools</span></a>
+ <span class="dropdown-text">Module 1.2: Prediction for Simple Linear Models</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../module-01/notes3.html">
@@ -4925,7 +4925,11 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../module-01/supplement.html">
- <span class="dropdown-text">Module 1 Supplement: A deeper look at finding coefficients</span></a>
+ <span class="dropdown-text">Module 1 Theory: A deeper look at finding coefficients</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/rtools.html">
+ <span class="dropdown-text">Module 1 R Tools: Introduction to ggplot2 and tidyverse</span></a>
   </li>  
     </ul>
   </li>
@@ -5002,7 +5006,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Module 1 Supplement: A deeper look into the least squares line</h1>
+<h1 class="title">Module 1 Theory: A deeper look into the least squares line</h1>
 </div>
 
 
@@ -5164,7 +5168,7 @@ intercept = 5.13433</code></pre>
 </section>
 <section id="standard-error" class="level2">
 <h2 class="anchored" data-anchor-id="standard-error">Standard Error</h2>
-<p>If we subtitute <span class="math inline">\(Y_i = \beta_0 + \beta_1 x_i + \epsilon_i\)</span> and <span class="math inline">\(\bar{y} = \beta_0 + \beta_1 \bar{x}\)</span> into our formual for <span class="math inline">\(\hat \beta_1\)</span> , we get: <span class="math display">\[ \hat{\beta_1} = \frac{\sum (x_i - \bar{x})(\beta_1(x_i - \bar{x})+\epsilon_i)}{\sum (x_i - \bar{x})^2} \]</span> which simplifies to <span class="math display">\[
+<p>If we substitute <span class="math inline">\(Y_i = \beta_0 + \beta_1 x_i + \epsilon_i\)</span> and <span class="math inline">\(\bar{y} = \beta_0 + \beta_1 \bar{x}\)</span> into our formula for <span class="math inline">\(\hat \beta_1\)</span> , we get: <span class="math display">\[ \hat{\beta_1} = \frac{\sum (x_i - \bar{x})(\beta_1(x_i - \bar{x})+\epsilon_i)}{\sum (x_i - \bar{x})^2} \]</span> which simplifies to <span class="math display">\[
 \hat{\beta_1} = \beta_1 + \frac{\sum (x_i - \bar{x}) \epsilon_i}{\sum (x_i - \bar{x})^2}
 \]</span> The variance is then: <span class="math display">\[
 \text{Var}(\hat{\beta_1}) = \text{Var} \left( \frac{\sum (x_i - \bar{x}) \epsilon_i}{\sum (x_i - \bar{x})^2} \right)
@@ -5187,7 +5191,7 @@ intercept = 5.13433</code></pre>
 <div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>I recommend working through the algebra to feel good about yourself.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>I recommend working through the algebra because its good for the soul.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

@@ -113,7 +113,9 @@ The most common package we will use in this course is tidyverse. If you haven't 
 library(tidyverse)
 ```
 
-The tidyverse package contains ggplot2, the premier plotting package in R and dare I say any data science software? We'll talk more about it in the next notes, but for now use the following set of commands to creates a scatterplot of *trump.vote* vs *non.white*
+The tidyverse package contains ggplot2, the premier plotting package[^1] in R and dare I say any data science software? The following set of commands to creates a scatterplot of *trump.vote* vs *non.white*
+
+[^1]: Details on how to use this package are covered in the Module 1 R Tools Supplement.
 
 ```{r}
 ggplot(election2016,
@@ -129,13 +131,13 @@ The geom_smooth command adds the "trendline" which has a negative slope in this 
 Y = \beta_0 + \beta_1 X + \varepsilon
 $$ where $Y$ = trump.vote, $X$ = non.white, and $\varepsilon$ is the random noise. In this case, $$
 f(X)= \beta_0 + \beta_1 X
-$$ is a linear function[^1] and so estimating it is equivalent to estimating the two parameters $\beta_0, \beta_1$ with some $\hat{\beta}_0, \hat{\beta}_1$. The predicted outcomes would then be $$
+$$ is a linear function[^2] and so estimating it is equivalent to estimating the two parameters $\beta_0, \beta_1$ with some $\hat{\beta}_0, \hat{\beta}_1$. The predicted outcomes would then be $$
 \hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i
 $$ For example, if we look at the line in the graph above, it looks like it has a slope of about $-0.05/0.2 = -0.25$ and an intercept of around 0.57 so we might guess $$
 \hat{\beta}_0 =0.57, \,  \hat{\beta}_1 = -0.25
 $$ Then the actual and predicted values would be as follows
 
-[^1]: We are getting away from using $mx+b$ because as we add more variables, we need an easy way to index coefficients.
+[^2]: We are getting away from using $mx+b$ because as we add more variables, we need an easy way to index coefficients.
 
 ```{r}
 y=election2016$trump.vote
@@ -144,23 +146,23 @@ yhat=0.57-0.25*x
 data.frame(state=election2016$state,actual=y,predicted=yhat)
 ```
 
-The Mean Squared Error (MSE) of a model is the average error made per observation: $$
-MSE = \frac{1}{n} \sum_{i=1}^n (y_i- \hat{y}_i)^2
-$$ We can compute MSE for our model as follows
+The Sum of Squared Errors (SSE) of a model is (as it sounds) the sum of squared errors made by replacing the outcome values $y_i$ with their predictions $$
+SSE = \sum_{i=1}^n (y_i- \hat{y}_i)^2
+$$ We can compute SSE for our model as follows
 
 ```{r}
-mse=mean((y-yhat)^2)
-mse
+sse=sum((y-yhat)^2)
+cat("SSE = ", sse)
 ```
 
-If someone chooses a different $\hat{f}$ that gives predictions with a better MSE, they can claim a better model. But wait a minute, instead of just guessing, can't we start with our goal of minimizing MSE and find the coefficients which make it as small as possible? In other words, we should start with a "loss" function[^2] given by the sum of squared errors (SSE): $$
-\ell(\beta_0,\beta_1) = \frac{1}{n} \sum_{i=1}^n (y_i - (\beta_0 + \beta_1 x_i))^2
+If someone chooses a different $\hat{f}$ that gives predictions with a better SSE, they can claim a better model. But wait a minute, instead of just guessing, can't we start with our goal of minimizing SSE and find the coefficients which make it as small as possible? In other words, we should think of the SSE as a function of $\beta_0, \beta_1$ (different lines gives a different error) and try to minimize the "loss" function[^3]): $$
+\ell(\beta_0,\beta_1) = SSE = \sum_{i=1}^n (y_i - (\beta_0 + \beta_1 x_i))^2
 $$\
-and choose estimates $\hat{\beta}_0,\hat{\beta}_1$ to make this quantity as small as possible. This becomes a calculus or linear algebra problem[^3] and solving it gives the least squares estimates of $\beta_0, \beta_1$. The R function lm will compute them by
+Minimize means choosing estimates $\hat{\beta}_0,\hat{\beta}_1$ to make this quantity as small as possible. This becomes a calculus or linear algebra problem[^4] and solving it gives the least squares estimates of $\beta_0, \beta_1$. The R function lm will compute them by
 
-[^2]: Sometimes called a cost function
+[^3]: Sometimes called a cost function
 
-[^3]: See the Module 1 Supplement for further details.
+[^4]: See the Module 1 Theory Supplement for further details.
 
 ```{r}
 lm(y~x)
@@ -179,35 +181,35 @@ Now let's check that our model is better than the eyeball one
 
 ```{r}
 yhat_lm=0.5811-0.2655*x
-mse_lm=mean((y-yhat_lm)^2)
-c(mse,mse_lm)
+sse_lm=sum((y-yhat_lm)^2)
+cat("SSE eyeball =",sse," Best SSE = ", sse_lm)
 ```
 
 Just a little bit smaller!
 
-## The Predict Function and RMSE
+## Assessing Model Fit
 
-Before we close out the first day of notes, it is worth mentioning that the predict function will compute yhat's from the output of R commands
+The mathematician George Box once said that "all models are wrong, some models are useful." The goal of statistical modeling is not a perfect description of real world phenomena but rather a helpful approximation that is "good enough" for the purpose at hand. Once we have fit a model $\hat y = \hat f (x)$ to a dataset, there are two types of questions we want to ask:
 
-```{r}
-trump_lm=lm(y~x)
-yhat_lm=predict(trump_lm)
-mean((y-yhat_lm)^2)
-```
+1.  Does the model yield accurate predictions for new observations?
+2.  Does the model allow us to infer generalizable relationships between variables?
 
-As our model formulas get more complicated, this becomes an increasingly important tool.
+These two types of questions fall under the categories of prediction and inference, respectively. The latter is the classical domain of mathematical statistics and probably what you are more familiar with if you've taken an introduction to statistics course (confidence intervals and hypothesis testing fall under this category). The former is of more concern in the age of machine learning where we often don't care as much about how our model makes predictions (although maybe we should) so much as the strength of such predictions. The next two sections will delve more into each topic with respect to the linear model considered in this section. If you want to dig even deeper, the Module 1 Theory supplement covers the mathematics behind least squares estimation (calculus background recommended), and the Module 1 R Tools supplement is a helpful primer if you are new to R or ggplot2.
 
-Second, MSE on its own has meaningless units (variance anyone?) so it is more common to look at its square root, the R(oot)MSE:
+## Practice
 
-```{r}
-rmse_lm <- sqrt(mean((y - yhat_lm)^2))
-rmse_lm
-```
-
-This says that our predictions are off by about 0.09 per state on average, although not exactly, since squaring the errors before taking the square root is not the same as simply averaging the absolute errors which instead leads to the Mean Absolute Deviation (best acronym in statistics: MAD):
+Choose another numeric variable from the election2016 dataset. You can get a quick glimpse of the options using `glimpse`:
 
 ```{r}
-mean(abs(y - yhat_lm))
+glimpse(election2016)
 ```
 
-The difference comes down to how each metric penalizes errors. RMSE squares the errors before averaging, which gives extra weight to large mistakes, while MAD treats all errors equally regardless of size. This is similar to the difference between the $\ell_2$ and $\ell_1$ norms if you know about such things (if not, they will appear later in the course). Both are valid ways of measuring model accuracy; RMSE has more theoretical appeal but MAD is much easier to explain to your friends.
+or simply list the variables using `names`
+
+```{r}
+names(election2016)
+```
+
+1.  Create a scatterplot of *trump.vote* vs your chosen variable along with a trendline
+2.  Calculate the coefficients of the best fitting line for predicting *trump.vote* using your chosen variable.
+3.  Calculate SSE for the best fitting line.

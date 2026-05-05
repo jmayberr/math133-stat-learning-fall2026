@@ -1,5 +1,5 @@
 ---
-title: "Module 1.3 Inference for SLM"
+title: "Module 1.3: Inference for SLM"
 author: "John Mayberry"
 output: html_document
 format: 
@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE,warning=FALSE,message = FALSE)
 
 ## Introduction
 
-In the Module 1.1 notes, we went around slapping trendlines onto data and using them to make predictions. We have some metrics which will help us judge between competing models, but sometimes we might see a linear trend even when none exists. For example, I could randomly generate 30 points and get a line with negative slope.
+In the last couple of notes, we have gone around slapping trendlines onto data and using them to make predictions. We have some metrics which will help us judge between competing models, but sometimes we might see a linear trend even when none exists. For example, I could randomly generate 30 points and get a line with negative slope.
 
 ```{r}
 library(tidyverse)
@@ -33,10 +33,9 @@ $$
 Y_i = 0 \times X_i + \varepsilon_i
 $$
 
-where $\varepsilon\_i$ is standard normal, but it is still negative and if we didn't know it was fake data, we might be tempted to conclude that there is a noisy linear relationship between $x$\
-and $y$.
+where $\varepsilon\_i$ is standard normal, but it is still negative and if we didn't know it was fake data, we might be tempted to conclude that there is a linear dependence between the variables $x$ and $y$ even though there really isn't.
 
-The inferential approach to linear models asks the following question: is the slope I got "significantly" nonzero. In statistics, significance implies that some kind of hypothesis test is at play. Without rehashing all of introductory statistics, I want to briefly explore two key terms that we will need this semester
+The inferential approach to linear models asks the following question: is the slope I got "significantly" nonzero. In statistics, significance implies that some kind of hypothesis test is at play. Without rehashing all of introductory statistics, I want to briefly explore two key terms that we will use throughout the course:
 
 1.  Standard Error (SE)
 2.  p-value
@@ -45,7 +44,7 @@ We'll do so in the context of finding the slope in an SLM.
 
 ## Standard Error and p-value
 
-The first thing to note is that in order to talk about the standard error of an estimator, we need to think of it as a random variable. Its standard error is then the standard deviation of its distribution. For example, if I replicate the experiment above by choosing 30 random x and y values 1000 times and computing the coefficient for each replicant, I will get a normal distribution of different slopes:
+The first thing to note is that in order to talk about the standard error of an estimator, we need to think of it as a random variable with a distribution of possible values called its *sampling distribution*. Its *standard error* is then the standard deviation of the sampling distribution (yeah its a mouthful, I know). For example, if I replicate the experiment above by choosing 30 random x and y values 1000 times and computing the estimated slope for each replicate, I will get a distribution of slopes we would expect for random data:
 
 ```{r}
 set.seed(45)
@@ -57,26 +56,32 @@ slopes = replicate(1000, {
 hist(slopes)
 ```
 
-This is aclled a Monte Carlo Simulation. The mean of this distribution is close to 0 because that is what the answer should be[^1]
+This type of experiment, where we repeatedly calculate a statistic from replicate samples (or *resamples*), is called a *Monte Carlo Simulation*. In the example, the output estimates the *null*[^1] sampling distribution of the estimator $\hat \beta_1$ (i.e. the distribution of possible slopes we might get if the true slope was 0). Notice that the mean is close to 0:
 
-[^1]: The theoretical mean is actually 0, but the mean of simulated data will vary.
+[^1]: *This term comes from hypothesis testing where the null hypothesis is that the true slope between* $x$ and $Y$ in our model is $\beta_1=0$.
 
 ```{r}
 mean(slopes)
 ```
 
-while the standard deviation of this distribution is the standard error of our estimate of the slope
+but we get values as large as
+
+```{r}
+max(abs(slopes))
+```
+
+in absolute value. An estimate of the standard error is the standard deviation of our simulated slopes.
 
 ```{r}
 sd(slopes)
 ```
 
-A good rule of thumb is that most observations of a random variable fall within 2–3 standard deviations of its mean[^2] Using this guideline, our simulation suggests that slopes of randomly generated pairs (using the specific normal paramaters above for to define random) should typically fall in the interval
+A good rule of thumb is that most observations of a random variable fall within 2–3 standard deviations of its mean[^2] Using this guideline, our simulation suggests that slopes of randomly generated pairs (using the specific normal parameters above) should typically fall in the interval(lower, upper) where:
 
 [^2]: For a normal distribution, about 95% of all observavtions are within 2 SD of the mean and 99.7% are within 3. Chebyshev's inequality gives a general distribution bound of 75% and 89%, respectively.
 
 ```{r}
-c(mean(slopes) -2*sd(slopes), mean(slopes) +2*sd(slopes))
+cat("lower = ",mean(slopes) -2*sd(slopes), ",upper = ", mean(slopes) +2*sd(slopes))
 ```
 
 If a computed slope falls outside this range, it would be considered unusual and may indicate that the true slope is significantly nonzero. For instance, if I generate data with the same noise but introduce an actual slope of 1, the estimated slope will fall outside this range, confirming its significance.
@@ -88,30 +93,34 @@ If a computed slope falls outside this range, it would be considered unusual and
   coef(model)[2]
 ```
 
-In this case, we would would say that the variable $x$ is a "significant" predictor of $y$. Its slope matters.
+In this case, we would say that the variable $x$ is a "significant" predictor of $y$. Its slope matters.
 
-Since we cannot rely on simulations like this for real data[^3], classical statistics gives us estimates of the standard error of the slope under SLM[^4]: $$
-SE(slope)= \sigma/\sqrt{\sum (x_i-\bar{x})^2}
+Since we cannot rely on simulations like this for real data[^3], classical statistics gives us a formula for the standard error of $\hat \beta_1$[^4]: $$
+SE(\hat \beta_1)= \sigma/\sqrt{\sum (x_i-\bar{x})^2}
 $$
 
 [^3]: Although we will see later that there are techniques like bootstrapping that allow us to "cheat" a little and do just that.
 
 [^4]: See supplement below for details.
 
-where $\sigma$ is the standard deviation of the noise. This formula is baked into lm as well[^5] and can be viewed using summary. Let's look at it for the Beerwings data from tehe exercise at the end of the last notes.
+where $\sigma$ is the standard deviation of the noise. This formula is baked into `lm` as well[^5] and can be viewed using `summary`. Let's look at the output of this function for the *trump.vote* vs *non.white* model:
 
 [^5]: Although since $\sigma$ is generally unknown, it uses the estimate $\sqrt{SSE/(n-2)}$ which is based on an unbiased estimator of $\sigma$ - take Math 132 if you want to learn more about that.
 
 ```{r}
-df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Beerwings.csv"
-Beerwings <- read_csv(df_url)
-bw_lm=lm(Hotwings~Beer,data=Beerwings)
-summary(bw_lm)
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016=read.csv(df_url)
+fit_lm=lm(trump.vote~non.white,data=election2016)
+summary(fit_lm)
 ```
 
-There's a lot here and we'll get to more of it later, but for now look at the Estimate and Std Error columns. The estimate 0.31681 next to Beer is the estimated slope and 0.04739 is the corresponding standard error. This means that even though our estimate of the slope is 0.31681, we are only confident in that up to 2 or 3 times 0.04739. This is often phrased in terms of what we call confidence intervals: a 95% confidence interval is roughly equal to the estimate +/- 2 SE[^6].
+There's a lot here and we'll get to more of it later, but for now look at the Estimate and Std Error columns. The estimate $-0.2656$ next to *non.white* is the estimated slope and 0.08230 is the corresponding standard error. This means that even though our estimate of the slope is $-0.2656$, we are only confident in that value being accurate up to 2 or 3 times 0.08230. This is often phrased in terms of what we call confidence intervals: a 95% confidence interval is roughly equal to the estimate +/- 2 SE[^6]. In our example, the 95% confidence interval would be
 
 [^6]: Although this approximation is not great for small sample sizes.
+
+```{r}
+cat("CI = (", -0.26546-2*0.08230,",", -0.26546+2*0.08230,")" )
+```
 
 The p-value is the probability of obtaining a slope of magnitude as large as the one obtained from our data ASSUMING the data was randomly generated from normal random variables (like our fake data above). For example, in our fake data, only
 
@@ -119,7 +128,20 @@ The p-value is the probability of obtaining a slope of magnitude as large as the
 sum(abs(slopes)>0.5)/1000
 ```
 
-of all our our slopes are as big as 0.5 so the p-value of 0.5 would be about 0.008. Since this number is small 0.5 would be a "significantly nonzero" slope in this scenario. On the other hand
+of all our our slopes are as big as 0.5 so the p-value of 0.5 would be about 0.008. Since this number is small 0.5 would be a "significantly nonzero" slope in this scenario. Visually, the p-value is the relative size of the shaded area to the total area shown below:
+
+```{r}
+hist_data <- hist(slopes, plot = FALSE)
+
+plot(hist_data, col = ifelse(abs(hist_data$mids) > 0.5, "steelblue", "lightgray"),
+     main = "Null Sampling Distribution of Slope",
+     xlab = "Slope",
+     border = "white")
+
+text(0.5, max(hist_data$counts) * 0.5, "Area = 0.008", col = "steelblue", cex = 0.9)
+```
+
+On the other hand, if we look at the fraction of slopes greater than 0.1 in absolute value, we see that
 
 ```{r}
 sum(abs(slopes)>0.1)/1000
@@ -129,8 +151,7 @@ of all slopes were greater than 0.1 so the p-value of 0.1 would be 0.608 . This 
 
 The smaller the p-value, the more surprising it would be to get a slope as extreme as we observed due to chance, providing more evidence of a significant linear relationship. By convention, a p-value below 0.05 is considered statistically significant, below 0.001 is considered highly significant, and between 0.05 and 0.1 is considered moderately significant, though these are guidelines rather than hard rules.
 
-Looking back at the output of Beerwings above, our p-value was $2.95*10^{-7}< 0.001$\
-so we can say that beer consumption is a significant predictor of hotwings consumption (more beer typically means more wings and less beer typically means less wings).
+Looking back at the output of of model above, the stated p-value for our slope was $0.0027< 0.05$ so we can say that non.white is a statistically significant predictor of trump.vote (even though we say in the last notes its a bad predictor) and since the slope is negative, states with a higher proportion of non-white residents tended to have lower Trump vote.
 
 ## Type I and Type II Errors
 
@@ -160,46 +181,58 @@ is within 2SE of 0.
 
 ## What are those grey areas that appear in geom_smooth?
 
-The astute observer will have noticed that geom_smooth plots a gray area around a trendline and perhaps questioned why it is has unequal width depending on where we are at on the $x$-axis. For example, using our Beerwings data:
+The astute observer will have noticed that geom_smooth plots a gray area around a trendline and perhaps questioned why it is has unequal width depending on where we are at on the $x$-axis. For example, looking back at the trump.vote model:
 
 ```{r}
-Beerwings |> ggplot(aes(x=Beer,y=Hotwings))+
+election2016 |> ggplot(aes(x=non.white,y=trump.vote))+
   geom_point() +
-  labs(x="Beer (oz)",y="Hotwings")+
+  labs(x="Non-white Proportion",y="Trump Vote Proportion")+
   geom_smooth(method="lm")
 ```
 
-The grey area shows 95% confidence intervals for the predicted means of our outcome. If we assume that the $x_i$ are fixed and that we have estimates $\hat \beta_0, \hat \beta_1$ for the coefficients in an SLM, then the standard errors of $\hat \beta_1$ and $\hat \beta_0$ tell us our level of confidence in the predictions of those parameters. But when we estimate the mean value of $Y$ for a given $x$ as $$
-\hat{y}_i = \hat{\beta}_0+\hat{\beta}_1 x_i
-$$the error we make depends on an interaction of errors in our estimates of $\beta_0, \beta_1$ and in the value of $x_i$. In fact, a formula for the standard error is $$
-SE(\hat{y}_i) = \sigma \sqrt{\frac{1}{n} + \frac{(x_i - \bar{x})^2}{\sum (x_j - \bar{x})^2}}
-$$which is usually calculated by using an estimate of $\sigma$ from our data. If $x_i$ is close to $\bar{x}$, then the numerator of the second term under the square root is close to 0. As we move further from $\bar{x}$, the SE gets bigger.
+The grey band shows 95% confidence intervals for the predicted mean of $Y$ at each value of $x$. Notice that the band is narrowest in the middle of the data and widens toward the edges. This is not a coincidence! The standard error of a predicted mean $\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1 x_i$ depends on how far $x_i$ is from $\bar{x}$:
+
+$$SE(\hat{y}_i) = \sigma \sqrt{\frac{1}{n} + \frac{(x_i - \bar{x})^2}{\sum (x_j - \bar{x})^2}}$$
+
+When $x_i$ is close to $\bar{x}$, the second term under the square root is nearly zero and the SE is small. As $x_i$ moves further from $\bar{x}$ in either direction, the SE grows, reflecting the fact that we are extrapolating further from where most of our data lives. Intuitively, our estimates of $\hat{\beta}_0$ and $\hat{\beta}_1$ each carry their own uncertainty, and that uncertainty compounds as we move away from the center of the data.
 
 One can get such confidence intervals using the `predict` function. Here are the first six in our Beerwings model. The "fit" term gives the estimate $\hat{y}$ for the corresponding $x$ in our data while "lwr" and "upr" give the endpoints for a 95% confidence interval of our estimate:
 
 ```{r}
-head(predict(bw_lm,Beerwings,interval = "confidence"))
+head(predict(fit_lm,interval = "confidence"))
 ```
 
 There is a further level of complexity that I hesitate to mention, but we have already gotten deep into the rabbit hole so here we go. There are also something called prediction intervals:
 
 ```{r}
-head(predict(bw_lm,Beerwings,interval = "prediction"))
+head(predict(fit_lm,interval = "prediction"))
 ```
 
-The prediction intervals try to take into account the variance of the noise as well and as such, they are always wider than the confidence intervals. Here is a comparison of the interpretations of confidence vs prediction intervals for the first observation in our dataset:
+The prediction intervals try to take into account the variance of the noise as well and as such, they are always wider than the confidence intervals. Here is a comparison of the interpretations of confidence vs prediction intervals for the first observation in our dataset (Alabama) which had a non-white proportion of
 
 ```{r}
-Beerwings[1,]
+election2016$non.white[1]
 ```
 
-1.  (Confidence Interval) Based on our model, we are 95% confident that the true mean number of hotwings consumed by all individuals who drink 24 ounces of beer lies between 10.08 and 12.39 wings per person
-2.  (Prediction Interval) Based on our model, we predict with 95% confidence that a randomly selected individual who drinks 24 ounces of beer will consume between 4.94 and 17.53 wings (or about 5-18 wings).
+1.  (Confidence Interval) Based on our model, we are 95% confident that the mean Trump vote of all states with a non-white proportion of 0.35 will be between 0.4611187 and 0.5153264.
+2.  (Prediction Interval) Based on our model, we predict with 95% confidence that a randomly selected state with a non-white proportion of 0.35 will have a Trump vote between 0.3005821 and 0.6758629.
 
 To summarize the difference:
 
--   \*\*Confidence interval for the mean\*\* at $x_i$: how uncertain are we about the \*average\* value of $Y$ at this $x_i$? This only accounts for uncertainty in estimating the line.
+- **Confidence interval for the mean** at $x_i$: how uncertain are we about the *average* value of $Y$ at this $x_i$? This only accounts for uncertainty in estimating the line.
 
-<!-- -->
+- **Prediction interval** at $x_i$: how uncertain are we about a *single new observation* $Y$ at this $x_i$? This accounts for uncertainty in estimating the line *plu\* the irreducible noise $\sigma$ of any individual observation.
 
--   \*\*Prediction interval\*\* at $x_i$​: how uncertain are we about a \*single new observation\* $Y$ at this $x_i$​? This accounts for uncertainty in estimating the line \*plus\* the irreducible noise $\sigma$ of any individual observation.
+## Practice 
+
+Import the dataset [Beerwings.csv](https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Beerwings.csv) (Source: [Mathematical Statistics with Resampling and R](https://bcs.wiley.com/he-bcs/Books?action=index&itemId=1119874033&bcsId=12641)) and complete the following steps. Note that _Beer_ measures beer consumed in ounces and _Hotwings_ measures number of hotwings consumed per individual.
+
+1. Create a scatterplot of _Beer_ (y-axis) vs _Hotwings_ (x-axis) with nicely labeled axes titles and an added trendline (you may have already done this if you read the rtools supplement)
+2. Fit an SLM to these two variables using _Beer_ as the outcome. Display the summary. 
+3. Identify the standard error and p-value of the slope. Is hotwing consumption a significant predictor of beer? 
+4. Calculate both a confidence and prediction interval for the amount of beer consumed by a customer who buys a 12 pack of hotwings. Write sentences interpreting both. 
+
+If time permits, review the previous notes as well by completing the following
+
+a. Partition the data into training-testing sets using a 70-30 split. 
+b. Fit an SLM to the training data and calculate $R^2$ on the testing data. Interpret the results.  
