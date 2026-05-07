@@ -5,6 +5,8 @@ project:
 execute:
   freeze: auto
 
+editor: source
+
 website:
   title: "Statistical Learning Methods"
   navbar:
@@ -25,7 +27,16 @@ website:
             text: "Module 1 R Tools: Introduction to ggplot2 and tidyverse"
       - text: "Module 2"
         menu:
-          - text: "Notes 1: ..."
+          - href: module-02/notes1.qmd
+            text: "Module 2.1: Multiple Regression Models"
+          - href: module-02/notes2.qmd
+            text: "Module 2.2: Enriching Linear Models"
+          - href: module-02/notes3.qmd
+            text: "Module 2.3: Regression Diagnostics"
+          - href: module-02/notes_bonus.qmd
+            text: "Module 2 Bonus: The F Test"
+          - href: module-02/supplement.qmd
+            text: "Module 2 Theory Supplement"
       - text: "Module 3"
         menu:
           - text: "Notes 1: ..."

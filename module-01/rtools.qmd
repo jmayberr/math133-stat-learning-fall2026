@@ -1,12 +1,6 @@
 ---
 title: "Module 1 R Tools"
-author: "John Mayberry"
-format: 
-  html:
-    embed-resources: true
-    self-contained: true
-    math: mathjax
-editor: visual
+
 ---
 
 ```{r setup, include=FALSE}

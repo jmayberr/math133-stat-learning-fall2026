@@ -4938,7 +4938,26 @@ window.Quarto = {
  <span class="menu-text">Module 2</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-module-2">    
-        <li class="dropdown-header">Notes 1: …</li>
+        <li>
+    <a class="dropdown-item" href="../module-02/notes1.qmd">
+ <span class="dropdown-text">Module 2.1: Multiple Regression Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes2.qmd">
+ <span class="dropdown-text">Module 2.2: Enriching Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes3.qmd">
+ <span class="dropdown-text">Module 2.3: Regression Diagnostics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes_bonus.html">
+ <span class="dropdown-text">Module 2 Bonus: The F Test</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/supplement.html">
+ <span class="dropdown-text">Module 2 Theory Supplement</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -5031,16 +5050,33 @@ window.Quarto = {
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Last class, we discussed the concept of a statistical model and introduced our first model in R: a simple linear model <span class="math display">\[
+<p>Last class, we discussed the concept of a statistical model and introduced our first model in R: a simple linear model</p>
+<p><span class="math display">\[
 Y = \beta_0 + \beta_1 X + \varepsilon
 \]</span> where <span class="math inline">\(\varepsilon\)</span> is a normal random variable with standard deviation <span class="math inline">\(\sigma\)</span>. We shall henceforth call this model a simple linear model (SLM).</p>
 <p>We introduced the function <code>lm</code> to estimate coefficients in an SLM from a given set of observations and used it to start exploring the relationship between <em>trump.vote</em> and <em>non.white</em> in the election2016 dataset:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">&quot;https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv&quot;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>election2016<span class="sc">$</span>trump.vote</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>x<span class="ot">=</span>election2016<span class="sc">$</span>non.white</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y<span class="sc">~</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package &#39;purrr&#39; was built under R version 4.5.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.2     ✔ tibble    3.3.0
+✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+✔ purrr     1.2.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">&quot;https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv&quot;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>election2016<span class="sc">$</span>trump.vote</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>x<span class="ot">=</span>election2016<span class="sc">$</span>non.white</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(y<span class="sc">~</span>x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -5053,7 +5089,7 @@ Coefficients:
 </div>
 <p>The output tells us that the best linear equation for predicting <span class="math inline">\(y=trump.vote\)</span> from <span class="math inline">\(x=non.white\)</span> is <span class="math inline">\(\hat y = 0.5811 - 0.2655x\)</span>. For example, if I have a state that is 50% white, than the predicted trump vote (as a proportion) would be</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fl">0.5811-0.2655</span><span class="sc">*</span><span class="fl">0.5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fl">0.5811-0.2655</span><span class="sc">*</span><span class="fl">0.5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.44835</code></pre>
 </div>
@@ -5061,7 +5097,7 @@ Coefficients:
 <p>The real test of a model then is how well it predicts new data, but that often first involves assessing how it fits the data used to estimate model paramaters in the first place (called the training data). Before we get into that, a couple comments on R.</p>
 <p>The most efficient way to use <code>lm</code> and other modeling functions is to pass the formula and data directly as inputs:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(trump.vote <span class="sc">~</span> non.white,<span class="at">data=</span>election2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lm</span>(trump.vote <span class="sc">~</span> non.white,<span class="at">data=</span>election2016)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -5074,8 +5110,8 @@ Coefficients:
 </div>
 <p>However, if you want use the model to predict new values it is helpful to first save the output of <code>lm</code> to a variable and then refer to that variable in future calls:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fit_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote <span class="sc">~</span> non.white,<span class="at">data=</span>election2016)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fit_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fit_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote <span class="sc">~</span> non.white,<span class="at">data=</span>election2016)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fit_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -5088,8 +5124,8 @@ Coefficients:
 </div>
 <p>One advantage of this approach is that instead of manually calculating the predicted values <span class="math inline">\(\hat y = \hat \beta_0 + \hat \beta_1x\)</span> for new or old observations, we can use the <code>predict</code> function. For example, to predict the Trump vote when the non-white proportion is 0.5, we do</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>new_df<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">non.white=</span><span class="fl">0.5</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(fit_lm,new_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>new_df<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">non.white=</span><span class="fl">0.5</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(fit_lm,new_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        1 
 0.4484042 </code></pre>
@@ -5097,8 +5133,8 @@ Coefficients:
 </div>
 <p>That may seem more tedious than just using the formula, but it won’t when the formulas get more complicated. The <code>predict</code> function is also helpful becaue we can pass multiple <span class="math inline">\(x\)</span> values and get all the predictions at once:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>new_df<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">non.white=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.1</span>))</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(fit_lm,new_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>new_df<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">non.white=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="fl">0.1</span>))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(fit_lm,new_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        1         2         3         4         5         6         7         8 
 0.5811319 0.5545863 0.5280408 0.5014953 0.4749497 0.4484042 0.4218587 0.3953132 
@@ -5108,8 +5144,8 @@ Coefficients:
 </div>
 <p>Or if you want to determine the predicted values for all points in the original dataset, leave the second input blank and this is done by default (first six shown below):</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>yhat_lm<span class="ot">=</span><span class="fu">predict</span>(fit_lm)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(yhat_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>yhat_lm<span class="ot">=</span><span class="fu">predict</span>(fit_lm)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(yhat_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        1         2         3         4         5         6 
 0.4882225 0.4696406 0.4510588 0.5121135 0.4192041 0.4988407 </code></pre>
@@ -5129,26 +5165,26 @@ MSE = SSE/n
 \]</span></p>
 <p>This can be calculated using the predicted outputs as follows</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> election2016<span class="sc">$</span>trump.vote</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>yhat_lm <span class="ot">=</span> <span class="fu">predict</span>(fit_lm)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>mse <span class="ot">=</span> <span class="fu">mean</span>((y<span class="sc">-</span>yhat_lm)<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(mse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> election2016<span class="sc">$</span>trump.vote</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>yhat_lm <span class="ot">=</span> <span class="fu">predict</span>(fit_lm)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>mse <span class="ot">=</span> <span class="fu">mean</span>((y<span class="sc">-</span>yhat_lm)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(mse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.008186537</code></pre>
 </div>
 </div>
 <p>Unfortunately, the MSE on its own has the meaningless units of <span class="math inline">\((y\; units)^2\)</span> (variance anyone?) so it is more common to look at its square root, the R(oot)MSE:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>rmse <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(mse)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(rmse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>rmse <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(mse)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(rmse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.09047949</code></pre>
 </div>
 </div>
 <p>This says that our predictions are off by about 0.09 per state on average, although not exactly, since squaring the errors before taking the square root is not the same as simply averaging the absolute errors which instead leads to the Mean Absolute Deviation (best acronym in statistics: MAD):</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mad<span class="ot">=</span><span class="fu">mean</span>(<span class="fu">abs</span>(y <span class="sc">-</span> yhat_lm))</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(mad)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>mad<span class="ot">=</span><span class="fu">mean</span>(<span class="fu">abs</span>(y <span class="sc">-</span> yhat_lm))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(mad)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.07823563</code></pre>
 </div>
@@ -5156,39 +5192,39 @@ MSE = SSE/n
 <p>The difference comes down to how each metric penalizes errors. RMSE squares the errors before averaging, which gives extra weight to large mistakes, while MAD treats all errors equally regardless of size. This is similar to the difference between the <span class="math inline">\(\ell_2\)</span> and <span class="math inline">\(\ell_1\)</span> norms if you know about such things (if not, they will appear later in the course). Both are valid ways of measuring model accuracy; RMSE has more theoretical appeal but MAD is much easier to explain to your friends.</p>
 <p>The final, and perhaps most commonly used metric for simple linear models, is <span class="math inline">\(R^2\)</span> (sometimes called the Coefficient of Determination but usually just R-squared). We’ll first give the calculation and then the explanation:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ybar<span class="ot">=</span><span class="fu">mean</span>(y)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>sst<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>ybar)<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>sse<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>yhat_lm)<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>r2<span class="ot">=</span><span class="dv">1</span><span class="sc">-</span>sse<span class="sc">/</span>sst</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(r2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ybar<span class="ot">=</span><span class="fu">mean</span>(y)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>sst<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>ybar)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>sse<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>yhat_lm)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>r2<span class="ot">=</span><span class="dv">1</span><span class="sc">-</span>sse<span class="sc">/</span>sst</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(r2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.178141</code></pre>
 </div>
 </div>
 <p><span class="math inline">\(R^2\)</span> gives the <em>proportion of variance</em> explained by the model. To explain this phrase, SST (Sum of Squares Total) represents the overall variance in <span class="math inline">\(y\)</span> values. It is the inherent variability in outcomes and the goal is to explain as much of that variance as possible with our models. SSE is the overall error in our model predictions or the variance left after we account for the relationship with our predictor. SSE/SST is therefore the fraction of the overall variance in outcomes that is NOT explained by the model and 1 - SSE/SST is the fraction that IS explained by our model. A perfect model would have an SSE of 0 and hence, an <span class="math inline">\(R^2\)</span> value of 1. Here is a function you can use to compute the <span class="math inline">\(R^2\)</span> for a model given an outcome <span class="math inline">\(y\)</span> and predicted values <span class="math inline">\(\hat y\)</span>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>get_r2<span class="ot">=</span><span class="cf">function</span>(y,yhat){</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  ybar<span class="ot">=</span><span class="fu">mean</span>(y)       </span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  sst<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>ybar)<span class="sc">^</span><span class="dv">2</span>) <span class="co"># total variance in y</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  sse<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>yhat)<span class="sc">^</span><span class="dv">2</span>) <span class="co"># variance unexplained by model</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  r2<span class="ot">=</span><span class="dv">1</span><span class="sc">-</span>sse<span class="sc">/</span>sst    <span class="co"># proportion of variance explained by model</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  r2</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Example usage from scratch</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>election2016<span class="sc">$</span>trump.vote</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>fit_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>non.white,<span class="at">data=</span>election2016)</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(fit_lm)</span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>r2<span class="ot">=</span><span class="fu">get_r2</span>(y,yhat)</span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(r2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>get_r2<span class="ot">=</span><span class="cf">function</span>(y,yhat){</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  ybar<span class="ot">=</span><span class="fu">mean</span>(y)       </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  sst<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>ybar)<span class="sc">^</span><span class="dv">2</span>) <span class="co"># total variance in y</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  sse<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>yhat)<span class="sc">^</span><span class="dv">2</span>) <span class="co"># variance unexplained by model</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  r2<span class="ot">=</span><span class="dv">1</span><span class="sc">-</span>sse<span class="sc">/</span>sst    <span class="co"># proportion of variance explained by model</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  r2</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co">#Example usage from scratch</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>election2016<span class="sc">$</span>trump.vote</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>fit_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>non.white,<span class="at">data=</span>election2016)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(fit_lm)</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>r2<span class="ot">=</span><span class="fu">get_r2</span>(y,yhat)</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(r2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.178141</code></pre>
 </div>
 </div>
 <p>We’ll need this in the next section. You can also get the <span class="math inline">\(R^2\)</span> value for the training data using the summary function:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>sum_lm<span class="ot">=</span><span class="fu">summary</span>(fit_lm)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(sum_lm<span class="sc">$</span>r.squared)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>sum_lm<span class="ot">=</span><span class="fu">summary</span>(fit_lm)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(sum_lm<span class="sc">$</span>r.squared)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.178141</code></pre>
 </div>
@@ -5207,23 +5243,23 @@ MSE = SSE/n
 <h2 class="anchored" data-anchor-id="training-testing-validation">Training-Testing Validation</h2>
 <p>Testing set validation means to split off some fraction of your data (usually 20-30%) for testing how well the model predicts “new data”. The observations used for testing are called the <em>hold-out set</em> or sometimes just <em>testing</em> data. Splitting the data into training and testing sets is called <em>partitioning</em> the data. In R, this can be done by deciding on the fraction <span class="math inline">\(p\)</span> to use for your training set and then sampling <span class="math inline">\(n*p\)</span> random rows from the dataset as the training set, using the excluded rows for testing:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">45</span>)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(election2016)</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>p<span class="ot">=</span><span class="fl">0.7</span> <span class="co"># Decide on fraction to keep for training, in this case 70%</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>train_rows<span class="ot">=</span><span class="fu">sample</span>(n,<span class="fu">round</span>(n<span class="sc">*</span><span class="fl">0.7</span>,<span class="dv">0</span>)) <span class="co"># Choose training row; round to ensure integer</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>train_df<span class="ot">=</span>election2016[train_rows,] <span class="co"># Extract training data</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>test_df<span class="ot">=</span> election2016[<span class="sc">-</span>train_rows,] <span class="co"># Extract testing data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">45</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(election2016)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>p<span class="ot">=</span><span class="fl">0.7</span> <span class="co"># Decide on fraction to keep for training, in this case 70%</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>train_rows<span class="ot">=</span><span class="fu">sample</span>(n,<span class="fu">round</span>(n<span class="sc">*</span><span class="fl">0.7</span>,<span class="dv">0</span>)) <span class="co"># Choose training row; round to ensure integer</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>train_df<span class="ot">=</span>election2016[train_rows,] <span class="co"># Extract training data</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>test_df<span class="ot">=</span> election2016[<span class="sc">-</span>train_rows,] <span class="co"># Extract testing data</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>This would be called a “70-30 split” because we used 70% for training and 30% for testing. We fit our model to the training set</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>fit_lm_train<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>non.white,<span class="at">data=</span>train_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>fit_lm_train<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>non.white,<span class="at">data=</span>train_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And calculate any validation metrics like R2 on the testing set</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>y_test<span class="ot">=</span>test_df<span class="sc">$</span>trump.vote</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>yhat_test<span class="ot">=</span><span class="fu">predict</span>(fit_lm_train,test_df)</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>r2_test<span class="ot">=</span><span class="fu">get_r2</span>(y_test,yhat_test)</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(r2_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>y_test<span class="ot">=</span>test_df<span class="sc">$</span>trump.vote</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>yhat_test<span class="ot">=</span><span class="fu">predict</span>(fit_lm_train,test_df)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>r2_test<span class="ot">=</span><span class="fu">get_r2</span>(y_test,yhat_test)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(r2_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -0.2826803</code></pre>
 </div>
@@ -5231,16 +5267,16 @@ MSE = SSE/n
 <p>Validation metrics will generally be smaller on the test set BUT less likely to be misleadingly large due to overfitting (more on this topic to come). We can see in this example that <span class="math inline">\(R^2\)</span> came out negative on the testing set which means that our model did terrible at predicting new data (it would have been better to just guess the mean of <span class="math inline">\(y\)</span> for all our observations).</p>
 <p>Every time we do the training-testing set split we will get a different value for <span class="math inline">\(R^2\)</span> on the testing set due to the randomness of our partition. For example, running the same code again yields</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(election2016)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>p<span class="ot">=</span><span class="fl">0.7</span> </span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>train_rows<span class="ot">=</span><span class="fu">sample</span>(n,<span class="fu">round</span>(n<span class="sc">*</span><span class="fl">0.7</span>,<span class="dv">0</span>))  </span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>train_df<span class="ot">=</span>election2016[train_rows,] </span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>test_df<span class="ot">=</span> election2016[<span class="sc">-</span>train_rows,] </span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>fit_lm_train<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>non.white,<span class="at">data=</span>train_df)</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>y_test<span class="ot">=</span>test_df<span class="sc">$</span>trump.vote</span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>yhat_test<span class="ot">=</span><span class="fu">predict</span>(fit_lm_train,test_df)</span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>r2_test<span class="ot">=</span><span class="fu">get_r2</span>(y_test,yhat_test)</span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(r2_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(election2016)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>p<span class="ot">=</span><span class="fl">0.7</span> </span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>train_rows<span class="ot">=</span><span class="fu">sample</span>(n,<span class="fu">round</span>(n<span class="sc">*</span><span class="fl">0.7</span>,<span class="dv">0</span>))  </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>train_df<span class="ot">=</span>election2016[train_rows,] </span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>test_df<span class="ot">=</span> election2016[<span class="sc">-</span>train_rows,] </span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>fit_lm_train<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>non.white,<span class="at">data=</span>train_df)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>y_test<span class="ot">=</span>test_df<span class="sc">$</span>trump.vote</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>yhat_test<span class="ot">=</span><span class="fu">predict</span>(fit_lm_train,test_df)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>r2_test<span class="ot">=</span><span class="fu">get_r2</span>(y_test,yhat_test)</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(r2_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] -0.04216912</code></pre>
 </div>
@@ -5255,7 +5291,6 @@ MSE = SSE/n
 <li><p>Split the data into training and testing sets using an 80-20 split.  Refit models for TV and radio to the training data and compute <span class="math inline">\(R^2\)</span> on the testing data for both. </p></li>
 <li><p>Create a scatterplot of sales vs x where x was the better of the two predictors in Step 2.</p></li>
 </ol>
-
 
 
 </section>

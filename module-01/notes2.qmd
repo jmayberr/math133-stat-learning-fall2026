@@ -1,29 +1,26 @@
 ---
 title: "Module 1.2: Prediction for SLM"
 author: "John Mayberry"
-output: html_document
-format: 
+
+format:
   html:
     embed-resources: true
-    self-contained: true
-    math: mathjax
+
 editor: visual
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(tidyverse)
-```
-
 ## Introduction
 
-Last class, we discussed the concept of a statistical model and introduced our first model in R: a simple linear model $$
+Last class, we discussed the concept of a statistical model and introduced our first model in R: a simple linear model
+
+$$
 Y = \beta_0 + \beta_1 X + \varepsilon
 $$ where $\varepsilon$ is a normal random variable with standard deviation $\sigma$. We shall henceforth call this model a simple linear model (SLM).
 
 We introduced the function `lm` to estimate coefficients in an SLM from a given set of observations and used it to start exploring the relationship between *trump.vote* and *non.white* in the election2016 dataset:
 
 ```{r}
+library(tidyverse)
 df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
 election2016=read.csv(df_url)
 y=election2016$trump.vote

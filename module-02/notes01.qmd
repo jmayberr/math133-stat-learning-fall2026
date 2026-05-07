@@ -1,0 +1,255 @@
+---
+title: "Module 2.1: Multiple Regression"
+---
+
+## The more the merrier?
+
+In the first module we restricted our attention to models with a single predictor $X$ of our outcome $Y$ and then beat ourselves up trying to decide which of two different possible predictors is best. For example, we could use either *non.white* or *median.income* to predict *trump.vote* in our election2016 dataset. Comparing the $R^2$ values of the two models, we see that Median Income is slightly better:
+
+```{r}
+library(tidyverse)
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016=read.csv(df_url)
+fit_lm1=lm(trump.vote~non.white,data=election2016)
+fit_lm2=lm(trump.vote~median.income,data=election2016)
+cat("Non.white R2:",summary(fit_lm1)$r.squared, 
+    "\nMedian.income R2:",summary(fit_lm2)$r.squared)
+```
+
+The natural question is: why not just include both predictors in our model if they are significant? In other wordswhy not look at a model of the form $$
+Y = f(X_1, X_2) +\varepsilon
+$$ where \$X_1 = \$ *non.white* and \$X_2 = \$ median.income?
+
+Multiple regression models do just that. They are the natural extension of simple linear models where we are allowed to include more than one predictor $X$ in our systematic information, but still assume it is a linear function of our parameters. In particular, if we have $p$ predictors $X_1,...X_p$, then a multiple regression model is one of the form $$
+Y = \beta_0  + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
+$$
+
+where as before $\varepsilon \sim Normal(0,\sigma)$.
+
+Our main goals today will be to see how to fit and interpret multiple regression models in R. But before we get to that, a note on notation. Multiple Regression models are often written in the simplified matrix-vector form $$
+Y = X \beta + \varepsilon
+$$ where $$
+X = \begin{bmatrix} 1 & X_1 & \cdots & X_p\end{bmatrix}
+$$ is what we call the *model matrix* and $$
+\beta = \begin{bmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_p \end{bmatrix}
+$$ is the *coefficient vector*. Notice that under this representation, $\varepsilon$ is technically what we call a multivariate normal random variable, but if we continue to assume that the errors are independent, you can treat it as $n$ independent normals with the same standard deviation. Please see the Module 2 Theory Supplement for further details about solving for $\beta$ using the matrix-vector formulation of the least squares problem. In the notes, we'll mainly just use the matrix-vector formulation as a notational tool.
+
+## Fitting Multiple Regression with R
+
+We are going to start with the smaller (in terms of number of variables) dataset Advertising.csv used in the Module 1 practice problems. This dataset has fictional information on number of sales (in thousands of units) and amount spent (in thousands of dollars) on TV, Radio, and newspaper advertising. You can load this dataset from the following url:
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Advertising.csv"
+advertising=read.csv(df_url)
+head(advertising)
+```
+
+An SLM model using just TV, for example, gives the following fit with an $R^2 \approx 0.61$
+
+```{r}
+fit_lm=lm(sales~TV,advertising)
+summary(fit_lm)
+```
+
+Using radio gives a worse fit:
+
+```{r}
+fit_lm=lm(sales~radio,advertising)
+summary(fit_lm)
+```
+
+and newspaper worst of all:
+
+```{r}
+fit_lm=lm(sales~newspaper,advertising)
+summary(fit_lm)
+```
+
+But instead of picking which model to use, let's try to fit a multiple regression model of the form
+
+$$
+sales = \beta_0 + \beta_1 \times TV + \beta_2 \times radio + \beta_3 \times newspaper + \varepsilon
+$$ The `lm` function is easily modified to accomplish this task:
+
+```{r}
+fit_lm_full=lm(sales~TV+radio+newspaper,data=advertising)
+summary(fit_lm_full)
+```
+
+Note that if you want to use all other columns as predictors (like in this example), you can use the following `.` notation shortcut to use all variables other variables on the right side of the formula:
+
+```{r dot-notation}
+sales_lm_full=lm(sales~.,data=advertising)
+summary(sales_lm_full)
+```
+
+Well, that definitely improved on the $R^2$ value of our model over the individual SLMs, jacking it up to almost 90%! (We'll talk about the difference between multiple and adjusted $R^2$ later.) Notice now that we also get a p-value for each of the three predictors. These can be interpreted in the same way as in a SLM; small values correspond to significant predictors. The p-values for both TV and radio are really small and hence, we conclude that their slopes are significantly nonzero. They are important linear predictors. Newspaper, by contrast, has a high p-value; if newspaper had no effect on sales, we would expect a coefficient as large as 0.001 in absolute value about 86% of the time. Therefore, we conclude that newspaper does NOT have a significant linear association with sales and we can safely remove it from our model. The `update` function is a slick way to pull that off (although you can also just build it from scratch):
+
+```{r}
+sales_lm_reduced=update(sales_lm_full,.~.-newspaper)
+summary(sales_lm_reduced)
+
+```
+
+Notice that the $R^2$ values is almost identical: excluding newspaper did not change the amount of variation explained by our model.
+
+## Interpreting Coefficients
+
+It is tempting to interpret the coefficients from a multiple regression model in the same way that we interpret the slope in an SLM, but that is misleading. The coefficient of newspaper in the model above was $-0.001$, but this does not mean that sales is expected to go down by $-0.001$ for every unit spent on newspaper. In fact, it actually turns out that the coefficient of newspaper in an SLM is positive AND significant:
+
+```{r}
+fit_lm_np=lm(sales~newspaper,data=advertising)
+summary(fit_lm_np)
+```
+
+Further, you can see in a plot that sales tends to go up with newspaper sales
+
+```{r}
+advertising |> 
+  ggplot(aes(x=newspaper,y=sales))+
+  geom_point(shape=1)+
+  geom_smooth(method="lm",se=FALSE,col="#e35205")
+```
+
+So what is going on here?
+
+The correct interpretation of the coefficient of newspaper in the multiple regression model is that we would expect sales to go down $-0.001$ for every additional unit spent on newspaper WHILE holding TV and radio constant. In other words, if two stores spent the same amount on TV and radio advertising but differed by one unit in newspaper spending, we would expect the state with more newspaper spending to have sales 0.001 lower on average. This is an important distinction because in practice the predictors are often correlated with each other, so changing one while truly holding the others fixed is not always realistic. In this example, there was a positive correlation between newspaper and radio:
+
+```{r}
+advertising |>
+  ggplot(aes(x=newspaper,y=radio))+
+  geom_point(shape=1)+
+  geom_smooth(method="lm",se=FALSE,col="#e35205")
+```
+
+Therefore, if we only include the single variable newspaper, it acts as a kind of "surrogate" for radio, stealing its thunder so to speak. When radio is included in the model, the true predictor speaks up and newspaper no longer adds anything to the model.
+
+This is a subtle example of the old adage "correlation does not imply causation". Just because a predictor appears to be related to a response does not mean that the predictor actually has an effect on the response. There could be a third confounding variable impacting this result. For a more extreme example, read about how [ice cream sales can be used to predict murder rates](https://bangordailynews.com/2013/07/10/opinion/when-ice-cream-sales-rise-so-do-homicides-coincidence-or-will-your-next-cone-murder-you/)
+
+## Why not include Newspaper anyways?
+
+Well, besides the fact that its stupid, there is also the issue of *over-fitting*. While the overall predictive value of the full model on the full dataset may be better, excluding irrelevant predictors will typically lower RMSE on a test set.
+
+To demonstrate this, let's do a 70-30 training-testing split on the advertising dataset
+
+```{r}
+set.seed(44)
+n=nrow(advertising)
+n1=round(0.7*n,0)
+train_rows=sample(n,n1)
+train_set=advertising[train_rows,]
+test_set=advertising[-train_rows,]
+```
+
+And refit our models
+
+```{r}
+train_lm_full=lm(sales~radio+TV+newspaper,data=train_set)
+train_lm_red=lm(sales~radio+TV,data=train_set)
+```
+
+Comparing the $R^2$ values on the test set:
+
+```{r}
+calculate_r2=function(y,yhat){
+  sse=sum((y-yhat)^2)
+  sst=sum((y-mean(y))^2)
+  1-sse/sst
+}
+y=test_set$sales
+yhat_full=predict(train_lm_full,test_set)
+yhat_red=predict(train_lm_red,test_set)
+cat("R2 full: ", calculate_r2(y,yhat_full),
+  "R2 reduced: ", calculate_r2(y,yhat_red))
+```
+
+We can see that the reduced model is slightly better and even though the difference is small in this example, you can imagine that it could be A LOT bigger in other situations (more on this in Module 4).
+
+To summarize, don't waste space for irrelevant variables in your model. Simple enough, right?
+
+## Visualizing the Fit
+
+Visualizing a multiple regression model with two variables requires a 3D plot since the equation $$
+\hat{y} = \beta_0 + \beta_1 x_1 + \beta_2 x_2
+$$defines a plane (think $z = a + bx + cy$). Unfortunately, ggplot doesn't do well with 3D plots. For that we need a new package plotly. Install it first and then run the following
+
+```{r}
+library(plotly)
+adv_3d=plot_ly(advertising,x=~TV,y=~radio,z=~sales)
+adv_3d |> 
+  add_markers()
+```
+
+This shows the points $(TV,radio,sales)$. To show the fitted plane we get from our reduced model is somewhat more tedious if you haven't seen done 3D plotting before. We first have to calculate the function $z = \hat{\beta}_0 +  \hat{\beta}_1 x + \hat{\beta}_2 y$ over a grid of values in the x-y plane. First, let's check the range of possible TV and radio values:
+
+```{r}
+summary(advertising[,c("TV","radio")])
+```
+
+Notice that TV goes from 0 to around 300 while radio goes from 0 to around 50. We'll use these as the endpoints of our grid and then space out points by 10 and 5, respectively[^1]
+
+[^1]: Technically we only need two points in each direction here because the function is linear, but its better practice to include more gridpoints for nonlinear functions
+
+```{r}
+x_values=seq(0,300, by=10)
+y_values=seq(0,50,by=5)
+xy_grid=expand.grid(TV=x_values,radio=y_values)
+```
+
+We then fit our model and calculated the predicted y-values, storing the result as a matrix.
+
+```{r}
+yhat=matrix(predict(sales_lm_reduced,xy_grid),
+         nrow=length(x_values),ncol=length(y_values))
+```
+
+Finally, we plot the predicted values on the z-axis alongside our grid. Note the "t" stands for transpose and flips the yhat matrix so that it matches up with the x- and y-values correctly[^2]:
+
+[^2]: The axes labeling and colors is unfortunately rather clunky in plotly but I guess if you want nice 3D graphics, you have to deal with it
+
+```{r}
+adv_3d |> 
+  add_markers(marker = list(color = "black", size = 3)) |>
+  add_surface(x = ~x_values, 
+              y = ~y_values, 
+              z = ~t(yhat),
+              colorscale = "Viridis",
+              opacity = 0.7) |>
+  layout(scene = list(
+    xaxis = list(title = "TV"),
+    yaxis = list(title = "Radio"),
+    zaxis = list(title = "Sales")
+  ))
+
+```
+
+You can see why the $R^2$ value was so high. The plane matches the points fairly well...
+
+Wait a second, does it? Personally, I just want to get in there and peal it down on the corners to better match the data. We'll learn in the next notes how to do just that. We'll close out these notes with one other visualization tool that will help with higher dimensions and is often easier for people to interpret than the 3D plots above.
+
+## Partial Regression Plots
+
+An *added variable* or *partial regression* plot shows the relationship between the outcome and each predictors individually after removing the influence of the other predictors from both[^3]. Added variable plots are implemented in the `car` package[^4]:
+
+[^3]: More precisely, to get the added variable plot for $X_j$, we regress $X_j$ on the other predictors to get predicted values $\hat X_j$ and calculate the errors $X_j - \hat X_j$ from our model and do the same for $Y$. Then we fit an SLM to the errors $Y-\hat Y$ based on $X_j - \hat X_j$
+
+[^4]: Here `car` is actually an acronym for "Classification and Regression". Its a package that contains additional diagnostic tools for model fitting which we'll see again in Section 2.3 and other random places throughout the course.
+
+```{r}
+library(car)
+avPlots(sales_lm_full)
+```
+
+To interpret these plots, we can say that increasing TV or radio leads to a predicted increase in sales holding spending in the other categories constant while increasing spending in newspaper does not.
+
+You may notice that the slopes are the coefficients from our multiple regression model as opposed to the slopes you would get by fitting three separate SLMs. This is not a coincidence! A famous result in econometrics called the Frisch-Waugh-Lovell Theorem says this will always happen and gives us a precise interpretation of the coefficients in a multiple regression model; they describe the influence of the variable on our outcome after removing the influence of the other predictors from both.
+
+The points with labels are influential points; more on this in Module 2.3!
+
+## Practice
+
+Load the election2016 dataset for these exercises.
+
+1.  Fit a multiple regression model to *trump.vote* using all remaining variables except *state* and *outcome* as predictors. Which were significant at a 0.05 level?
+2.  Fit a reduced model with only the significant predictors from part 1. Compare the $R^2$ of the two models.
+3.  Produce either a 3D plot or added variable plots for your model in part 2. (If time permits, try both!)
