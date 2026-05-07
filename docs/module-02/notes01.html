@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Module 2.1: Multiple Regression – Statistical Learning Methods</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d4be639c637f3db3c684c66cefad7e0c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="../site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+
+<script src="../site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<script src="../site_libs/plotly-binding-4.12.0/plotly.js"></script>
+
+<script src="../site_libs/typedarray-0.1/typedarray.min.js"></script>
+
+<script src="../site_libs/jquery-3.5.1/jquery.min.js"></script>
+
+<link href="../site_libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
+
+<script src="../site_libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+
+<link href="../site_libs/plotly-htmlwidgets-css-2.25.2/plotly-htmlwidgets.css" rel="stylesheet">
+
+<script src="../site_libs/plotly-main-2.25.2/plotly-latest.min.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Statistical Learning Methods</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-1" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 1</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-1">    
+        <li>
+    <a class="dropdown-item" href="../module-01/notes1.html">
+ <span class="dropdown-text">Module 1.1: Introduction to Statistical Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes2.html">
+ <span class="dropdown-text">Module 1.2: Prediction for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes3.html">
+ <span class="dropdown-text">Module 1.3: Inference for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/supplement.html">
+ <span class="dropdown-text">Module 1 Theory: A deeper look at finding coefficients</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/rtools.html">
+ <span class="dropdown-text">Module 1 R Tools: Introduction to ggplot2 and tidyverse</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-2" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 2</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-2">    
+        <li>
+    <a class="dropdown-item" href="../module-02/notes1.qmd">
+ <span class="dropdown-text">Module 2.1: Multiple Regression Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes2.qmd">
+ <span class="dropdown-text">Module 2.2: Enriching Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes3.qmd">
+ <span class="dropdown-text">Module 2.3: Regression Diagnostics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes_bonus.html">
+ <span class="dropdown-text">Module 2 Bonus: The F Test</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/supplement.html">
+ <span class="dropdown-text">Module 2 Theory Supplement</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-3" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 3</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-3">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-4" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 4</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-4">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-5" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 5</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-5">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-6" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 6</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-6">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-7" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 7</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-7">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-8" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 8</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-8">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Module 2.1: Multiple Regression</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="the-more-the-merrier" class="level2">
+<h2 class="anchored" data-anchor-id="the-more-the-merrier">The more the merrier?</h2>
+<p>In the first module we restricted our attention to models with a single predictor <span class="math inline">\(X\)</span> of our outcome <span class="math inline">\(Y\)</span> and then beat ourselves up trying to decide which of two different possible predictors is best. For example, we could use either <em>non.white</em> or <em>median.income</em> to predict <em>trump.vote</em> in our election2016 dataset. Comparing the <span class="math inline">\(R^2\)</span> values of the two models, we see that Median Income is slightly better:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'purrr' was built under R version 4.5.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.2     ✔ tibble    3.3.0
+✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+✔ purrr     1.2.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>fit_lm1<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>non.white,<span class="at">data=</span>election2016)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>fit_lm2<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>median.income,<span class="at">data=</span>election2016)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Non.white R2:"</span>,<span class="fu">summary</span>(fit_lm1)<span class="sc">$</span>r.squared, </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span><span class="sc">\n</span><span class="st">Median.income R2:"</span>,<span class="fu">summary</span>(fit_lm2)<span class="sc">$</span>r.squared)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Non.white R2: 0.178141 
+Median.income R2: 0.3511742</code></pre>
+</div>
+</div>
+<p>The natural question is: why not just include both predictors in our model if they are significant? In other wordswhy not look at a model of the form <span class="math display">\[
+Y = f(X_1, X_2) +\varepsilon
+\]</span> where $X_1 = $ <em>non.white</em> and $X_2 = $ median.income?</p>
+<p>Multiple regression models do just that. They are the natural extension of simple linear models where we are allowed to include more than one predictor <span class="math inline">\(X\)</span> in our systematic information, but still assume it is a linear function of our parameters. In particular, if we have <span class="math inline">\(p\)</span> predictors <span class="math inline">\(X_1,...X_p\)</span>, then a multiple regression model is one of the form <span class="math display">\[
+Y = \beta_0  + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
+\]</span></p>
+<p>where as before <span class="math inline">\(\varepsilon \sim Normal(0,\sigma)\)</span>.</p>
+<p>Our main goals today will be to see how to fit and interpret multiple regression models in R. But before we get to that, a note on notation. Multiple Regression models are often written in the simplified matrix-vector form <span class="math display">\[
+Y = X \beta + \varepsilon
+\]</span> where <span class="math display">\[
+X = \begin{bmatrix} 1 &amp; X_1 &amp; \cdots &amp; X_p\end{bmatrix}
+\]</span> is what we call the <em>model matrix</em> and <span class="math display">\[
+\beta = \begin{bmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_p \end{bmatrix}
+\]</span> is the <em>coefficient vector</em>. Notice that under this representation, <span class="math inline">\(\varepsilon\)</span> is technically what we call a multivariate normal random variable, but if we continue to assume that the errors are independent, you can treat it as <span class="math inline">\(n\)</span> independent normals with the same standard deviation. Please see the Module 2 Theory Supplement for further details about solving for <span class="math inline">\(\beta\)</span> using the matrix-vector formulation of the least squares problem. In the notes, we’ll mainly just use the matrix-vector formulation as a notational tool.</p>
+</section>
+<section id="fitting-multiple-regression-with-r" class="level2">
+<h2 class="anchored" data-anchor-id="fitting-multiple-regression-with-r">Fitting Multiple Regression with R</h2>
+<p>We are going to start with the smaller (in terms of number of variables) dataset Advertising.csv used in the Module 1 practice problems. This dataset has fictional information on number of sales (in thousands of units) and amount spent (in thousands of dollars) on TV, Radio, and newspaper advertising. You can load this dataset from the following url:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Advertising.csv"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>advertising<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(advertising)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     TV radio newspaper sales
+1 230.1  37.8      69.2  22.1
+2  44.5  39.3      45.1  10.4
+3  17.2  45.9      69.3   9.3
+4 151.5  41.3      58.5  18.5
+5 180.8  10.8      58.4  12.9
+6   8.7  48.9      75.0   7.2</code></pre>
+</div>
+</div>
+<p>An SLM model using just TV, for example, gives the following fit with an <span class="math inline">\(R^2 \approx 0.61\)</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fit_lm<span class="ot">=</span><span class="fu">lm</span>(sales<span class="sc">~</span>TV,advertising)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = sales ~ TV, data = advertising)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-8.3860 -1.9545 -0.1913  2.0671  7.2124 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 7.032594   0.457843   15.36   &lt;2e-16 ***
+TV          0.047537   0.002691   17.67   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 3.259 on 198 degrees of freedom
+Multiple R-squared:  0.6119,    Adjusted R-squared:  0.6099 
+F-statistic: 312.1 on 1 and 198 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>Using radio gives a worse fit:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fit_lm<span class="ot">=</span><span class="fu">lm</span>(sales<span class="sc">~</span>radio,advertising)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = sales ~ radio, data = advertising)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-15.7305  -2.1324   0.7707   2.7775   8.1810 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  9.31164    0.56290  16.542   &lt;2e-16 ***
+radio        0.20250    0.02041   9.921   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 4.275 on 198 degrees of freedom
+Multiple R-squared:  0.332, Adjusted R-squared:  0.3287 
+F-statistic: 98.42 on 1 and 198 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>and newspaper worst of all:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>fit_lm<span class="ot">=</span><span class="fu">lm</span>(sales<span class="sc">~</span>newspaper,advertising)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = sales ~ newspaper, data = advertising)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-11.2272  -3.3873  -0.8392   3.5059  12.7751 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 12.35141    0.62142   19.88  &lt; 2e-16 ***
+newspaper    0.05469    0.01658    3.30  0.00115 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 5.092 on 198 degrees of freedom
+Multiple R-squared:  0.05212,   Adjusted R-squared:  0.04733 
+F-statistic: 10.89 on 1 and 198 DF,  p-value: 0.001148</code></pre>
+</div>
+</div>
+<p>But instead of picking which model to use, let’s try to fit a multiple regression model of the form</p>
+<p><span class="math display">\[
+sales = \beta_0 + \beta_1 \times TV + \beta_2 \times radio + \beta_3 \times newspaper + \varepsilon
+\]</span> The <code>lm</code> function is easily modified to accomplish this task:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fit_lm_full<span class="ot">=</span><span class="fu">lm</span>(sales<span class="sc">~</span>TV<span class="sc">+</span>radio<span class="sc">+</span>newspaper,<span class="at">data=</span>advertising)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_lm_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = sales ~ TV + radio + newspaper, data = advertising)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-8.8277 -0.8908  0.2418  1.1893  2.8292 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  2.938889   0.311908   9.422   &lt;2e-16 ***
+TV           0.045765   0.001395  32.809   &lt;2e-16 ***
+radio        0.188530   0.008611  21.893   &lt;2e-16 ***
+newspaper   -0.001037   0.005871  -0.177     0.86    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.686 on 196 degrees of freedom
+Multiple R-squared:  0.8972,    Adjusted R-squared:  0.8956 
+F-statistic: 570.3 on 3 and 196 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>Note that if you want to use all other columns as predictors (like in this example), you can use the following <code>.</code> notation shortcut to use all variables other variables on the right side of the formula:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>sales_lm_full<span class="ot">=</span><span class="fu">lm</span>(sales<span class="sc">~</span>.,<span class="at">data=</span>advertising)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sales_lm_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = sales ~ ., data = advertising)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-8.8277 -0.8908  0.2418  1.1893  2.8292 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  2.938889   0.311908   9.422   &lt;2e-16 ***
+TV           0.045765   0.001395  32.809   &lt;2e-16 ***
+radio        0.188530   0.008611  21.893   &lt;2e-16 ***
+newspaper   -0.001037   0.005871  -0.177     0.86    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.686 on 196 degrees of freedom
+Multiple R-squared:  0.8972,    Adjusted R-squared:  0.8956 
+F-statistic: 570.3 on 3 and 196 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>Well, that definitely improved on the <span class="math inline">\(R^2\)</span> value of our model over the individual SLMs, jacking it up to almost 90%! (We’ll talk about the difference between multiple and adjusted <span class="math inline">\(R^2\)</span> later.) Notice now that we also get a p-value for each of the three predictors. These can be interpreted in the same way as in a SLM; small values correspond to significant predictors. The p-values for both TV and radio are really small and hence, we conclude that their slopes are significantly nonzero. They are important linear predictors. Newspaper, by contrast, has a high p-value; if newspaper had no effect on sales, we would expect a coefficient as large as 0.001 in absolute value about 86% of the time. Therefore, we conclude that newspaper does NOT have a significant linear association with sales and we can safely remove it from our model. The <code>update</code> function is a slick way to pull that off (although you can also just build it from scratch):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>sales_lm_reduced<span class="ot">=</span><span class="fu">update</span>(sales_lm_full,.<span class="sc">~</span>.<span class="sc">-</span>newspaper)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(sales_lm_reduced)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = sales ~ TV + radio, data = advertising)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-8.7977 -0.8752  0.2422  1.1708  2.8328 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  2.92110    0.29449   9.919   &lt;2e-16 ***
+TV           0.04575    0.00139  32.909   &lt;2e-16 ***
+radio        0.18799    0.00804  23.382   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.681 on 197 degrees of freedom
+Multiple R-squared:  0.8972,    Adjusted R-squared:  0.8962 
+F-statistic: 859.6 on 2 and 197 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>Notice that the <span class="math inline">\(R^2\)</span> values is almost identical: excluding newspaper did not change the amount of variation explained by our model.</p>
+</section>
+<section id="interpreting-coefficients" class="level2">
+<h2 class="anchored" data-anchor-id="interpreting-coefficients">Interpreting Coefficients</h2>
+<p>It is tempting to interpret the coefficients from a multiple regression model in the same way that we interpret the slope in an SLM, but that is misleading. The coefficient of newspaper in the model above was <span class="math inline">\(-0.001\)</span>, but this does not mean that sales is expected to go down by <span class="math inline">\(-0.001\)</span> for every unit spent on newspaper. In fact, it actually turns out that the coefficient of newspaper in an SLM is positive AND significant:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fit_lm_np<span class="ot">=</span><span class="fu">lm</span>(sales<span class="sc">~</span>newspaper,<span class="at">data=</span>advertising)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_lm_np)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = sales ~ newspaper, data = advertising)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-11.2272  -3.3873  -0.8392   3.5059  12.7751 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 12.35141    0.62142   19.88  &lt; 2e-16 ***
+newspaper    0.05469    0.01658    3.30  0.00115 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 5.092 on 198 degrees of freedom
+Multiple R-squared:  0.05212,   Adjusted R-squared:  0.04733 
+F-statistic: 10.89 on 1 and 198 DF,  p-value: 0.001148</code></pre>
+</div>
+</div>
+<p>Further, you can see in a plot that sales tends to go up with newspaper sales</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>advertising <span class="sc">|&gt;</span> </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>newspaper,<span class="at">y=</span>sales))<span class="sc">+</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>,<span class="at">se=</span><span class="cn">FALSE</span>,<span class="at">col=</span><span class="st">"#e35205"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes01_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>So what is going on here?</p>
+<p>The correct interpretation of the coefficient of newspaper in the multiple regression model is that we would expect sales to go down <span class="math inline">\(-0.001\)</span> for every additional unit spent on newspaper WHILE holding TV and radio constant. In other words, if two stores spent the same amount on TV and radio advertising but differed by one unit in newspaper spending, we would expect the state with more newspaper spending to have sales 0.001 lower on average. This is an important distinction because in practice the predictors are often correlated with each other, so changing one while truly holding the others fixed is not always realistic. In this example, there was a positive correlation between newspaper and radio:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>advertising <span class="sc">|&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>newspaper,<span class="at">y=</span>radio))<span class="sc">+</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>,<span class="at">se=</span><span class="cn">FALSE</span>,<span class="at">col=</span><span class="st">"#e35205"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes01_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Therefore, if we only include the single variable newspaper, it acts as a kind of “surrogate” for radio, stealing its thunder so to speak. When radio is included in the model, the true predictor speaks up and newspaper no longer adds anything to the model.</p>
+<p>This is a subtle example of the old adage “correlation does not imply causation”. Just because a predictor appears to be related to a response does not mean that the predictor actually has an effect on the response. There could be a third confounding variable impacting this result. For a more extreme example, read about how <a href="https://bangordailynews.com/2013/07/10/opinion/when-ice-cream-sales-rise-so-do-homicides-coincidence-or-will-your-next-cone-murder-you/">ice cream sales can be used to predict murder rates</a></p>
+</section>
+<section id="why-not-include-newspaper-anyways" class="level2">
+<h2 class="anchored" data-anchor-id="why-not-include-newspaper-anyways">Why not include Newspaper anyways?</h2>
+<p>Well, besides the fact that its stupid, there is also the issue of <em>over-fitting</em>. While the overall predictive value of the full model on the full dataset may be better, excluding irrelevant predictors will typically lower RMSE on a test set.</p>
+<p>To demonstrate this, let’s do a 70-30 training-testing split on the advertising dataset</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">44</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(advertising)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>n1<span class="ot">=</span><span class="fu">round</span>(<span class="fl">0.7</span><span class="sc">*</span>n,<span class="dv">0</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>train_rows<span class="ot">=</span><span class="fu">sample</span>(n,n1)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>train_set<span class="ot">=</span>advertising[train_rows,]</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>test_set<span class="ot">=</span>advertising[<span class="sc">-</span>train_rows,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And refit our models</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>train_lm_full<span class="ot">=</span><span class="fu">lm</span>(sales<span class="sc">~</span>radio<span class="sc">+</span>TV<span class="sc">+</span>newspaper,<span class="at">data=</span>train_set)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>train_lm_red<span class="ot">=</span><span class="fu">lm</span>(sales<span class="sc">~</span>radio<span class="sc">+</span>TV,<span class="at">data=</span>train_set)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Comparing the <span class="math inline">\(R^2\)</span> values on the test set:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>calculate_r2<span class="ot">=</span><span class="cf">function</span>(y,yhat){</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  sse<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>yhat)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  sst<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span><span class="fu">mean</span>(y))<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span><span class="sc">-</span>sse<span class="sc">/</span>sst</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>test_set<span class="sc">$</span>sales</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>yhat_full<span class="ot">=</span><span class="fu">predict</span>(train_lm_full,test_set)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>yhat_red<span class="ot">=</span><span class="fu">predict</span>(train_lm_red,test_set)</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"R2 full: "</span>, <span class="fu">calculate_r2</span>(y,yhat_full),</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"R2 reduced: "</span>, <span class="fu">calculate_r2</span>(y,yhat_red))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>R2 full:  0.9092742 R2 reduced:  0.9100812</code></pre>
+</div>
+</div>
+<p>We can see that the reduced model is slightly better and even though the difference is small in this example, you can imagine that it could be A LOT bigger in other situations (more on this in Module 4).</p>
+<p>To summarize, don’t waste space for irrelevant variables in your model. Simple enough, right?</p>
+</section>
+<section id="visualizing-the-fit" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing-the-fit">Visualizing the Fit</h2>
+<p>Visualizing a multiple regression model with two variables requires a 3D plot since the equation <span class="math display">\[
+\hat{y} = \beta_0 + \beta_1 x_1 + \beta_2 x_2
+\]</span>defines a plane (think <span class="math inline">\(z = a + bx + cy\)</span>). Unfortunately, ggplot doesn’t do well with 3D plots. For that we need a new package plotly. Install it first and then run the following</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'plotly' was built under R version 4.5.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'plotly'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:ggplot2':
+
+    last_plot</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:stats':
+
+    filter</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:graphics':
+
+    layout</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>adv_3d<span class="ot">=</span><span class="fu">plot_ly</span>(advertising,<span class="at">x=</span><span class="sc">~</span>TV,<span class="at">y=</span><span class="sc">~</span>radio,<span class="at">z=</span><span class="sc">~</span>sales)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>adv_3d <span class="sc">|&gt;</span> </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_markers</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-01bcfad15cd6b46e2a6f" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-01bcfad15cd6b46e2a6f">{"x":{"visdat":{"67281fc37037":["function () ","plotlyVisDat"]},"cur_data":"67281fc37037","attrs":{"67281fc37037":{"x":{},"y":{},"z":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d","mode":"markers","inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"TV"},"yaxis":{"title":"radio"},"zaxis":{"title":"sales"}},"hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[230.09999999999999,44.5,17.199999999999999,151.5,180.80000000000001,8.6999999999999993,57.5,120.2,8.5999999999999996,199.80000000000001,66.099999999999994,214.69999999999999,23.800000000000001,97.5,204.09999999999999,195.40000000000001,67.799999999999997,281.39999999999998,69.200000000000003,147.30000000000001,218.40000000000001,237.40000000000001,13.199999999999999,228.30000000000001,62.299999999999997,262.89999999999998,142.90000000000001,240.09999999999999,248.80000000000001,70.599999999999994,292.89999999999998,112.90000000000001,97.200000000000003,265.60000000000002,95.700000000000003,290.69999999999999,266.89999999999998,74.700000000000003,43.100000000000001,228,202.5,177,293.60000000000002,206.90000000000001,25.100000000000001,175.09999999999999,89.700000000000003,239.90000000000001,227.19999999999999,66.900000000000006,199.80000000000001,100.40000000000001,216.40000000000001,182.59999999999999,262.69999999999999,198.90000000000001,7.2999999999999998,136.19999999999999,210.80000000000001,210.69999999999999,53.5,261.30000000000001,239.30000000000001,102.7,131.09999999999999,69,31.5,139.30000000000001,237.40000000000001,216.80000000000001,199.09999999999999,109.8,26.800000000000001,129.40000000000001,213.40000000000001,16.899999999999999,27.5,120.5,5.4000000000000004,116,76.400000000000006,239.80000000000001,75.299999999999997,68.400000000000006,213.5,193.19999999999999,76.299999999999997,110.7,88.299999999999997,109.8,134.30000000000001,28.600000000000001,217.69999999999999,250.90000000000001,107.40000000000001,163.30000000000001,197.59999999999999,184.90000000000001,289.69999999999999,135.19999999999999,222.40000000000001,296.39999999999998,280.19999999999999,187.90000000000001,238.19999999999999,137.90000000000001,25,90.400000000000006,13.1,255.40000000000001,225.80000000000001,241.69999999999999,175.69999999999999,209.59999999999999,78.200000000000003,75.099999999999994,139.19999999999999,76.400000000000006,125.7,19.399999999999999,141.30000000000001,18.800000000000001,224,123.09999999999999,229.5,87.200000000000003,7.7999999999999998,80.200000000000003,220.30000000000001,59.600000000000001,0.69999999999999996,265.19999999999999,8.4000000000000004,219.80000000000001,36.899999999999999,48.299999999999997,25.600000000000001,273.69999999999999,43,184.90000000000001,73.400000000000006,193.69999999999999,220.5,104.59999999999999,96.200000000000003,140.30000000000001,240.09999999999999,243.19999999999999,38,44.700000000000003,280.69999999999999,121,197.59999999999999,171.30000000000001,187.80000000000001,4.0999999999999996,93.900000000000006,149.80000000000001,11.699999999999999,131.69999999999999,172.5,85.700000000000003,188.40000000000001,163.5,117.2,234.5,17.899999999999999,206.80000000000001,215.40000000000001,284.30000000000001,50,164.5,19.600000000000001,168.40000000000001,222.40000000000001,276.89999999999998,248.40000000000001,170.19999999999999,276.69999999999999,165.59999999999999,156.59999999999999,218.5,56.200000000000003,287.60000000000002,253.80000000000001,205,139.5,191.09999999999999,286,18.699999999999999,39.5,75.5,17.199999999999999,166.80000000000001,149.69999999999999,38.200000000000003,94.200000000000003,177,283.60000000000002,232.09999999999999],"y":[37.799999999999997,39.299999999999997,45.899999999999999,41.299999999999997,10.800000000000001,48.899999999999999,32.799999999999997,19.600000000000001,2.1000000000000001,2.6000000000000001,5.7999999999999998,24,35.100000000000001,7.5999999999999996,32.899999999999999,47.700000000000003,36.600000000000001,39.600000000000001,20.5,23.899999999999999,27.699999999999999,5.0999999999999996,15.9,16.899999999999999,12.6,3.5,29.300000000000001,16.699999999999999,27.100000000000001,16,28.300000000000001,17.399999999999999,1.5,20,1.3999999999999999,4.0999999999999996,43.799999999999997,49.399999999999999,26.699999999999999,37.700000000000003,22.300000000000001,33.399999999999999,27.699999999999999,8.4000000000000004,25.699999999999999,22.5,9.9000000000000004,41.5,15.800000000000001,11.699999999999999,3.1000000000000001,9.5999999999999996,41.700000000000003,46.200000000000003,28.800000000000001,49.399999999999999,28.100000000000001,19.199999999999999,49.600000000000001,29.5,2,42.700000000000003,15.5,29.600000000000001,42.799999999999997,9.3000000000000007,24.600000000000001,14.5,27.5,43.899999999999999,30.600000000000001,14.300000000000001,33,5.7000000000000002,24.600000000000001,43.700000000000003,1.6000000000000001,28.5,29.899999999999999,7.7000000000000002,26.699999999999999,4.0999999999999996,20.300000000000001,44.5,43,18.399999999999999,27.5,40.600000000000001,25.5,47.799999999999997,4.9000000000000004,1.5,33.5,36.5,14,31.600000000000001,3.5,21,42.299999999999997,41.700000000000003,4.2999999999999998,36.299999999999997,10.1,17.199999999999999,34.299999999999997,46.399999999999999,11,0.29999999999999999,0.40000000000000002,26.899999999999999,8.1999999999999993,38,15.4,20.600000000000001,46.799999999999997,35,14.300000000000001,0.80000000000000004,36.899999999999999,16,26.800000000000001,21.699999999999999,2.3999999999999999,34.600000000000001,32.299999999999997,11.800000000000001,38.899999999999999,0,49,12,39.600000000000001,2.8999999999999999,27.199999999999999,33.5,38.600000000000001,47,39,28.899999999999999,25.899999999999999,43.899999999999999,17,35.399999999999999,33.200000000000003,5.7000000000000002,14.800000000000001,1.8999999999999999,7.2999999999999998,49,40.299999999999997,25.800000000000001,13.9,8.4000000000000004,23.300000000000001,39.700000000000003,21.100000000000001,11.6,43.5,1.3,36.899999999999999,18.399999999999999,18.100000000000001,35.799999999999997,18.100000000000001,36.799999999999997,14.699999999999999,3.3999999999999999,37.600000000000001,5.2000000000000002,23.600000000000001,10.6,11.6,20.899999999999999,20.100000000000001,7.0999999999999996,3.3999999999999999,48.899999999999999,30.199999999999999,7.7999999999999998,2.2999999999999998,10,2.6000000000000001,5.4000000000000004,5.7000000000000002,43,21.300000000000001,45.100000000000001,2.1000000000000001,28.699999999999999,13.9,12.1,41.100000000000001,10.800000000000001,4.0999999999999996,42,35.600000000000001,3.7000000000000002,4.9000000000000004,9.3000000000000007,42,8.5999999999999996],"z":[22.100000000000001,10.4,9.3000000000000007,18.5,12.9,7.2000000000000002,11.800000000000001,13.199999999999999,4.7999999999999998,10.6,8.5999999999999996,17.399999999999999,9.1999999999999993,9.6999999999999993,19,22.399999999999999,12.5,24.399999999999999,11.300000000000001,14.6,18,12.5,5.5999999999999996,15.5,9.6999999999999993,12,15,15.9,18.899999999999999,10.5,21.399999999999999,11.9,9.5999999999999996,17.399999999999999,9.5,12.800000000000001,25.399999999999999,14.699999999999999,10.1,21.5,16.600000000000001,17.100000000000001,20.699999999999999,12.9,8.5,14.9,10.6,23.199999999999999,14.800000000000001,9.6999999999999993,11.4,10.699999999999999,22.600000000000001,21.199999999999999,20.199999999999999,23.699999999999999,5.5,13.199999999999999,23.800000000000001,18.399999999999999,8.0999999999999996,24.199999999999999,15.699999999999999,14,18,9.3000000000000007,9.5,13.4,18.899999999999999,22.300000000000001,18.300000000000001,12.4,8.8000000000000007,11,17,8.6999999999999993,6.9000000000000004,14.199999999999999,5.2999999999999998,11,11.800000000000001,12.300000000000001,11.300000000000001,13.6,21.699999999999999,15.199999999999999,12,16,12.9,16.699999999999999,11.199999999999999,7.2999999999999998,19.399999999999999,22.199999999999999,11.5,16.899999999999999,11.699999999999999,15.5,25.399999999999999,17.199999999999999,11.699999999999999,23.800000000000001,14.800000000000001,14.699999999999999,20.699999999999999,19.199999999999999,7.2000000000000002,8.6999999999999993,5.2999999999999998,19.800000000000001,13.4,21.800000000000001,14.1,15.9,14.6,12.6,12.199999999999999,9.4000000000000004,15.9,6.5999999999999996,15.5,7,11.6,15.199999999999999,19.699999999999999,10.6,6.5999999999999996,8.8000000000000007,24.699999999999999,9.6999999999999993,1.6000000000000001,12.699999999999999,5.7000000000000002,19.600000000000001,10.800000000000001,11.6,9.5,20.800000000000001,9.5999999999999996,20.699999999999999,10.9,19.199999999999999,20.100000000000001,10.4,11.4,10.300000000000001,13.199999999999999,25.399999999999999,10.9,10.1,16.100000000000001,11.6,16.600000000000001,19,15.6,3.2000000000000002,15.300000000000001,10.1,7.2999999999999998,12.9,14.4,13.300000000000001,14.9,18,11.9,11.9,8,12.199999999999999,17.100000000000001,15,8.4000000000000004,14.5,7.5999999999999996,11.699999999999999,11.5,27,20.199999999999999,11.699999999999999,11.800000000000001,12.6,10.5,12.199999999999999,8.6999999999999993,26.199999999999999,17.600000000000001,22.600000000000001,10.300000000000001,17.300000000000001,15.9,6.7000000000000002,10.800000000000001,9.9000000000000004,5.9000000000000004,19.600000000000001,17.300000000000001,7.5999999999999996,9.6999999999999993,12.800000000000001,25.5,13.4],"type":"scatter3d","mode":"markers","marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"line":{"color":"rgba(31,119,180,1)"},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>This shows the points <span class="math inline">\((TV,radio,sales)\)</span>. To show the fitted plane we get from our reduced model is somewhat more tedious if you haven’t seen done 3D plotting before. We first have to calculate the function <span class="math inline">\(z = \hat{\beta}_0 +  \hat{\beta}_1 x + \hat{\beta}_2 y\)</span> over a grid of values in the x-y plane. First, let’s check the range of possible TV and radio values:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(advertising[,<span class="fu">c</span>(<span class="st">"TV"</span>,<span class="st">"radio"</span>)])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       TV             radio       
+ Min.   :  0.70   Min.   : 0.000  
+ 1st Qu.: 74.38   1st Qu.: 9.975  
+ Median :149.75   Median :22.900  
+ Mean   :147.04   Mean   :23.264  
+ 3rd Qu.:218.82   3rd Qu.:36.525  
+ Max.   :296.40   Max.   :49.600  </code></pre>
+</div>
+</div>
+<p>Notice that TV goes from 0 to around 300 while radio goes from 0 to around 50. We’ll use these as the endpoints of our grid and then space out points by 10 and 5, respectively<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>x_values<span class="ot">=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">300</span>, <span class="at">by=</span><span class="dv">10</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>y_values<span class="ot">=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">50</span>,<span class="at">by=</span><span class="dv">5</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>xy_grid<span class="ot">=</span><span class="fu">expand.grid</span>(<span class="at">TV=</span>x_values,<span class="at">radio=</span>y_values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We then fit our model and calculated the predicted y-values, storing the result as a matrix.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">matrix</span>(<span class="fu">predict</span>(sales_lm_reduced,xy_grid),</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">nrow=</span><span class="fu">length</span>(x_values),<span class="at">ncol=</span><span class="fu">length</span>(y_values))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Finally, we plot the predicted values on the z-axis alongside our grid. Note the “t” stands for transpose and flips the yhat matrix so that it matches up with the x- and y-values correctly<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>adv_3d <span class="sc">|&gt;</span> </span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_markers</span>(<span class="at">marker =</span> <span class="fu">list</span>(<span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">3</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_surface</span>(<span class="at">x =</span> <span class="sc">~</span>x_values, </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">y =</span> <span class="sc">~</span>y_values, </span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">z =</span> <span class="sc">~</span><span class="fu">t</span>(yhat),</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">colorscale =</span> <span class="st">"Viridis"</span>,</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">opacity =</span> <span class="fl">0.7</span>) <span class="sc">|&gt;</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">layout</span>(<span class="at">scene =</span> <span class="fu">list</span>(</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">xaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">"TV"</span>),</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">yaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">"Radio"</span>),</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">zaxis =</span> <span class="fu">list</span>(<span class="at">title =</span> <span class="st">"Sales"</span>)</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>  ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-2abf57431e7980fcb2ae" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-2abf57431e7980fcb2ae">{"x":{"visdat":{"67281fc37037":["function () ","plotlyVisDat"]},"cur_data":"67281fc37037","attrs":{"67281fc37037":{"x":{},"y":{},"z":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d","mode":"markers","marker":{"color":"black","size":3},"inherit":true},"67281fc37037.1":{"x":{},"y":{},"z":{},"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"surface","colorscale":"Viridis","opacity":0.69999999999999996,"inherit":true}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"TV"},"yaxis":{"title":"Radio"},"zaxis":{"title":"Sales"}},"hovermode":"closest","showlegend":false,"legend":{"yanchor":"top","y":0.5}},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[230.09999999999999,44.5,17.199999999999999,151.5,180.80000000000001,8.6999999999999993,57.5,120.2,8.5999999999999996,199.80000000000001,66.099999999999994,214.69999999999999,23.800000000000001,97.5,204.09999999999999,195.40000000000001,67.799999999999997,281.39999999999998,69.200000000000003,147.30000000000001,218.40000000000001,237.40000000000001,13.199999999999999,228.30000000000001,62.299999999999997,262.89999999999998,142.90000000000001,240.09999999999999,248.80000000000001,70.599999999999994,292.89999999999998,112.90000000000001,97.200000000000003,265.60000000000002,95.700000000000003,290.69999999999999,266.89999999999998,74.700000000000003,43.100000000000001,228,202.5,177,293.60000000000002,206.90000000000001,25.100000000000001,175.09999999999999,89.700000000000003,239.90000000000001,227.19999999999999,66.900000000000006,199.80000000000001,100.40000000000001,216.40000000000001,182.59999999999999,262.69999999999999,198.90000000000001,7.2999999999999998,136.19999999999999,210.80000000000001,210.69999999999999,53.5,261.30000000000001,239.30000000000001,102.7,131.09999999999999,69,31.5,139.30000000000001,237.40000000000001,216.80000000000001,199.09999999999999,109.8,26.800000000000001,129.40000000000001,213.40000000000001,16.899999999999999,27.5,120.5,5.4000000000000004,116,76.400000000000006,239.80000000000001,75.299999999999997,68.400000000000006,213.5,193.19999999999999,76.299999999999997,110.7,88.299999999999997,109.8,134.30000000000001,28.600000000000001,217.69999999999999,250.90000000000001,107.40000000000001,163.30000000000001,197.59999999999999,184.90000000000001,289.69999999999999,135.19999999999999,222.40000000000001,296.39999999999998,280.19999999999999,187.90000000000001,238.19999999999999,137.90000000000001,25,90.400000000000006,13.1,255.40000000000001,225.80000000000001,241.69999999999999,175.69999999999999,209.59999999999999,78.200000000000003,75.099999999999994,139.19999999999999,76.400000000000006,125.7,19.399999999999999,141.30000000000001,18.800000000000001,224,123.09999999999999,229.5,87.200000000000003,7.7999999999999998,80.200000000000003,220.30000000000001,59.600000000000001,0.69999999999999996,265.19999999999999,8.4000000000000004,219.80000000000001,36.899999999999999,48.299999999999997,25.600000000000001,273.69999999999999,43,184.90000000000001,73.400000000000006,193.69999999999999,220.5,104.59999999999999,96.200000000000003,140.30000000000001,240.09999999999999,243.19999999999999,38,44.700000000000003,280.69999999999999,121,197.59999999999999,171.30000000000001,187.80000000000001,4.0999999999999996,93.900000000000006,149.80000000000001,11.699999999999999,131.69999999999999,172.5,85.700000000000003,188.40000000000001,163.5,117.2,234.5,17.899999999999999,206.80000000000001,215.40000000000001,284.30000000000001,50,164.5,19.600000000000001,168.40000000000001,222.40000000000001,276.89999999999998,248.40000000000001,170.19999999999999,276.69999999999999,165.59999999999999,156.59999999999999,218.5,56.200000000000003,287.60000000000002,253.80000000000001,205,139.5,191.09999999999999,286,18.699999999999999,39.5,75.5,17.199999999999999,166.80000000000001,149.69999999999999,38.200000000000003,94.200000000000003,177,283.60000000000002,232.09999999999999],"y":[37.799999999999997,39.299999999999997,45.899999999999999,41.299999999999997,10.800000000000001,48.899999999999999,32.799999999999997,19.600000000000001,2.1000000000000001,2.6000000000000001,5.7999999999999998,24,35.100000000000001,7.5999999999999996,32.899999999999999,47.700000000000003,36.600000000000001,39.600000000000001,20.5,23.899999999999999,27.699999999999999,5.0999999999999996,15.9,16.899999999999999,12.6,3.5,29.300000000000001,16.699999999999999,27.100000000000001,16,28.300000000000001,17.399999999999999,1.5,20,1.3999999999999999,4.0999999999999996,43.799999999999997,49.399999999999999,26.699999999999999,37.700000000000003,22.300000000000001,33.399999999999999,27.699999999999999,8.4000000000000004,25.699999999999999,22.5,9.9000000000000004,41.5,15.800000000000001,11.699999999999999,3.1000000000000001,9.5999999999999996,41.700000000000003,46.200000000000003,28.800000000000001,49.399999999999999,28.100000000000001,19.199999999999999,49.600000000000001,29.5,2,42.700000000000003,15.5,29.600000000000001,42.799999999999997,9.3000000000000007,24.600000000000001,14.5,27.5,43.899999999999999,30.600000000000001,14.300000000000001,33,5.7000000000000002,24.600000000000001,43.700000000000003,1.6000000000000001,28.5,29.899999999999999,7.7000000000000002,26.699999999999999,4.0999999999999996,20.300000000000001,44.5,43,18.399999999999999,27.5,40.600000000000001,25.5,47.799999999999997,4.9000000000000004,1.5,33.5,36.5,14,31.600000000000001,3.5,21,42.299999999999997,41.700000000000003,4.2999999999999998,36.299999999999997,10.1,17.199999999999999,34.299999999999997,46.399999999999999,11,0.29999999999999999,0.40000000000000002,26.899999999999999,8.1999999999999993,38,15.4,20.600000000000001,46.799999999999997,35,14.300000000000001,0.80000000000000004,36.899999999999999,16,26.800000000000001,21.699999999999999,2.3999999999999999,34.600000000000001,32.299999999999997,11.800000000000001,38.899999999999999,0,49,12,39.600000000000001,2.8999999999999999,27.199999999999999,33.5,38.600000000000001,47,39,28.899999999999999,25.899999999999999,43.899999999999999,17,35.399999999999999,33.200000000000003,5.7000000000000002,14.800000000000001,1.8999999999999999,7.2999999999999998,49,40.299999999999997,25.800000000000001,13.9,8.4000000000000004,23.300000000000001,39.700000000000003,21.100000000000001,11.6,43.5,1.3,36.899999999999999,18.399999999999999,18.100000000000001,35.799999999999997,18.100000000000001,36.799999999999997,14.699999999999999,3.3999999999999999,37.600000000000001,5.2000000000000002,23.600000000000001,10.6,11.6,20.899999999999999,20.100000000000001,7.0999999999999996,3.3999999999999999,48.899999999999999,30.199999999999999,7.7999999999999998,2.2999999999999998,10,2.6000000000000001,5.4000000000000004,5.7000000000000002,43,21.300000000000001,45.100000000000001,2.1000000000000001,28.699999999999999,13.9,12.1,41.100000000000001,10.800000000000001,4.0999999999999996,42,35.600000000000001,3.7000000000000002,4.9000000000000004,9.3000000000000007,42,8.5999999999999996],"z":[22.100000000000001,10.4,9.3000000000000007,18.5,12.9,7.2000000000000002,11.800000000000001,13.199999999999999,4.7999999999999998,10.6,8.5999999999999996,17.399999999999999,9.1999999999999993,9.6999999999999993,19,22.399999999999999,12.5,24.399999999999999,11.300000000000001,14.6,18,12.5,5.5999999999999996,15.5,9.6999999999999993,12,15,15.9,18.899999999999999,10.5,21.399999999999999,11.9,9.5999999999999996,17.399999999999999,9.5,12.800000000000001,25.399999999999999,14.699999999999999,10.1,21.5,16.600000000000001,17.100000000000001,20.699999999999999,12.9,8.5,14.9,10.6,23.199999999999999,14.800000000000001,9.6999999999999993,11.4,10.699999999999999,22.600000000000001,21.199999999999999,20.199999999999999,23.699999999999999,5.5,13.199999999999999,23.800000000000001,18.399999999999999,8.0999999999999996,24.199999999999999,15.699999999999999,14,18,9.3000000000000007,9.5,13.4,18.899999999999999,22.300000000000001,18.300000000000001,12.4,8.8000000000000007,11,17,8.6999999999999993,6.9000000000000004,14.199999999999999,5.2999999999999998,11,11.800000000000001,12.300000000000001,11.300000000000001,13.6,21.699999999999999,15.199999999999999,12,16,12.9,16.699999999999999,11.199999999999999,7.2999999999999998,19.399999999999999,22.199999999999999,11.5,16.899999999999999,11.699999999999999,15.5,25.399999999999999,17.199999999999999,11.699999999999999,23.800000000000001,14.800000000000001,14.699999999999999,20.699999999999999,19.199999999999999,7.2000000000000002,8.6999999999999993,5.2999999999999998,19.800000000000001,13.4,21.800000000000001,14.1,15.9,14.6,12.6,12.199999999999999,9.4000000000000004,15.9,6.5999999999999996,15.5,7,11.6,15.199999999999999,19.699999999999999,10.6,6.5999999999999996,8.8000000000000007,24.699999999999999,9.6999999999999993,1.6000000000000001,12.699999999999999,5.7000000000000002,19.600000000000001,10.800000000000001,11.6,9.5,20.800000000000001,9.5999999999999996,20.699999999999999,10.9,19.199999999999999,20.100000000000001,10.4,11.4,10.300000000000001,13.199999999999999,25.399999999999999,10.9,10.1,16.100000000000001,11.6,16.600000000000001,19,15.6,3.2000000000000002,15.300000000000001,10.1,7.2999999999999998,12.9,14.4,13.300000000000001,14.9,18,11.9,11.9,8,12.199999999999999,17.100000000000001,15,8.4000000000000004,14.5,7.5999999999999996,11.699999999999999,11.5,27,20.199999999999999,11.699999999999999,11.800000000000001,12.6,10.5,12.199999999999999,8.6999999999999993,26.199999999999999,17.600000000000001,22.600000000000001,10.300000000000001,17.300000000000001,15.9,6.7000000000000002,10.800000000000001,9.9000000000000004,5.9000000000000004,19.600000000000001,17.300000000000001,7.5999999999999996,9.6999999999999993,12.800000000000001,25.5,13.4],"type":"scatter3d","mode":"markers","marker":{"color":"black","size":3,"line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"line":{"color":"rgba(31,119,180,1)"},"frame":null},{"colorbar":{"title":"sales<br />t(yhat)","ticklen":2,"len":0.5,"lenmode":"fraction","y":1,"yanchor":"top"},"colorscale":"Viridis","showscale":true,"x":[0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300],"y":[0,5,10,15,20,25,30,35,40,45,50],"z":[[2.9210999124051464,3.3786480634159082,3.8361962144266695,4.2937443654374308,4.7512925164481921,5.2088406674589542,5.6663888184697155,6.1239369694804768,6.581485120491239,7.0390332715019994,7.4965814225127616,7.9541295735235238,8.4116777245342842,8.8692258755450464,9.3267740265558086,9.784322177566569,10.241870328577331,10.699418479588092,11.156966630598854,11.614514781609616,12.072062932620376,12.529611083631139,12.987159234641901,13.444707385652661,13.902255536663423,14.359803687674185,14.817351838684946,15.274899989695708,15.73244814070647,16.189996291717229,16.647544442727991],[3.8610710455066921,4.3186191965174539,4.7761673475282151,5.2337154985389764,5.6912636495497377,6.1488118005604999,6.6063599515712612,7.0639081025820225,7.5214562535927847,7.9790044046035451,8.4365525556143073,8.8941007066250695,9.3516488576358299,9.8091970086465921,10.266745159657354,10.724293310668115,11.181841461678877,11.639389612689637,12.096937763700399,12.554485914711162,13.012034065721922,13.469582216732684,13.927130367743446,14.384678518754207,14.842226669764969,15.299774820775731,15.757322971786492,16.214871122797256,16.672419273808018,17.129967424818776,17.587515575829539],[4.8010421786082382,5.2585903296189995,5.7161384806297608,6.1736866316405221,6.6312347826512834,7.0887829336620456,7.5463310846728069,8.0038792356835682,8.4614273866943304,8.9189755377050908,9.376523688715853,9.8340718397266151,10.291619990737376,10.749168141748138,11.2067162927589,11.66426444376966,12.121812594780423,12.579360745791183,13.036908896801945,13.494457047812707,13.952005198823468,14.40955334983423,14.867101500844992,15.324649651855752,15.782197802866515,16.239745953877279,16.697294104888037,17.154842255898799,17.612390406909562,18.06993855792032,18.527486708931082],[5.7410133117097839,6.1985614627205461,6.6561096137313065,7.1136577647420687,7.5712059157528291,8.0287540667635913,8.4863022177743535,8.9438503687851139,9.401398519795876,9.8589466708066364,10.316494821817399,10.774042972828161,11.231591123838921,11.689139274849683,12.146687425860446,12.604235576871206,13.061783727881968,13.519331878892729,13.976880029903491,14.434428180914253,14.891976331925013,15.349524482935776,15.807072633946538,16.264620784957298,16.72216893596806,17.179717086978822,17.637265237989585,18.094813389000347,18.552361540011109,19.009909691021868,19.46745784203263],[6.6809844448113296,7.1385325958220918,7.5960807468328522,8.0536288978436144,8.5111770488543748,8.9687251998651369,9.4262733508758991,9.8838215018866595,10.341369652897422,10.798917803908182,11.256465954918944,11.714014105929706,12.171562256940467,12.629110407951229,13.086658558961991,13.544206709972752,14.001754860983514,14.459303011994274,14.916851163005036,15.374399314015799,15.831947465026559,16.289495616037321,16.747043767048083,17.204591918058846,17.662140069069608,18.11968822008037,18.577236371091129,19.034784522101891,19.492332673112653,19.949880824123412,20.407428975134174],[7.6209555779128753,8.0785037289236357,8.5360518799343978,8.99360003094516,9.4511481819559204,9.9086963329666826,10.366244483977443,10.823792634988205,11.281340785998967,11.738888937009728,12.19643708802049,12.653985239031252,13.111533390042013,13.569081541052775,14.026629692063537,14.484177843074297,14.94172599408506,15.39927414509582,15.856822296106582,16.314370447117344,16.771918598128103,17.229466749138865,17.687014900149627,18.144563051160389,18.602111202171152,19.059659353181914,19.517207504192676,19.974755655203438,20.4323038062142,20.889851957224955,21.347400108235718],[8.5609267110144209,9.0184748620251831,9.4760230130359453,9.9335711640467057,10.391119315057466,10.848667466068228,11.30621561707899,11.763763768089753,12.221311919100515,12.678860070111273,13.136408221122036,13.593956372132798,14.05150452314356,14.509052674154322,14.966600825165084,15.424148976175843,15.881697127186605,16.339245278197367,16.79679342920813,17.254341580218892,17.71188973122965,18.169437882240413,18.626986033251175,19.084534184261937,19.542082335272699,19.999630486283461,20.45717863729422,20.914726788304982,21.372274939315744,21.829823090326503,22.287371241337265],[9.5008978441159666,9.9584459951267288,10.415994146137489,10.873542297148251,11.331090448159014,11.788638599169776,12.246186750180536,12.703734901191297,13.161283052202059,13.618831203212821,14.076379354223583,14.533927505234345,14.991475656245104,15.449023807255866,15.906571958266628,16.36412010927739,16.821668260288153,17.279216411298911,17.736764562309673,18.194312713320436,18.651860864331198,19.10940901534196,19.566957166352722,20.024505317363481,20.482053468374243,20.939601619385005,21.397149770395767,21.85469792140653,22.312246072417292,22.76979422342805,23.227342374438813],[10.440868977217512,10.898417128228274,11.355965279239037,11.813513430249797,12.271061581260557,12.72860973227132,13.186157883282082,13.643706034292844,14.101254185303606,14.558802336314365,15.016350487325127,15.473898638335889,15.931446789346651,16.388994940357414,16.846543091368176,17.304091242378934,17.761639393389697,18.219187544400459,18.676735695411221,19.134283846421983,19.591831997432742,20.049380148443504,20.506928299454266,20.964476450465028,21.42202460147579,21.879572752486553,22.337120903497311,22.794669054508073,23.252217205518836,23.709765356529594,24.167313507540356],[11.380840110319058,11.838388261329818,12.295936412340581,12.753484563351343,13.211032714362103,13.668580865372865,14.126129016383626,14.583677167394388,15.04122531840515,15.49877346941591,15.956321620426673,16.413869771437433,16.871417922448195,17.328966073458957,17.78651422446972,18.244062375480482,18.701610526491244,19.159158677502003,19.616706828512765,20.074254979523527,20.531803130534286,20.989351281545048,21.44689943255581,21.904447583566572,22.361995734577334,22.819543885588097,23.277092036598859,23.734640187609621,24.192188338620383,24.649736489631138,25.1072846406419],[12.320811243420604,12.778359394431366,13.235907545442126,13.693455696452887,14.151003847463649,14.608551998474411,15.066100149485173,15.523648300495934,15.981196451506696,16.438744602517456,16.896292753528218,17.353840904538981,17.811389055549739,18.268937206560501,18.726485357571264,19.184033508582026,19.641581659592788,20.09912981060355,20.556677961614312,21.014226112625074,21.471774263635833,21.929322414646595,22.386870565657357,22.844418716668116,23.301966867678878,23.75951501868964,24.217063169700403,24.674611320711165,25.132159471721927,25.589707622732686,26.047255773743448]],"type":"surface","opacity":0.69999999999999996,"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>You can see why the <span class="math inline">\(R^2\)</span> value was so high. The plane matches the points fairly well…</p>
+<p>Wait a second, does it? Personally, I just want to get in there and peal it down on the corners to better match the data. We’ll learn in the next notes how to do just that. We’ll close out these notes with one other visualization tool that will help with higher dimensions and is often easier for people to interpret than the 3D plots above.</p>
+</section>
+<section id="partial-regression-plots" class="level2">
+<h2 class="anchored" data-anchor-id="partial-regression-plots">Partial Regression Plots</h2>
+<p>An <em>added variable</em> or <em>partial regression</em> plot shows the relationship between the outcome and each predictors individually after removing the influence of the other predictors from both<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. Added variable plots are implemented in the <code>car</code> package<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(car)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: carData</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'car'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:dplyr':
+
+    recode</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:purrr':
+
+    some</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">avPlots</span>(sales_lm_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes01_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To interpret these plots, we can say that increasing TV or radio leads to a predicted increase in sales holding spending in the other categories constant while increasing spending in newspaper does not.</p>
+<p>You may notice that the slopes are the coefficients from our multiple regression model as opposed to the slopes you would get by fitting three separate SLMs. This is not a coincidence! A famous result in econometrics called the Frisch-Waugh-Lovell Theorem says this will always happen and gives us a precise interpretation of the coefficients in a multiple regression model; they describe the influence of the variable on our outcome after removing the influence of the other predictors from both.</p>
+<p>The points with labels are influential points; more on this in Module 2.3!</p>
+</section>
+<section id="practice" class="level2">
+<h2 class="anchored" data-anchor-id="practice">Practice</h2>
+<p>Load the election2016 dataset for these exercises.</p>
+<ol type="1">
+<li>Fit a multiple regression model to <em>trump.vote</em> using all remaining variables except <em>state</em> and <em>outcome</em> as predictors. Which were significant at a 0.05 level?</li>
+<li>Fit a reduced model with only the significant predictors from part 1. Compare the <span class="math inline">\(R^2\)</span> of the two models.</li>
+<li>Produce either a 3D plot or added variable plots for your model in part 2. (If time permits, try both!)</li>
+</ol>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Technically we only need two points in each direction here because the function is linear, but its better practice to include more gridpoints for nonlinear functions<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The axes labeling and colors is unfortunately rather clunky in plotly but I guess if you want nice 3D graphics, you have to deal with it<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>More precisely, to get the added variable plot for <span class="math inline">\(X_j\)</span>, we regress <span class="math inline">\(X_j\)</span> on the other predictors to get predicted values <span class="math inline">\(\hat X_j\)</span> and calculate the errors <span class="math inline">\(X_j - \hat X_j\)</span> from our model and do the same for <span class="math inline">\(Y\)</span>. Then we fit an SLM to the errors <span class="math inline">\(Y-\hat Y\)</span> based on <span class="math inline">\(X_j - \hat X_j\)</span><a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Here <code>car</code> is actually an acronym for “Classification and Regression”. Its a package that contains additional diagnostic tools for model fitting which we’ll see again in Section 2.3 and other random places throughout the course.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

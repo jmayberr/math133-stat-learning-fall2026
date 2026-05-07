@@ -1,0 +1,193 @@
+---
+title: "Module 2 Bonus: $F$-test"
+---
+
+This section goes deeper into the statistical theory behind model comparison. It is optional but recommended for students with a strong statistics background or those planning to take further courses in statistics or machine learning.
+
+## Introduction
+
+In these notes, we will be explaining the last line of the regression output
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Advertising.csv"
+advertising=read.csv(df_url)
+sales_lm_int=lm(sales~TV*radio,data=advertising)
+summary(sales_lm_int)
+```
+
+In particular, we'll discuss two important issues with multiple regression:
+
+1. How do we know that our model is significantly better than just guessing $Y$ with no knowledge of the predictors?  (Round 1: Full vs Null) 
+2. How do we know that the addition of radio and the interaction significantly improved our model (Round 2: Full vs Reduced)? 
+
+We'll then attempt to tie this in with the $F$ test that comes in Math 37 in the context of ANOVA and show how this all fits into the framework of multiple regression. 
+
+
+## Round 1: Fight!
+
+First we would like to develop a statistical method for comparing the performance of a linear model $Y = X \beta + \varepsilon$ vs what we call a "no information" or "null" model. A _null_ model is one in which we try to predict $Y$ without any knowledge of $X$ so that our model looks like 
+
+$$
+Y = \beta_0 + \varepsilon. 
+$$
+where $\beta_0$ is just a constant. In this case, one can show that $\bar{y} = \frac{1}{n} \sum y_i$ is the least squares estimator^[If you are interested in the proof, look at the function $f(\beta_0) = \sum (y_i - \beta_0)^2$ and take the derivative with respect to $\beta_0$. Setting the result equal to 0 will lead to the single critical point $\beta_0 = \bar{y}$ and then you can show it is a minimum using the first or second derivative test.] of $\beta_0$ and the corresponding sum of squared errors would end up being
+$$
+SST = \sum (y_i - \bar{y})^2.
+$$
+In contrast, the total variance not explained by a linear model is the sum of squared errors
+$$
+SSE = \sum (y_i - \hat{y}_i)^2
+$$
+This is the error that remains after we make our predictions. The $R^2$ statistic is a metric for determining if our linear model is better than the null model: if
+$$
+R^2 = 1 - SSE/SST = (SST-SSE)/SST
+$$
+is "closer to 1", our model is good and if its "closer to 0", our model is shitty^[Obviously I am drastically over-simplifying the situation here for the sake of dramatic impact.]. 
+
+The problem is, what do we mean by "close to 0"? In statistics, we like to have a hypothesis test which will tell us if something is "significantly different from 0". A hypothesis test requires a test statistic with a known distribution (eg. $z$, $t$, $\chi^2$). Unfortunately, $R^2$ does not have as nice a density function as the closely related $F$ statistic and hence people often use the latter for hypothesis testing purposes. 
+
+The $F$ statistic is a modified version of $R^2$ where we "average" the sums in both the numerator and denominator before looking at the ratio (and also use $SSE$ instead of $SST$ in the denominator). In other words, instead of a sum of squared errors, we look at a sort of mean squared error. Life would be too easy if we could just divide everything by $n$, but instead, there's this little fucker called degrees of freedom we need to worry about. 
+
+In linear models, degrees of freedom is the difference between the sample size and the number of estimated parameters and is the proper thing to use when averaging sums^[A simple algebraic example is as follows. Suppose we have two points $y_1, y_2$ and we look at the sum of squares total
+$$
+(y_1 - \bar{y})^2 + (y_2-\bar{y})^2
+$$ 
+Substituting $\bar{y} = (y_1+y_2)/2$ and simplifying reduces this to a single term
+$$
+(y_1-y_2)^2/2
+$$
+In essence this means that the sum of squared errors actually involves only one independent term instead of two so if we want to look at the mean sum of squares, we should divide by $2-1$ instead of 2. We lost one degree of freedom because we estimated the true mean with the sample mean $\bar{y}$ leading to less "dimensionality" in our sum (or alternatively, we could say that we projected down one dimension and hence only have $n-1$ dimensions in our space of errors). We loose a dimension for each estimation we make. In linear algebra, this is equivalent to the idea that if you project a vector onto a $d$ dimensional subspace of $R^n$, there are $n-d$ dimensions in the orthogonal space. Since estimating $y$ with $\hat{y} = X \hat{\beta}$ where $\hat{\beta}$ is the least squares esimator of $\beta$ is equivalent to projecting $y$ onto the column space of $X$, we loose $p+1$ dimensions ($p$ predictors + the intercept). But now I am going too far so I'll shut up. ]. That's why when we calculate the sample standard deviation, we divide by $n-1$: we are estimating one parameter (the population mean $\mu$) with a sample statistic ($\bar{x}$). In a linear model, we have $p+1$ parameters so the degrees of freedom is $n-(p+1)$. Thus, we are going to replace the denominator in $R^2$ with 
+$$
+SSE/(n-(p+1))
+$$
+a term called the "mean squared error" (even though it is not the same as the MSE we previously discussed). For the numerator
+$$
+SST-SSE
+$$
+the degrees of freedom in SST is $n-1$ (we are estimating only one parameter) so the difference in the degrees of freedom is
+$$
+(n-1) - (n-p-1) = p
+$$
+Hence, we will replace the numerator with
+$$
+(SST-SSE)/p
+$$
+a quantity called the mean squared regression or "treatment". The ratio of these two quantities
+$$
+F = \frac{(SST-SSE)/p}{SSE/(n-(p+1))}
+$$
+is an alternative way of measuring the ratio of explained to unexplained variance in our model. We typically call the numerator degrees of freedom "df1" and the denominator "df2" (that's how they are referred to in R as well). While we don't have time to get too deep into the world of F distributions (also pretty sweetly called Snedecor's F - google it), here is what the density function looks like for the degrees of freedom in the advertising interaction model
+
+```{r}
+curve(df(x,3,200-3-1),xlim=c(0,5),xlab="F",ylab="Density")
+abline(v=qf(0.95,3,200-2-1),col="#e35205")
+```
+
+The line shows the cutoff for the upper 5% of the curve's area (i.e. for p-value < 0.05). Any $F$ values to the right would be statistically significant. Now here is the actual value of $F$ for the advertising interaction model. 
+
+```{r}
+yhat=predict(sales_lm_int,advertising)
+y=advertising$sales
+n=length(advertising$sales)
+p=3
+SST=sum((y-mean(y))^2)
+SSE=sum((y-yhat)^2)
+F=((SST-SSE)/p)/(SSE/(n-p-1))
+print(F)
+```
+
+I think we can safely say this is to the right of the line which is why the p-value is really, really small. This model is definitely significantly better than the null!
+
+## Round 2, Extra Sums of Squares: Fight!
+
+Now that we have established that, can we also say that the interaction model is significantly better than the TV only model? These types of questions, where we have one set of predictors, but want to add another and see if the model is improved, can also be answered using an $F$-statistic, but where we replace the null model with the reduced model (i.e. the one with fewer variables). To be more concrete, lets call 
+
+$$
+Y = \beta_0 + \beta_1 X_1 + \varepsilon
+$$
+the reduced model and 
+
+$$
+Y = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \beta_3 X_1 X_2 + \varepsilon
+$$
+the full model. For each, we can compute predicted values $\hat{y}$ and to distinguish them, we'll use the notation $\hat{y}_{red}$ and $\hat{y}_{full}$ to denote the predictions of the two models and $SSE_{red}, SSE_{full}$ to denote the corresponding sums of squared residuals. So, in our example
+
+```{r}
+sales_lm_red=lm(sales~TV,data=advertising)
+sales_lm_full=sales_lm_int
+y=advertising$sales
+yhat_red=predict(sales_lm_red,advertising)
+yhat_full=predict(sales_lm_full,advertising)
+SSE_red=sum((y-yhat_red)^2)
+SSE_full=sum((y-yhat_full)^2)
+```
+
+
+Now let's make the following replacements in the $F$ statistic
+$$
+SST \to SSE_{red}
+$$
+and 
+$$
+SSE \to  SSE_{full}
+$$
+
+For degrees of freedom, df2 will stay the same, but df1 will now be the difference in degrees of freedom
+$$
+df_{red} - df_{full} = n-p_1-1 - (n-p_2-1) = p_2-p_1
+$$
+where $p_1, p_2$ are the numbers of variables used in the reduced and full models. In other words, the numerator degrees of freedom is the number of added parameters. Set $q=p_2-p_1$. This leads to the new statistic
+$$
+F = \frac{(SSE_{red}-SSE_{full})/q}{SSE_{full}/(n-p_2-1)}
+$$
+
+In our example, $q = 2$ because we added two extra terms and $p_2 = 3$ because we have three variables ($X_1, X_2, X_1\times X_2$) in the full model. Here is the calculation 
+
+```{r}
+F=((SSE_red-SSE_full)/2)/(SSE_full/(200-3-1))
+print(F)
+```
+
+You can use the anova function in R to compute this directly and also get a p-value for this extra sum of squares test
+
+```{r}
+anova(sales_lm_red,sales_lm_full)
+```
+
+The p-value is again really small which means that the interaction model is significantly better than the TV only one.
+
+## Summary: so far
+
+Using the $F$ tests described in this section, one can test the significance of any model against the null model or against models with a reduced number of variables. The Round 1 $F$-test is just a special case of the one in Round 2. Both procedures can be encapsulated in the statistic
+$$
+F = \frac{(SSE_{red}-SSE_{full})/q}{SSE_{full}/(n-p-1)}
+$$
+
+where the reduced model could be the null model, $q$ is the difference in the number of variables used in the two models, and $p$ is the number of parameters in the full model. In R, this is usually implemented using the anova function. 
+
+## Connection to ANOVA
+
+For this section, we need a dataset with qualitative predictors so let's go back to the credit one from the Module 2.2 exercises. 
+
+```{r}
+url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/credit.csv"
+credit=read.csv(url)
+head(credit)
+```
+
+
+In Math 37 (and other intro to stats courses), we typically cover a hypothesis test called ANalysis Of VAriance (ANOVA). ANOVA covers the following scenario: Suppose we wish to see if a quantitative outcome $Y$ varies significantly across $k$ groups. Then the appropriate null hypothesis is $H_0: \mu_1 = \mu_2 = \cdots =\mu_k$ where $\mu_i$ is the population mean for group $i$. In terms of a statistical learning model, we could think of this as testing between a hierarchy of two models: the null model of 
+$$
+Y = \beta_1 +\varepsilon
+$$
+where $\beta_1$ is a constant (overall) mean and 
+$$
+Y = \beta_1 + \beta_2 X_2 + \cdots \beta_kX_k + \varepsilon
+$$
+where $X_i$ is the indicator for whether of not the individual is in group $i$ and group 1 is baseline. Here, $\beta_1$ would be the group 1 mean $\mu_1$ and each of the other $\beta$'s would be the difference between $\mu_i$ and $\mu_1$. Thus, we could use the $F$ test mentioned above to test for whether of not $\beta_2 = \beta_3 =\cdots =\beta_k$ are all zero. The full, individual group means model would have $df=n-k$ where $k$ is the number of groups and it has $k-1$ more parameters than the full model so the $F$ is
+$$
+F = \frac{(SST-SSE)/(k-1)}{SSE/(n-k)}
+$$
+In Math 37 (and typical ANOVA), the denominator is called the Mean Square Error (basically our MSE except normalized by df) and the numerator is called the Mean Square Treatment because it represents how much better the model with group effects ("treatments") did than baseline. 
+
+

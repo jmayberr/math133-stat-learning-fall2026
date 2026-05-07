@@ -35,7 +35,13 @@ Load the dataset into R and print the first six rows using `head`
 
 ## Problem 2
 
-Create scatterplots of the outcome vs each of the three features separately. Include the following in your plot: - axis labels - fitted regression line - color of your choosing
+Create scatterplots of the outcome vs each of the three features separately. Include the following in your plot:
+
+-   axis labels
+
+-   fitted regression line
+
+-    color of your choosing
 
 ## Problem 3
 

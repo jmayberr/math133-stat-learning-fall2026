@@ -2,10 +2,8 @@
   "hash": "eb13516aac785ac2b0b77a39653a8cb9",
   "result": {
     "engine": "knitr",
-    "markdown": "---\ntitle: \"Quarto Template\"\nauthor: \"Your Name Here\"\nformat: \n  html:\n    embed-resources: true\n    self-contained: true\n    math: mathjax\neditor: visual\n---\n\n\n\n\n\n## Problem 1\n\nInsert problem 1 solution here...\n\n\n\n\n\n::: {.cell}\n\n:::\n\n\n\n\n\nEnter additional code chunks by either going to Insert –\\> Executable Cell –\\> R or typing / and selecting \"R Code Chunk\" or typing CTRL+ALT+I.\n\nEnter equations in mathfont by enclosing them in dollar signs, for example $\\hat y = \\beta_0 + \\beta_1 x$.\n\n## Problem 2\n\nAdd additional problems by starting a new line and typing `## Problem Number` . Type enter and begin typing solutions.\n",
-    "supporting": [
-      "quartoTemplate_files"
-    ],
+    "markdown": "---\ntitle: \"Quarto Template\"\nauthor: \"Your Name Here\"\nformat: \n  html:\n    embed-resources: true\n    self-contained: true\n    math: mathjax\neditor: visual\n---\n\n\n\n## Problem 1\n\nInsert problem 1 solution here...\n\n\n\n::: {.cell}\n\n:::\n\n\n\nEnter additional code chunks by either going to Insert –\\> Executable Cell –\\> R or typing / and selecting \"R Code Chunk\" or typing CTRL+ALT+I.\n\nEnter equations in mathfont by enclosing them in dollar signs, for example $\\hat y = \\beta_0 + \\beta_1 x$.\n\n## Problem 2\n\nAdd additional problems by starting a new line and typing `## Problem Number` . Type enter and begin typing solutions.\n",
+    "supporting": [],
     "filters": [
       "rmarkdown/pagebreak.lua"
     ],

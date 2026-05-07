@@ -1,0 +1,306 @@
+---
+title: "Module 2.2: Enriching Linear Models"
+---
+
+## Introduction
+
+This section will focus on three additions to the multiple regression models discussed in the last section:
+
+-   Qualitative predictors
+
+-   Interaction terms
+
+-   Polynomial terms
+
+All three topics are examples of feature engineering: building new input variables from existing ones to capture relationships that a raw linear model would miss. Despite these enrichments, the model remains linear in its coefficients, so everything we have learned so far still applies.
+
+We'll be using three datasets to demonstrate concepts: the Beerwings dataset, the advertising dataset, and the mtcars dataset which is built into R.
+
+## Qualitative Predictors
+
+The Beerwings dataset introduced at the end of Module 1.3 contains information on gender, hotwings and beer consumption for 30 patrons of a Minneapolis bar.
+
+```{r}
+library(tidyverse)
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Beerwings.csv"
+beerwings=read.csv(df_url) |>
+  select(-ID)
+head(beerwings)
+```
+
+In the practice problem, you were asked to fit a SLM
+
+$$
+Beer = \beta_0 + \beta_1 \times Wings + \varepsilon
+$$
+
+We also might want to look at the relationship between Gender and Beer consumption by considering a model of the form
+
+$$
+Beer = \beta_0 + \beta_1 \times Gender + \varepsilon
+$$
+
+as it seems there is definitely a difference in beer consumption between the two groups:
+
+```{r}
+beerwings |>
+  ggplot(aes(x=Gender,y=Beer,fill=Gender))+
+  geom_boxplot(width=0.5)+
+  scale_fill_manual(values=c("#0072B2","#D55E00"))+
+  theme_classic()
+```
+
+The standard way of incorporating *qualitative* or *categorical* variables like Gender into statistical models is via a process called *one-hot encoding*. If the variable is binary[^1], we choose one value to serve as the baseline for the model (R does this by alphabetical order so it will choose "F" in this example). The baseline value is *recoded* with a 0, and the other value with 1. In other words, we would define a new variable $$
+GenderM = \begin{cases}1 & \text{if  Gender == "Male"} \\ 0 & \text{if  Gender == "Female"} \end{cases}
+$$
+
+[^1]: Not to imply that Gender is binary, but there were only two values recorded in this dataset. It was Minnesota in the early 2000s.
+
+and then add this as a predictor in our SLM. We can *engineer* such variables in R using `ifelse`:
+
+```{r}
+beerwings$GenderM = ifelse(beerwings$Gender=="M",1,0)
+table(beerwings$Gender,beerwings$GenderM)
+```
+
+Then we run `lm` with the new variable
+
+```{r}
+fit_lm=lm(Beer ~ GenderM,beerwings)
+summary(fit_lm)
+```
+
+To interpret this, males (GenderM =1) consumed about 8.4 more wings on average than females (GenderM=0) although the result was only moderately significant[^2] (p-value = 0.0502)
+
+[^2]: The hypothesis test for nonzero slope is essentially equivalent to doing a two-sample t-test for comparing average beer consumption between genders except that the degrees of freedom is different.
+
+Engineering a new variable through one-hot encoding was intentionally tedious to illustrate the steps involved. In the future, we'll just have R do it automatically within the `lm` call:
+
+```{r}
+lm(Beer ~ Gender,beerwings)
+```
+
+Notice that it adds "M" at the end of Gender to tell us which value is treated as a "1" in the encoding. You can directly use such calls in the future.
+
+For qualitative predictors with $k \geq 2$ categories, the idea is similar. We choose one category to serve as baseline and then we create $k-1$ binary variables for the other categories of the form $$
+X_j = \begin{cases}1 & \text{if  Category ==} j \\ 0 & \text{if  Category !=} j\end{cases}
+$$
+
+Note that `!=` is R language for "not equal to". The $X_j$ are called *indicator* or (group) *dummy* variables. Again, `lm` is built to handle this kind of stuff. Let's illustrate using the Math 37 survey dataset from the Module 1 Assessment
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/survey_fall2025.csv"
+survey=read.csv(df_url)
+head(survey)
+```
+
+Suppose we want to look at the relationship between *home_environment* (rural, suburban, or urban) and *stress_score.* We can run an SLM:
+
+```{r}
+fit_lm=lm(stress_score~home_environment,survey)
+summary(fit_lm)
+```
+
+Notice that the output now shows two coefficients even though we only had one input variable. That is because both Suburban and Urban are being compared with the baseline of Rural. The coefficients say that Suburban and Urban students, respectively, are expected to have stress scores of $4.731$ and $3.672$ lower than Rural students although only Suburban had a moderately significant difference with Rural.
+
+One disadvantage of one-hot encoding this way is that we can't compare Suburban and Urban directly. To do so, we nee to recode *home_environment* so that Suburban comes first^[You can also set up contrasts between categories which allow you to interpret coefficients relative to the overall mean. Look up the documentation of `contrasts` for details.]:
+
+```{r}
+survey$home_environment <- relevel(factor(survey$home_environment), 
+                                   ref = "Suburban")
+table(survey$home_environment)
+```
+
+Rerunning `lm` will now use Suburban as the baseline.
+
+```{r}
+fit_lm=lm(stress_score~home_environment,survey)
+summary(fit_lm)
+```
+
+## Interaction Terms
+
+Returning to our Beerwings example, suppose we want to jointly look at the impact of Gender and Hotwings on Beer consumption:
+
+```{r}
+beerwings |>
+  ggplot(aes(x=Hotwings,y=Beer,color=Gender))+
+  geom_point(shape=1)+
+  scale_color_manual(values=c("#0072B2","#D55E00"))+
+  geom_smooth(method=lm,se=F)+
+  theme_classic()
+```
+
+There are two separate questions we could ask
+
+1.  Do the two lines have the same intercept?
+2.  Do the two lines have the same slope?
+
+The first can be answered by considering a multiple regression model of the form
+
+$$
+Beer = \beta_0 + \beta_1 \times Gender + \beta_2 \times Hotwings + \varepsilon
+$$
+
+The $\beta_1$ serves as the "shift" in intercept between Gender = 0 (F) and Gender = 1 (M) because if Gender = 0 we get
+
+$$
+Beer = \beta_0  + \beta_2 \times Hotwings + \varepsilon
+$$ and if Gender = 1, we get
+
+$$
+Beer = (\beta_0 + \beta_1)  + \beta_2 \times Hotwings + \varepsilon
+$$
+
+so $\beta_1$ is the difference in intercepts. This is just another application of multiple regression
+
+```{r}
+fit_lm=lm(Beer~Gender+Hotwings,beerwings)
+summary(fit_lm)
+```
+
+Note that the coefficient of GenderM was not significant (although interestingly, it was negative!) so we conclude that the intercepts for Male and Female were not significantly different. To test for a difference in slopes, we can add an *interaction term* and consider the model
+
+$$
+Beer = \beta_0 + \beta_1 (Gender) + \beta_2 (Hotwings) + \beta_3 (Gender \times Hotwings)+  \varepsilon
+$$
+
+To see why this works, note that if Gender = 0, the model becomes $$
+Beer = \beta_0 + \beta_2 (Hotwings)+  \varepsilon
+$$ while if Gender = 1, we get $$
+Beer = \beta_0 + \beta_1 + (\beta_2+\beta_3)  (Hotwings)+  \varepsilon
+$$
+
+So $\beta_3$ is the difference in the slopes and $\beta_1$ is still the difference in the intercepts.
+
+Adding an interaction term is the same as engineering a new variable whose values are $Hotwings \times Gender$, but again `lm` will do this automatically if you include both variables with a `*` between them:
+
+```{r}
+fit_lm_int=lm(Beer~Gender*Hotwings,beerwings)
+summary(fit_lm_int)
+```
+
+In this case, the coefficient of *GenderM:Hotwings* tells us the estimate of $\beta_3$. In this case it is negative, but insignificant so we conclude that gender does not impact beer consumption after accounting for wings consumption (i.e. if you have two people consume the same number of wings, our model would predict the same beer consumption regardless of gender).
+
+We can also include interactions between numeric predictors like in the advertising dataset. Remember that 3D plot we showed in Module 2.1 and my comment about wanting to peal down the surface? Well we can do that if we consider the model $$
+sales = \beta_0 + \beta_1 (TV) + \beta_2 (radio) + \beta_3 (TV \times radio) + \varepsilon
+$$
+
+which creates an estimation function of the form $$
+\hat y = a + b_1 x_1 + b_2 x_2 + b_3 x_1x_2
+$$
+
+It turns out the interaction between TV and radio is significant:
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Advertising.csv"
+advertising=read.csv(df_url)
+sales_lm_int=lm(sales~TV*radio,data=advertising)
+summary(sales_lm_int)
+```
+
+Even more rewarding is to re-examine the 3D plot with this new model:
+
+```{r}
+library(plotly)
+x_values=seq(0,300, by=10)
+y_values=seq(0,50,by=5)
+xy_grid=expand.grid(TV=x_values,radio=y_values)
+yhat=matrix(predict(sales_lm_int,xy_grid),
+         nrow=length(x_values),ncol=length(y_values))
+adv_3d=plot_ly(advertising,x=~TV,y=~radio,z=~sales)
+adv_3d |> 
+  add_markers(marker = list(color = "black", size = 3)) |>
+  add_surface(x = ~x_values, 
+              y = ~y_values, 
+              z = ~t(yhat),
+              colorscale = "Viridis",
+              opacity = 0.7) |>
+  layout(scene = list(
+    xaxis = list(title = "TV"),
+    yaxis = list(title = "Radio"),
+    zaxis = list(title = "Sales")
+  ))
+
+```
+
+Its so beautiful it brings tears to my eyes.
+
+A second way of visualizing the interactive effect of TV and radio is to compare the slopes of the regression lines for sales vs TV when radio is high vs low. First, we need to engineer a new variable to represent the latter splitting which we will base on the median
+
+```{r, message=F}
+mr=median(advertising$radio)
+advertising$radio_level=ifelse(advertising$radio>mr,"high","low")
+advertising |>
+  ggplot(aes(x=TV,y=sales,color=radio_level))+
+  geom_point()+
+  geom_smooth(method="lm",se=FALSE)+
+  scale_color_manual(values=c("darkorange","#17806d"))
+```
+
+You can see that unlike in the beerwings example, the slopes of the regression lines are different for the two groups: when radio spending is high, you also get more "bang for your buck" in terms of TV spending too (higher slope). This is the reason an interactive effect is also sometimes called a *synergy effect* (at least when the coefficient is positive).
+
+## Polynomial Terms
+
+The final type of enrichment we'll discuss in this section is the addition of polynomial terms in linear models[^3]. To motivate this, lets look at the `mtcars` dataset which is built into R and has specs on 30 different makes of cars:
+
+[^3]: It may seem strange to call polynomial models linear, but as you can see below, they are linear in the coefficients $\beta_i$. The nonlinearity only creates additional features to engineer.
+
+```{r}
+glimpse(mtcars)
+```
+
+You may not know much about cars (I sure don't!) but if you're driving one that takes gas, I'm sure you're paying lots of attention to the mpg column these days. Suppose we want to see how mpg depends on the horsepower (hp) of the car:
+
+```{r, message=F}
+mtcars |> 
+  ggplot(aes(x=hp,y=mpg))+
+  geom_point()+
+  geom_smooth(method=lm,
+              color="#D55E00")
+```
+
+This doesn't look very linear[^4] even though we get a significant linear coefficient and decent $R^2$ :
+
+[^4]: We'll further discuss checking for nonlinearity Module 2.3
+
+```{r}
+fit_lm=lm(mpg~hp,mtcars)
+summary(fit_lm)
+```
+
+Instead, noticing the curvature, let's try fitting a quadratic model
+
+$$
+mpg = \beta_0 + \beta_1 (hp) + \beta_2 (hp)^2 + \varepsilon
+$$
+
+This requires engineering a new variable $(hp)^2$ which `lm` will do automatically:
+
+```{r}
+fit_lm_quad=lm(mpg~hp+I(hp^2),mtcars)
+summary(fit_lm_quad)
+```
+
+We see an improvement in $R^2$ and the model visually matches the data better too (although the increase in mpg for large hp is unrealistic):
+
+```{r}
+mtcars |> 
+  ggplot(aes(x=hp,y=mpg))+
+  geom_point()+
+  geom_smooth(method=lm,
+              formula=y~poly(x,2),
+              color = "#0072B2")
+```
+
+To get a more realistic model which incorporates curvature without the increase, we need to use a data transformation. This and a few other topics related to regression diagnostics will be discussed in 2.3.
+
+## Practice
+
+The [credit](https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/credit.csv) dataset (Source: [ISLR](https://www.statlearning.com/)) contains simulated data on customer credit card balance based on several predictors including income, limit, rating, cards, age, education, own, student, married, and region.
+
+1.  Fit a multiple regression model using Income, Student, and Region. Which were significant?
+2.  Interpret the coefficient of the Student variable.
+3.  Interpret the coefficients of the region variables. What was the baseline?
+4.  Create a scatterplot and trendline of Balance vs Income with points colored by Student. Does it look like there is a difference in the intercepts or slopes of the lines?
+5.  Test for an interactive effect between Income and Student. Does the interaction improve the model?
