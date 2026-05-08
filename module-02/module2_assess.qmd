@@ -1,0 +1,51 @@
+---
+title: "Module 2 Assignment"
+author: "Your Name Here"
+format: 
+  html:
+    embed-resources: true
+    self-contained: true
+    math: mathjax
+editor: visual
+---
+
+## Introduction
+
+This assignment will be working with the [gapminder.csv](https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/gapminder.csv) which contains information on gdp per capita, life expectancy, and population for 142 different countries every five years starting in 1952.
+
+Each problem will be graded on a 2-point scale with
+
+2 = solution is fully correct with proper coding and explanations
+
+1= solution is at least half correct with mostly proper coding and explanations
+
+0 = solution is less than half correct
+
+If you submit the assignment before the due date (not the accept until date), I will provide feedback and give you a chance to resubmit.
+
+## Problem 1
+
+Load and filter the dataset to include only the measurements for 2007 and all continents except Oceania. Fit a regression model for $Y$ = _lifeExp_ using the predictors _gdpPercap_, _pop_, and _continent_ and show the summary of results.  
+
+Answer the following questions about your model in question 1: 
+
+- Which predictors were significant?
+- Interpret the coefficients of continent. What was the baseline and what do the other coefficients say in terms of countries?  
+
+
+## Problem 2
+
+Create a scatterplot of lifeExp vs gdpPercap with points and trendlines colored by continent (and please change the eye-sore natural colors). Explain why this graph suggests evidence of an interaction between gdpPercap and continent (hint: are the slopes the same?) and then test to see if the interaction is significant for any of the continents. 
+
+
+## Problem 3
+
+Create a log-log graph of $lifeExp$ vs $gdpPercap$ and test for an interaction between log(gdpPercap) and continent. In other words, fit a model to log(lifeExp) using log(gdpPercap) and continent as predictors and include an interaction between the two predictors. 
+
+## Problem 4
+
+Write a brief summary of the three models considered in 1-3, including a comparison of $R^2$ values and a suggestion of which model you think fits the data best with supporting evidence.
+
+## Problem 5
+
+Create a residual plot for your preferred model from Problem 4 and comment on any patterns you observe. Identify any outliers by country and discuss their potential impact on the model fit. 
