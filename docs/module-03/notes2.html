@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Module 3.2: Logistic Regression – Statistical Learning Methods</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d4be639c637f3db3c684c66cefad7e0c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Statistical Learning Methods</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-1" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 1</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-1">    
+        <li>
+    <a class="dropdown-item" href="../module-01/notes1.html">
+ <span class="dropdown-text">Module 1.1: Introduction to Statistical Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes2.html">
+ <span class="dropdown-text">Module 1.2: Prediction for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes3.html">
+ <span class="dropdown-text">Module 1.3: Inference for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/supplement.html">
+ <span class="dropdown-text">Module 1 Theory: A deeper look at finding coefficients</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/rtools.html">
+ <span class="dropdown-text">Module 1 R Tools: Introduction to ggplot2 and tidyverse</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-2" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 2</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-2">    
+        <li>
+    <a class="dropdown-item" href="../module-02/notes1.html">
+ <span class="dropdown-text">Module 2.1: Multiple Regression Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes2.html">
+ <span class="dropdown-text">Module 2.2: Enriching Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes3.html">
+ <span class="dropdown-text">Module 2.3: Regression Diagnostics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes_bonus.html">
+ <span class="dropdown-text">Module 2 Bonus: The F Test</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/supplement.html">
+ <span class="dropdown-text">Module 2 Theory Supplement</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-3" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 3</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-3">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-4" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 4</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-4">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-5" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 5</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-5">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-6" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 6</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-6">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-7" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 7</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-7">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-8" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 8</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-8">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Module 3.2: Logistic Regression</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="issue-with-knn" class="level2">
+<h2 class="anchored" data-anchor-id="issue-with-knn">Issue with KNN</h2>
+<p>In the last notes, we discussed how to use KNN to classify points. There are several issues with this method, some of which we already discussed</p>
+<ul>
+<li>Choosing an optimal K can involve a lot of trial and error</li>
+<li>The final model doesn’t really reveal much about how the individual predictors affect the outcome (it’s kind of a “black box”).</li>
+<li>It’s hard to incorporate qualitative predictors in meaningful ways.</li>
+<li>Unlike regression models, there is no natural way to estimate the probability of belonging to a class, only a hard prediction</li>
+</ul>
+<p>Let’s expand on these. To see why 2 is an issue, think back to Module 2. When we fit a multiple regression model, we were able to say which predictors were significant. There is no way to do that with KNN, so while it might be a good predictive model in <em>some</em> scenarios, it doesn’t give us much in the realm of inference. Sure, if we only have two predictors, we can look at a plot of the decision regions, but such plots can be too holey and unpredictable for my taste. For issue 3, KNN relies on being able to calculate the “distance” between points which isn’t so well defined for categories. If two data points have the same value of a category but are 5 units a part in a numeric variable, how should this compare with two data points that have different categories but are only 1 unit apart<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>? Weird.</p>
+<p>For the rest of these notes, we are going to assume that our response variable <span class="math inline">\(Y\)</span> is binary and denote its values as 0 and 1. We will assume that we are using an arbitrary number of <span class="math inline">\(p\)</span> predictors, which could be quantitative or qualitative and let <span class="math inline">\(X\)</span> be the model matrix of predictors with the constant term appended on. In other words, <span class="math display">\[
+X = \begin{bmatrix} 1 &amp; X_1 &amp; X_2 &amp; \cdots &amp; X_p \end{bmatrix}
+\]</span></p>
+</section>
+<section id="logistic-regression" class="level2">
+<h2 class="anchored" data-anchor-id="logistic-regression">Logistic Regression</h2>
+<p>Logistic regression, which despite the name is a classification method, takes a more inferential and quantitative approach to the problem. Instead of trying to directly classify points as 0s or 1s for new X, it tries to build a model for the probability of being in class 1 (or 0) and then classifies new points as 1 (or 0) if this probability is <span class="math inline">\(&gt; 0.5\)</span>. In other words, we set $p(X) = P(Y=1 | X) $ (the probability of getting a 1 for a given predictor vector <span class="math inline">\(X\)</span>). Then we would like to fit a model to <span class="math inline">\(p(X)\)</span> instead of <span class="math inline">\(Y\)</span> itself. We could try for <span class="math display">\[
+p(X) = X\beta
+\]</span> (i.e.&nbsp;a multiple regression model), but that would lead to values of <span class="math inline">\(p\)</span> outside [0,1]. <span class="math inline">\(p\)</span> is supposed to be a probability so that is bad.</p>
+<p>Instead, a generalized linear model (GLM) is one which tries to fit a function of <span class="math inline">\(p\)</span> as a linear model: <span class="math display">\[
+g(p(X)) = X \beta
+\]</span></p>
+<p>for some function <span class="math inline">\(g\)</span> (called the link function). Different choices of <span class="math inline">\(g\)</span> lead to different GLMs but the most widely used is the logistic model where <span class="math inline">\(g\)</span> is taken as the log-odds function <span class="math display">\[
+g(x) = \log(x/(1-x))
+\]</span> Why is this choice so popular? Here’s a thought experiment to explain.</p>
+<p>Suppose that we are building a model for water polo shots again and we would like to say something along the following lines: “the chances of making a shot doubles when you move 2 meters closer to the goal”. First of all, using “doubled” implies a multiplicative change, not an additive one, and hence, we need to use log in our model. Second, we use the word “chance” very loosely in these type of statements, but it can really mean one of two things: probability or odds. Let’s say it means the probability <span class="math inline">\(p\)</span> of making a shot and the chances of making a shot from 4.5 meters out is 0.5. That would mean the chances of making a shot for 2.5 meter out is 1 and the chances of making a shot from 0.5 meters is 2. WTF? You can’t have a probability 2 of making a shot.</p>
+<p>However, suppose that we take a different approach and instead interpret the statement as one about odds: <span class="math display">\[
+odds = \frac{p}{1-p}
+\]</span> Note that a probability of 0.5 would correspond to an odds of 1, a probability of 2/3 would correspond to an odds of 2, 3/4 would correspond to an odds of 3, and so on. Now if we double odds going from 4.5 to 2.5 to 0.5 meters, we go from an odds of 1 to an odds of 2 to an odds of 4 which make more sense! So really, if we want to make statements about “doubling chances” as we change predictors, we should work in terms of odds. Hence the “log-odds” model.</p>
+<p>Now if you invert the model <span class="math display">\[
+\log\left(\frac{p(X)}{1-p(X)}\right) = X\beta
+\]</span> to solve for <span class="math inline">\(p(X)\)</span> we get <span class="math display">\[
+p(X) = \frac{e^{X\beta}}{1 + e^{X\beta}} = \frac{1}{1 + e^{-X\beta}}
+\]</span> The function <span class="math display">\[
+h(x) = 1/(1+e^{-x})
+\]</span> is called the <em>logistic function</em>. Hence the model name.</p>
+<p>Plotting <span class="math inline">\(h\)</span> also helps see why the model <span class="math display">\[
+p(X) = h(X\beta)= \frac{1}{1 + e^{-X\beta}}
+\]</span> is a reasonable choice for modeling probabilities as a function of <span class="math inline">\(X\)</span>. Suppose for example we have just single predictor <span class="math inline">\(X_1\)</span>. Then the plot of</p>
+<p><span class="math display">\[
+p(X_1) = 1/(1+e^{-(\beta_0 + \beta_1 X_1)})
+\]</span> would look like this:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(shiny)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'shiny' was built under R version 4.5.3</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'purrr' was built under R version 4.5.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.2     ✔ tibble    3.3.0
+✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+✔ purrr     1.2.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Slider inputs for beta0 and beta1</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ui <span class="ot">&lt;-</span> <span class="fu">fluidPage</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sliderInput</span>(<span class="st">"beta0"</span>, <span class="st">"β₀ (beta0):"</span>, <span class="at">min =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">max =</span> <span class="dv">5</span>, <span class="at">value =</span> <span class="dv">0</span>, <span class="at">step =</span> <span class="fl">0.1</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sliderInput</span>(<span class="st">"beta1"</span>, <span class="st">"β₁ (beta1):"</span>, <span class="at">min =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">max =</span> <span class="dv">5</span>, <span class="at">value =</span> <span class="dv">1</span>, <span class="at">step =</span> <span class="fl">0.1</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plotOutput</span>(<span class="st">"logisticPlot"</span>, <span class="at">width =</span> <span class="st">"400px"</span>, <span class="at">height =</span> <span class="st">"200px"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Server function to calculate logistic function and plot</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>server <span class="ot">&lt;-</span> <span class="cf">function</span>(input, output) {</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  output<span class="sc">$</span>logisticPlot <span class="ot">&lt;-</span> <span class="fu">renderPlot</span>({</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Define the logistic function</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    logistic_func <span class="ot">=</span> <span class="cf">function</span>(x, beta0, beta1) {</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span> (<span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>(beta0 <span class="sc">+</span> beta1 <span class="sc">*</span> x))))</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Generate data for plotting</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    x_vals <span class="ot">=</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="dv">10</span>, <span class="at">by =</span> <span class="fl">0.1</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    y_vals <span class="ot">=</span> <span class="fu">logistic_func</span>(x_vals, input<span class="sc">$</span>beta0, input<span class="sc">$</span>beta1)</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot the logistic function</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Logistic curve</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_line</span>(<span class="at">data =</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x_vals, <span class="at">y =</span> y_vals), <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y))</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the Shiny app</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="fu">shinyApp</span>(<span class="at">ui =</span> ui, <span class="at">server =</span> server)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><iframe data-deferred-src="app2b920a3c318276f1dca6772901945a74/?w=&amp;__subapp__=1" width="100%" height="400" class="shiny-frame shiny-frame-deferred"></iframe></p>
+</div>
+</div>
+<p>You can play around with different values of <span class="math inline">\(\beta_0, \beta_1\)</span> to get some ideas about what is going on. Try to answer the following based on this application:</p>
+<ol type="1">
+<li>How does changing <span class="math inline">\(\beta_0\)</span> affect the shape?</li>
+<li>How does changing <span class="math inline">\(\beta_1\)</span> affect the shape?</li>
+<li>If <span class="math inline">\(p(x)\)</span> tends to decrease with <span class="math inline">\(x\)</span>, what could we say about the parameters?</li>
+<li>What happens if <span class="math inline">\(\beta_0 = 0\)</span>? What if <span class="math inline">\(\beta_1 = 0\)</span>?</li>
+</ol>
+<p>The sliders below also allow you to see how the logistic graph matches up with the empirical probabality of making a shot as a function of vertical distance form the goal in the shots dataset. See if you can choose <span class="math inline">\(\beta_0, \beta_1\)</span> to capture the basic shape.</p>
+<div class="cell">
+<pre class="shinylive cell-code"><code>url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"
+shots=read.csv(url)
+# UI: Sliders for beta0 and beta1
+ui &lt;- fluidPage(
+  sliderInput("beta0", "β₀ (Intercept):", min = -5, max = 5, value = 0, step = 0.1),
+  sliderInput("beta1", "β₁ (Slope):", min = -5, max = 5, value = 1, step = 0.1),
+  plotOutput("logisticPlot", width = "400px", height = "200px")
+)
+
+# Server: Compute logistic function and binned proportions
+server &lt;- function(input, output) {
+  
+  output$logisticPlot &lt;- renderPlot({
+    # Define the logistic function
+    logistic_func = function(x, beta0, beta1) {
+      (1/(1 + exp(-(beta0 + beta1 * x))))
+    }
+    
+    # Generate logistic curve data
+    x_vals = seq(0, 8, by = 0.1)
+    y_vals = logistic_func(x_vals, input$beta0, input$beta1)
+    
+    # Bin the shots based on vertical slices
+    shots_binned = shots %&gt;%
+      group_by(y) %&gt;%
+      summarize(prop_goal = mean(Goal == "Goal")) 
+    
+    # Create the plot
+    ggplot() +
+      # Logistic curve
+      geom_line(data = data.frame(x = x_vals, y = y_vals), aes(x = x, y = y), 
+                color = "red2", size = 1) +
+      # Bar plot of binned proportions
+      geom_bar(data = shots_binned, aes(x = y, y = prop_goal), 
+               stat = "identity", fill = "steelblue", color="white", 
+               alpha = 0.6, width = 1) +
+      labs(title = paste("Logistic Regression: β₀ =", input$beta0, ", β₁ =", input$beta1),
+           x = "Vertical Distance", y = "Proportion of Goals")
+  })
+}
+
+# Run the Shiny app
+shinyApp(ui = ui, server = server)
+</code></pre>
+</div>
+<p>Alright enough fun. Let’s fit this shit to our data.</p>
+</section>
+<section id="logistic-model-on-water-polo-data" class="level2">
+<h2 class="anchored" data-anchor-id="logistic-model-on-water-polo-data">Logistic Model on Water Polo Data</h2>
+<p>To fit a logistic model to shot probabilities on the water polo data, we use the glm function in R with the family = “binomial” option. The response variable needs to be one-hot encoded a 0/1 or F/T first.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>shots<span class="ot">=</span><span class="fu">read.csv</span>(url)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>shots<span class="sc">$</span>Goal_1<span class="ot">=</span><span class="fu">ifelse</span>(shots<span class="sc">$</span>Goal<span class="sc">==</span><span class="st">"Goal"</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>goal_glm<span class="ot">=</span><span class="fu">glm</span>(Goal_1<span class="sc">~</span>xj<span class="sc">+</span>yj,<span class="at">family=</span><span class="st">"binomial"</span>,<span class="at">data=</span>shots)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(goal_glm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Goal_1 ~ xj + yj, family = "binomial", data = shots)
+
+Coefficients:
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  0.337554   0.156129   2.162   0.0306 *  
+xj           0.007154   0.031643   0.226   0.8211    
+yj          -0.206886   0.035306  -5.860 4.63e-09 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2116.2  on 1606  degrees of freedom
+Residual deviance: 2081.0  on 1604  degrees of freedom
+AIC: 2087
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+<p>Don’t freak out! Let’s talk about this output. The three values in the “Estimate” column are the coefficients <span class="math inline">\(\hat{\beta}_0,  \hat{\beta}_1, \hat{\beta}_2\)</span> in the model <span class="math display">\[
+p(X) = h(\beta_0 +\beta_1 X_1 + \beta_2 X_2)
+\]</span> with <span class="math inline">\(X_1=xj\)</span> and <span class="math inline">\(X_2=yj\)</span>. If we want to predict the probability of making a shot from position (2,4), we would plug in <span class="math inline">\(X_1= 2\)</span> and <span class="math inline">\(X_2=4\)</span> into the right hand side of this equation:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>bx<span class="ot">=</span><span class="fu">coef</span>(goal_glm)[<span class="dv">1</span>] <span class="sc">+</span><span class="fu">coef</span>(goal_glm)[<span class="dv">2</span>]<span class="sc">*</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">coef</span>(goal_glm)[<span class="dv">3</span>]<span class="sc">*</span><span class="dv">4</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(bx)<span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(bx))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept) 
+  0.3832721 </code></pre>
+</div>
+</div>
+<p>You can also use the predict function with type = “response”, to get the probability directly:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(goal_glm,<span class="at">newdata=</span><span class="fu">data.frame</span>(<span class="at">xj=</span><span class="dv">2</span>,<span class="at">yj=</span><span class="dv">4</span>),<span class="at">type=</span><span class="st">"response"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        1 
+0.3832721 </code></pre>
+</div>
+</div>
+<p>Now, in terms of interpreting the coefficients, remember that the model is linear in log-odds: <span class="math display">\[
+\log(p(X)/(1-p(X))) = \beta_0 + \beta_1X_1 + \beta_2 X_2
+\]</span></p>
+<p>In a normal linear equation, a change of <span class="math inline">\(\Delta x\)</span> to <span class="math inline">\(x\)</span> means that the outcome variable changes by <span class="math inline">\(m\Delta x\)</span> where <span class="math inline">\(m\)</span> is the slope. Now a change <span class="math inline">\(\Delta x\)</span> in one of the predictors <span class="math inline">\(X_i\)</span>, while holding the others constant, means that the log-odds of “success” go up by <span class="math inline">\(\hat{\beta}_i \Delta x\)</span> so the odds increase by a multiplicative factor <span class="math inline">\(e^{\hat{\beta}_i \Delta x}\)</span>. For example, if we keep our horizontal position constant, but move one meter closer to the goal (change in <span class="math inline">\(yj\)</span> of <span class="math inline">\(-1\)</span>), then the odds get multiplied by</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(goal_glm)[<span class="dv">3</span>]<span class="sc">*</span>(<span class="sc">-</span><span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      yj 
+1.229843 </code></pre>
+</div>
+</div>
+<p>As a percent change (subtract the above from 1 and multiply by 100), the odds increase by about 22%. Here are the odds changes as a function of the <span class="math inline">\(\Delta yj\)</span>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="sc">-</span><span class="dv">5</span><span class="sc">:</span><span class="dv">5</span>,(<span class="fu">exp</span>(<span class="fu">coef</span>(goal_glm)[<span class="dv">3</span>]<span class="sc">*</span>(<span class="sc">-</span><span class="dv">5</span><span class="sc">:</span><span class="dv">5</span>))<span class="sc">-</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">100</span>,<span class="at">xlab=</span><span class="st">"Change in yj"</span>,<span class="at">ylab=</span><span class="st">"% change in odds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes2_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Note that odds changes are negative if you move further away.</p>
+<p>One more comment before we wrap this up. The last column of the summary table once again gives the p-values for tests of nonzero coefficients:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(goal_glm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Goal_1 ~ xj + yj, family = "binomial", data = shots)
+
+Coefficients:
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  0.337554   0.156129   2.162   0.0306 *  
+xj           0.007154   0.031643   0.226   0.8211    
+yj          -0.206886   0.035306  -5.860 4.63e-09 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2116.2  on 1606  degrees of freedom
+Residual deviance: 2081.0  on 1604  degrees of freedom
+AIC: 2087
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+<p>In our example, the intercept and <span class="math inline">\(y\)</span> distance were significant, but the <span class="math inline">\(x\)</span> distance was not. That is probably because <span class="math inline">\(x\)</span> is not distance, but rather horizontal position. Instead, we should fit the model with <span class="math inline">\(|xj|\)</span>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>goal_glm<span class="ot">=</span><span class="fu">glm</span>(Goal<span class="sc">==</span><span class="st">"Goal"</span><span class="sc">~</span><span class="fu">abs</span>(xj)<span class="sc">+</span>yj,<span class="at">family=</span><span class="st">"binomial"</span>,<span class="at">data=</span>shots)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(goal_glm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Goal == "Goal" ~ abs(xj) + yj, family = "binomial", 
+    data = shots)
+
+Coefficients:
+            Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  0.97473    0.19288   5.054 4.34e-07 ***
+abs(xj)     -0.36053    0.06217  -5.800 6.65e-09 ***
+yj          -0.24183    0.03629  -6.664 2.66e-11 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2116.2  on 1606  degrees of freedom
+Residual deviance: 2046.3  on 1604  degrees of freedom
+AIC: 2052.3
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+<p>That seems better!</p>
+</section>
+<section id="logistic-regression-decision-boundaries-and-prediction" class="level2">
+<h2 class="anchored" data-anchor-id="logistic-regression-decision-boundaries-and-prediction">Logistic Regression, Decision Boundaries, and Prediction</h2>
+<p>After we have computed a logistic regression model, we can also use it to visualize the decision regions <span class="math inline">\(G\)</span> and <span class="math inline">\(\bar{G}\)</span>. <span class="math inline">\(G\)</span> will be the region of <span class="math inline">\((x,y)\)</span> values where</p>
+<p><span class="math display">\[
+P(Goal|(x,y)) &gt; 0.5
+\]</span> The “triangular” boundary for this region<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> is shown with the shot data in the plot below:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>x_range <span class="ot">=</span> </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seq</span>(<span class="fu">min</span>(shots<span class="sc">$</span>xj), <span class="fu">max</span>(shots<span class="sc">$</span>xj), </span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">length.out =</span> <span class="dv">100</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>y_range <span class="ot">=</span> </span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fu">max</span>(shots<span class="sc">$</span>yj), </span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">length.out =</span> <span class="dv">100</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">=</span> <span class="fu">expand.grid</span>(<span class="at">xj =</span> x_range, <span class="at">yj =</span> y_range)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict probabilities using the logistic regression model</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>prob <span class="ot">=</span> <span class="fu">predict</span>(goal_glm, </span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>                    <span class="at">newdata =</span> grid, </span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>                    <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert probability into a classification (1 if prob &gt; 0.5, else 0)</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>prediction <span class="ot">=</span> <span class="fu">ifelse</span>(grid<span class="sc">$</span>prob <span class="sc">&gt;</span> <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the decision boundary with the actual data</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(shots, <span class="fu">aes</span>(<span class="at">x =</span> xj, <span class="at">y =</span> yj, <span class="at">color =</span> Goal)) <span class="sc">+</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span>  </span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_contour</span>(<span class="at">data =</span> grid, <span class="fu">aes</span>(<span class="at">z =</span> prob), <span class="at">breaks =</span> <span class="fl">0.5</span>, <span class="at">color =</span> <span class="st">"red2"</span>) <span class="sc">+</span>  <span class="co"># Decision boundary</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">color =</span> <span class="st">"Goal"</span>) <span class="sc">+</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#FF671D"</span>,<span class="st">"black"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes2_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We could also visualize this as in the last notes with a color grid</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>  grid <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>xj,<span class="at">y=</span>yj,<span class="at">col=</span><span class="fu">as.factor</span>(prediction)))<span class="sc">+</span><span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name=</span><span class="st">"Goal"</span>,<span class="at">values=</span><span class="fu">c</span>(<span class="st">"black"</span>,<span class="st">"#FF671D"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes2_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To compute the predictive power, use a training-testing split</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(shots)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(n,<span class="fu">round</span>(.<span class="dv">7</span><span class="sc">*</span>n,<span class="dv">0</span>))</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>shots[s,]</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>shots[<span class="sc">-</span>s,]</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>goal_train<span class="ot">=</span><span class="fu">glm</span>(Goal<span class="sc">==</span><span class="st">"Goal"</span><span class="sc">~</span><span class="fu">abs</span>(xj)<span class="sc">+</span>yj,<span class="at">family=</span><span class="st">"binomial"</span>,<span class="at">data=</span>train)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>prob <span class="ot">=</span> <span class="fu">predict</span>(goal_train, </span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">newdata =</span> test, </span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>test<span class="sc">$</span>prediction <span class="ot">=</span> <span class="fu">ifelse</span>(test<span class="sc">$</span>prob <span class="sc">&gt;</span> <span class="fl">0.5</span>, <span class="st">"Goal"</span>, <span class="st">"Not Goal"</span>)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>er_logistic<span class="ot">=</span><span class="fu">sum</span>(test<span class="sc">$</span>prediction<span class="sc">!=</span>test<span class="sc">$</span>Goal)<span class="sc">/</span><span class="fu">length</span>(test<span class="sc">$</span>Goal)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>er_logistic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3962656</code></pre>
+</div>
+</div>
+<p>For those of you who did the last group work, this should be close to the best knn model error rates you got.</p>
+</section>
+<section id="what-else-we-need-to-say" class="level2">
+<h2 class="anchored" data-anchor-id="what-else-we-need-to-say">What else we need to say</h2>
+<p>To summarize these notes,</p>
+<ul>
+<li>The logistic model fits a linear function <span class="math inline">\(\beta X\)</span> to the log-odds of getting a 1.</li>
+<li>The exponentiated coefficients tell us changes in the log-odds of success when the corresponding variable is changed.</li>
+<li>A logistic model can reveal some important information about the relationships between our predictors and the outcome.</li>
+</ul>
+<p>But there is one kind of strange issue here which is the use of 0.5 as a cutoff for class predictions. Since the classes Goal and Not Goal are imbalanced with roughly twice as many of the latter, could we actually do better by using a different cutoff? Furthermore, we haven’t look at the types of misclassifications. If we actually create a two-way table of predictions vs realtiy for our Goals:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(test<span class="sc">$</span>prediction,test<span class="sc">$</span>Goal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          
+           Goal Not Goal
+  Goal       24       15
+  Not Goal  176      267</code></pre>
+</div>
+</div>
+<p>we see that there are two types of errors: predicting goal for not goal and predicting not goal for goal.The second type of error is happening much more frequently. Is this desirable? Next notes we’ll talk about these two way confusion matrices in more detail and some other metrics one can use to talk about to assess the value of a classification scheme. We’ll also discuss incorporating qualitative predictors into our models and how we compare our logistic model with the “null”. Until then, love the ones you’re with.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Ok, there is a method of computing distances in the presence of mixed quantitative/qualitative predictors called Gower Distance - I’ll leave it to you to go down that rabbit hole if you want to take the red pill.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Usually the boundary is linear but using absolute value turned it into a triangle<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
