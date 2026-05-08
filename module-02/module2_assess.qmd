@@ -25,27 +25,39 @@ If you submit the assignment before the due date (not the accept until date), I 
 
 ## Problem 1
 
-Load and filter the dataset to include only the measurements for 2007 and all continents except Oceania. Fit a regression model for $Y$ = _lifeExp_ using the predictors _gdpPercap_, _pop_, and _continent_ and show the summary of results.  
+Load and filter the dataset to include only the measurements for 2007 and all continents except Oceania. Fit a regression model `lifeExp ~ continent + gdpPercap + pop` and show the summary of results.  
 
 Answer the following questions about your model in question 1: 
 
 - Which predictors were significant?
-- Interpret the coefficients of continent. What was the baseline and what do the other coefficients say in terms of countries?  
+- Interpret the coefficients of continent. What was the baseline and what do the other coefficients say about lifeExp in the other continents?  
 
 
 ## Problem 2
 
-Create a scatterplot of lifeExp vs gdpPercap with points and trendlines colored by continent (and please change the eye-sore natural colors). Explain why this graph suggests evidence of an interaction between gdpPercap and continent (hint: are the slopes the same?) and then test to see if the interaction is significant for any of the continents. 
+Create a scatterplot of lifeExp vs gdpPercap with points and trendlines colored by continent (and please change the eye-sore natural colors). Explain why this graph suggests evidence of an interaction between gdpPercap and continent (hint: are the slopes the same?) and then test to see if the interaction is significant for any of the continents by fitting the model `lifeExp ~ continent*gdpPercap`. 
 
 
 ## Problem 3
 
-Create a log-log graph of $lifeExp$ vs $gdpPercap$ and test for an interaction between log(gdpPercap) and continent. In other words, fit a model to log(lifeExp) using log(gdpPercap) and continent as predictors and include an interaction between the two predictors. 
+Create a log-log graph of _lifeExp_ vs _gdpPercap_ colored by continent. Then fit a model of the form `log(lifeExp)~ log(gdpPercap)*continent` and discuss the significance of the coefficients. Compare the $R^2$ with the model from Problem 2. 
 
 ## Problem 4
 
-Write a brief summary of the three models considered in 1-3, including a comparison of $R^2$ values and a suggestion of which model you think fits the data best with supporting evidence.
+The $R^2$ values from `summary()` tell us how well each model fits the training data, but as we discussed in Module 1, a more honest evaluation is to test predictive performance on new observations the model has never seen. Compute the predicted values and test RMSE for each of the following models on the 2002 gapminder data (again filtered to exclude Oceania): 
+- `lifeExp ~ continent + gdpPercap + population` (Problem 1)
+- `lifeExp ~ continent*gdpPercap` (Problem 2)
+- `log(lifeExp)~ log(gdpPercap)` (Problem 3 without continent) 
+
+Hint: For the third model, remember that your predictions are on the log scale so you will need to back-transform them by taking `exp()` before computing RMSE.
+
+Answer the following:
+
+- Which model has the lowest test RMSE?
+- Does the ranking of models by test RMSE agree with the ranking by training $R^2$?
+- Why might a model with higher training $R^2$ perform worse on new data?
+
 
 ## Problem 5
 
-Create a residual plot for your preferred model from Problem 4 and comment on any patterns you observe. Identify any outliers by country and discuss their potential impact on the model fit. 
+Pick the model from 4 which you think fits the data best and create a residual plot for your this model. Comment on any patterns you observe. Identify any outliers by country and discuss their potential impact on the model fit. 
