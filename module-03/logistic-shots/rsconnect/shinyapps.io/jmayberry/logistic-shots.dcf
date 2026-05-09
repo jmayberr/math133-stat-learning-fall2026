@@ -1,0 +1,10 @@
+name: logistic-shots
+title:
+username: jmayberry
+account: jmayberry
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17327250
+bundleId: 11970427
+url: https://jmayberry.shinyapps.io/logistic-shots/
+version: 1
