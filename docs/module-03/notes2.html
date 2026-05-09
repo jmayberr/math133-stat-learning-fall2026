@@ -213,7 +213,14 @@ window.Quarto = {
  <span class="menu-text">Module 3</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-module-3">    
-        <li class="dropdown-header">Notes 1: …</li>
+        <li>
+    <a class="dropdown-item" href="../module-03/notes1.html">
+ <span class="dropdown-text">Module 3.1: Introduction to Classification</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/notes2.html">
+ <span class="dropdown-text">Module 3.2: Logistic Regression</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -383,7 +390,7 @@ p(X_1) = 1/(1+e^{-(\beta_0 + \beta_1 X_1)})
 <span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the Shiny app</span></span>
 <span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="fu">shinyApp</span>(<span class="at">ui =</span> ui, <span class="at">server =</span> server)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><iframe data-deferred-src="app75926b1494fde8e29727ecb6f442e156/?w=&amp;__subapp__=1" width="100%" height="400" class="shiny-frame shiny-frame-deferred"></iframe></p>
+<p><iframe data-deferred-src="app8019d311be3f237c421a497b818ab03a/?w=&amp;__subapp__=1" width="100%" height="400" class="shiny-frame shiny-frame-deferred"></iframe></p>
 </div>
 </div>
 <p>You can play around with different values of <span class="math inline">\(\beta_0, \beta_1\)</span> to get some ideas about what is going on. Try to answer the following based on this application:</p>
@@ -639,7 +646,7 @@ P(Goal|(x,y)) &gt; 0.5
 <span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>er_logistic<span class="ot">=</span><span class="fu">sum</span>(test_set<span class="sc">$</span>prediction<span class="sc">!=</span>test_set<span class="sc">$</span>Goal)<span class="sc">/</span><span class="fu">length</span>(test_set<span class="sc">$</span>Goal)</span>
 <span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>er_logistic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3630705</code></pre>
+<pre><code>[1] 0.3340249</code></pre>
 </div>
 </div>
 <p>For those of you who did the last group work, this should be close to the best knn model error rates you got.</p>
@@ -658,14 +665,16 @@ P(Goal|(x,y)) &gt; 0.5
 <div class="cell-output cell-output-stdout">
 <pre><code>          
            Goal Not Goal
-  Goal       36       30
-  Not Goal  145      271</code></pre>
+  Goal       30       32
+  Not Goal  129      291</code></pre>
 </div>
 </div>
 <p>we see that there are two types of errors: predicting goal for not goal and predicting not goal for goal.The second type of error is happening much more frequently. Is this desirable? Next notes we’ll talk about these two way confusion matrices in more detail and some other metrics one can use to talk about to assess the value of a classification scheme. We’ll also discuss incorporating qualitative predictors into our models and how we compare our logistic model with the “null”. Until then, love the ones you’re with.</p>
 </section>
 <section id="practice" class="level2">
 <h2 class="anchored" data-anchor-id="practice">Practice</h2>
+<p>The framingham.csv dataset contains information from a study in Framingham, MA on cardiovascular heart disease. You can view more information about the data <a href="https://www.kaggle.com/datasets/dileep070/heart-disease-prediction-using-logistic-regression">here</a> Download this data and remove all subjects with missing data using the drop_na() command.</p>
+<p>Fit a logistic regression model to the variable TenYearCHD based on all the other predictors in the dataset If you hold all other variables fixed, what is the percent change in odds for a Male vs Female getting heart disease? Suppose that a smoker decides to smoke one less pack per day ( about 20 less cigs per day), holding all other variables constant. What will be the percent changes in their odds of getting heart disease?</p>
 
 
 </section>
