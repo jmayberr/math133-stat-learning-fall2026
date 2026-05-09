@@ -316,3 +316,8 @@ we see that there are two types of errors: predicting goal for not goal and pred
 
 ## Practice
 
+The framingham.csv dataset contains information from a study in Framingham, MA on cardiovascular heart disease. You can view more information about the data [here](https://www.kaggle.com/datasets/dileep070/heart-disease-prediction-using-logistic-regression) Download this data and remove all subjects with missing data using the drop_na() command. 
+
+Fit a logistic regression model to the variable TenYearCHD based on all the other predictors in the dataset
+If you hold all other variables fixed, what is the percent change in odds for a Male vs Female getting heart disease?
+Suppose that a smoker decides to smoke one less pack per day ( about 20 less cigs per day), holding all other variables constant. What will be the percent changes in their odds of getting heart disease?

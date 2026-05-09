@@ -43,7 +43,6 @@ website:
             text: "Module 3.1: Introduction to Classification"
           - href: module-03/notes2.qmd
             text: "Module 3.2: Logistic Regression"
-          - href: module-02/notes3.qmd
       - text: "Module 4"
         menu:
           - text: "Notes 1: ..."
