@@ -184,9 +184,10 @@ with $X_1=xj$ and $X_2=yj$. If we want to predict the probability of making a sh
 
 ```{r}
 bx=coef(goal_glm)[1] +coef(goal_glm)[2]*2 + coef(goal_glm)[3]*4
-exp(bx)/(1+exp(bx))
+1/(1+exp(-bx))
 
 ```
+
 You can also use the predict function with type = "response", to get the probability directly: 
 
 ```{r}
@@ -199,7 +200,7 @@ $$
 $$
 
 
-In a normal linear equation, a change of $\Delta x$ to $x$ means that the outcome variable changes by $m\Delta x$ where $m$ is the slope. Now a change $\Delta x$ in one of the predictors $X_i$, while holding the others constant, means that the log-odds of "success" go up by $\hat{\beta}_i \Delta x$ so the odds increase by a multiplicative factor $e^{\hat{\beta}_i \Delta x}$. For example, if we keep our horizontal position constant, but move one meter closer to the goal (change in $yj$ of $-1$), then the odds get multiplied by 
+In a simple linear equation, a change of $\Delta x$ to $x$ means that the outcome variable changes by $m\Delta x$ where $m$ is the slope. Now a change $\Delta x$ in one of the predictors $X_i$, while holding the others constant, means that the log-odds of "success" goes up by $\hat{\beta}_i \Delta x$ so the odds increase by a multiplicative factor $e^{\hat{\beta}_i \Delta x}$. For example, if we keep our horizontal position constant, but move one meter closer to the goal (change in $yj$ of $-1$), then the odds get multiplied by 
 
 ```{r}
 exp(coef(goal_glm)[3]*(-1))
@@ -213,7 +214,7 @@ plot(-5:5,(exp(coef(goal_glm)[3]*(-5:5))-1)*100,xlab="Change in yj",ylab="% chan
 
 Note that odds changes are negative if you move further away. 
 
-One more comment before we wrap this up. The last column of the summary table once again gives the p-values for tests of nonzero coefficients:
+One more comment before we wrap this up. The last column of the summary table again gives the p-values for tests of nonzero coefficients:
 
 ```{r}
 summary(goal_glm)
@@ -222,7 +223,7 @@ summary(goal_glm)
 In our example, the intercept and $y$ distance were significant, but the $x$ distance was not. That is probably because  $x$ is not distance, but rather horizontal position. Instead, we should fit the model with $|xj|$:
 
 ```{r}
-goal_glm=glm(Goal=="Goal"~abs(xj)+yj,family="binomial",data=shots)
+goal_glm=glm(Goal_1~abs(xj)+yj,family="binomial",data=shots)
 summary(goal_glm)
 ```
 
@@ -257,11 +258,13 @@ grid$prob = predict(goal_glm,
 grid$prediction = ifelse(grid$prob > 0.5, 1, 0)
 
 # Plot the decision boundary with the actual data
-ggplot(shots, aes(x = xj, y = yj, color = Goal)) +
+shots |>
+  ggplot(aes(x = xj, y = yj, color = Goal)) +
   geom_point(size = 2) +  
-  geom_contour(data = grid, aes(z = prob), breaks = 0.5, color = "red2") +  # Decision boundary
+  geom_contour(data = grid, aes(z = prob), 
+               breaks = 0.5, color = "red2",linewidth=2) +  # Decision boundary
   labs(color = "Goal") +
-  scale_color_manual(values=c("#FF671D","black"))
+  scale_color_manual(values=c("#e35205","black"))
 
 
 ```
@@ -269,8 +272,10 @@ ggplot(shots, aes(x = xj, y = yj, color = Goal)) +
 We could also visualize this as in the last notes with a color grid
 
 ```{r}
-  grid %>% ggplot(aes(x=xj,y=yj,col=as.factor(prediction)))+geom_point(size=3)+
-  scale_color_manual(name="Goal",values=c("black","#FF671D"))
+  grid |>
+  ggplot(aes(x=xj,y=yj,col=as.factor(prediction)))+
+  geom_point(size=3)+
+  scale_color_manual(name="Goal",values=c("black","#e35205"))
 ```
 
 To compute the predictive power, use a training-testing split
@@ -278,14 +283,16 @@ To compute the predictive power, use a training-testing split
 ```{r}
 n=nrow(shots)
 s=sample(n,round(.7*n,0))
-train=shots[s,]
-test=shots[-s,]
-goal_train=glm(Goal=="Goal"~abs(xj)+yj,family="binomial",data=train)
-test$prob = predict(goal_train, 
-                    newdata = test, 
+train_set=shots[s,]
+test_set=shots[-s,]
+goal_train=glm(Goal_1~abs(xj)+yj,family="binomial",data=train_set)
+test_set$prob = predict(goal_train, 
+                    newdata = test_set, 
                     type = "response")
-test$prediction = ifelse(test$prob > 0.5, "Goal", "Not Goal")
-er_logistic=sum(test$prediction!=test$Goal)/length(test$Goal)
+test_set$prediction = ifelse(test_set$prob > 0.5, 
+                             "Goal", 
+                             "Not Goal")
+er_logistic=sum(test_set$prediction!=test_set$Goal)/length(test_set$Goal)
 er_logistic
 ```
 
@@ -299,10 +306,13 @@ To summarize these notes,
 * The exponentiated coefficients tell us changes in the log-odds of success when the corresponding variable is changed. 
 * A logistic model can reveal some important information about the relationships between our predictors and the outcome. 
 
-But there is one kind of strange issue here which is the use of 0.5 as a cutoff for class predictions. Since the classes Goal and Not Goal are imbalanced with roughly twice as many of the latter, could we actually do better by using a different cutoff? Furthermore, we haven't look at the types of misclassifications. If we actually create a two-way table of predictions vs realtiy for our Goals:
+But there is one kind of strange issue here which is the use of 0.5 as a cutoff for class predictions. Since the classes Goal and Not Goal are imbalanced with roughly twice as many of the latter, could we actually do better by using a different cutoff? Furthermore, we haven't look at the types of misclassifications. If we actually create a two-way table of predictions vs reality for our Goals:
 
 ```{r}
-table(test$prediction,test$Goal)
+table(test_set$prediction,test_set$Goal)
 ```
 
 we see that there are two types of errors: predicting goal for not goal and predicting not goal for goal.The second type of error is happening much more frequently. Is this desirable? Next notes we'll talk about these two way confusion matrices in more detail and some other metrics one can use to talk about to assess the value of a classification scheme. We'll also discuss incorporating qualitative predictors into our models and how we compare our logistic model with the "null". Until then, love the ones you're with.  
+
+## Practice
+
