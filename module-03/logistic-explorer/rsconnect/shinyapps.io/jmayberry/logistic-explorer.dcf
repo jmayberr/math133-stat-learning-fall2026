@@ -1,0 +1,10 @@
+name: logistic-explorer
+title:
+username: jmayberry
+account: jmayberry
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17327241
+bundleId: 11970421
+url: https://jmayberry.shinyapps.io/logistic-explorer/
+version: 1
