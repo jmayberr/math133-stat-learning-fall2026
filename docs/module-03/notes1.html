@@ -221,6 +221,14 @@ window.Quarto = {
     <a class="dropdown-item" href="../module-03/notes2.html">
  <span class="dropdown-text">Module 3.2: Logistic Regression</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/notes3.html">
+ <span class="dropdown-text">Module 3.3: Evaluating Classifiers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/supplement.html">
+ <span class="dropdown-text">Module 3 Theory Supplement: Finding Logistic Regression Coefficients</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -299,6 +307,9 @@ window.Quarto = {
 
 <section id="what-is-classification" class="level2">
 <h2 class="anchored" data-anchor-id="what-is-classification">What is classification?</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>The womenShots.csv dataset contains positional and situational data on a collection of shots taken in several NCAA women’s water polo games from the 2018-2019 seasons.</p>
 <p>In this scenario, the variable we would like to predict is the binary variable Goal. Ultimately, we would like to build a model for predicting Goal based on all the other variables but we are going to start with just the variables xj and yj which contain the “jittered” positions of the shots. The coordinates are relative to the center of the goal with the positive y-axis pointing into the pool and the positive x-axis pointed right. Our model will be of the form <span class="math display">\[
 Y = f(X) + \varepsilon
@@ -309,33 +320,17 @@ Y = f(X) + \varepsilon
 <p>where <span class="math inline">\(G\)</span> is some region of <span class="math inline">\((x,y)\)</span> space and <span class="math inline">\(\bar{G}\)</span> is its complement. Such problems are fundamentally different from the regression models in Modules 1-2 and are called <strong>classification</strong> problems (you can think of Goal and Not Goal as two classes in which we want to split the observations). When the response is binary (like above) the goal is to split the predictor space into two decision regions (<span class="math inline">\(G\)</span> and <span class="math inline">\(\bar{G}\)</span>) where we will respectively predict goals and misses.</p>
 <p>Before building a formal model, let’s first visualize the data to get a sences of whether classification is even feasible. Plotting shots based on position and coloring the points by whethere or not there was a goal, we can see there will be no perfect way to split the space into decision regions, but there are some clustering of orange and black so maybe we have some hope of beating the “always guess miss model”.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'purrr' was built under R version 4.5.3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.4     ✔ readr     2.1.5
-✔ forcats   1.0.0     ✔ stringr   1.5.1
-✔ ggplot2   3.5.2     ✔ tibble    3.3.0
-✔ lubridate 1.9.4     ✔ tidyr     1.3.1
-✔ purrr     1.2.2     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-✖ dplyr::filter() masks stats::filter()
-✖ dplyr::lag()    masks stats::lag()
-ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>shots<span class="ot">=</span><span class="fu">read.csv</span>(url)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>shots <span class="sc">|&gt;</span> </span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>xj,<span class="at">y=</span>yj,<span class="at">col=</span>Goal))<span class="sc">+</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#e35205"</span>,<span class="st">"black"</span>))<span class="sc">+</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Horizontal Distance from Goal"</span>,<span class="at">y=</span><span class="st">'vertical Distance from Goal'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>shots<span class="ot">=</span><span class="fu">read.csv</span>(url)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>shots <span class="sc">|&gt;</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>xj,<span class="at">y=</span>yj,<span class="at">col=</span>Goal))<span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#e35205"</span>,<span class="st">"black"</span>))<span class="sc">+</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Horizontal Distance from Goal"</span>,<span class="at">y=</span><span class="st">'vertical Distance from Goal'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes1_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -350,20 +345,20 @@ Y = f(X) + \varepsilon
 </ul>
 <p>To answer the first question, we need to define a metric for assessing how well our model fits the data (akin to RMSE or <span class="math inline">\(R^2\)</span> for regression problem). The most obvious choice is <em>accuracy</em>, the proportion of correct guesses made by our model: <span class="math display">\[
 accuracy = \frac{1}{n} \sum_{i=1}^n (\hat{y}_i ==y_i)
-\]</span> The model with the highest accuracy wins. Usually, (to keep things consistent with regression where we looked to minimize the MSE) instead of maximizing the accuracy, we will talk in terms of minimizing the error rate <span class="math display">\[
+\]</span> The model with the highest accuracy wins. Sometimes (to keep things consistent with regression where we looked to minimize the MSE) instead of maximizing the accuracy, people talk in terms of minimizing the error rate: <span class="math display">\[
 ER = 1 - accuracy
-\]</span> We’ll discuss some issues with this metric in 3.3 and Module 6, but use it for now.</p>
+\]</span> We’ll discuss some issues with accuracy and error rate in 3.3 and Module 6, but use it for now.</p>
 <p>Second, to explain the “always guess miss model”, note that the majority of shots were misses:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(shots<span class="sc">$</span>Goal<span class="sc">==</span><span class="st">"Not Goal"</span>)<span class="sc">/</span><span class="fu">length</span>(shots<span class="sc">$</span>Goal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(shots<span class="sc">$</span>Goal<span class="sc">==</span><span class="st">"Not Goal"</span>)<span class="sc">/</span><span class="fu">length</span>(shots<span class="sc">$</span>Goal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.6309894</code></pre>
 </div>
 </div>
 <p>Therefore, it is not enough for the error rate of our model to be lower than 50% as one might hope for in coin toss scenarios. We need to beat the model that will always predict <span class="math inline">\(\hat{Y}\)</span> = Not Goal for any value of <span class="math inline">\(X\)</span> (called the <em>null</em> classifier). This is kind of like the null model in regression; in absence of a relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, we might as well guess the most likely value of <span class="math inline">\(Y\)</span> every time. In the shots dataset, the error rate obtaining by always guessing miss would be</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>null_er<span class="ot">=</span><span class="fu">sum</span>(shots<span class="sc">$</span>Goal<span class="sc">!=</span><span class="st">"Not Goal"</span>)<span class="sc">/</span><span class="fu">length</span>(shots<span class="sc">$</span>Goal)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(null_er)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>null_er<span class="ot">=</span><span class="fu">sum</span>(shots<span class="sc">$</span>Goal<span class="sc">!=</span><span class="st">"Not Goal"</span>)<span class="sc">/</span><span class="fu">length</span>(shots<span class="sc">$</span>Goal)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(null_er)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.3690106</code></pre>
 </div>
@@ -384,36 +379,36 @@ ER = 1 - accuracy
 </ul>
 <p>Here is the code to generate this data:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1089</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">=</span> <span class="dv">1000</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">runif</span>(n) <span class="co">#runif generates random uniform numbers between 0 and 1</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">runif</span>(n)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign class probabilities</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># P(A) = 0.9 if y &lt; x^2 but 0.1 otherwise. </span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>prob_A <span class="ot">=</span> <span class="fu">ifelse</span>(y <span class="sc">&lt;</span> x<span class="sc">^</span><span class="dv">2</span>, <span class="fl">0.9</span>, <span class="fl">0.1</span>)  </span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>class <span class="ot">=</span> <span class="fu">ifelse</span>(<span class="fu">runif</span>(n) <span class="sc">&lt;</span> prob_A, <span class="st">"A"</span>, <span class="st">"B"</span>)  </span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>df <span class="ot">=</span> <span class="fu">data.frame</span>(x, y, class)</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>class))<span class="sc">+</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_function</span>(</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">fun=</span><span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span>,</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour=</span><span class="st">"black"</span>)<span class="sc">+</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1089</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">=</span> <span class="dv">1000</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">=</span> <span class="fu">runif</span>(n) <span class="co">#runif generates random uniform numbers between 0 and 1</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> <span class="fu">runif</span>(n)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Assign class probabilities</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># P(A) = 0.9 if y &lt; x^2 but 0.1 otherwise. </span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>prob_A <span class="ot">=</span> <span class="fu">ifelse</span>(y <span class="sc">&lt;</span> x<span class="sc">^</span><span class="dv">2</span>, <span class="fl">0.9</span>, <span class="fl">0.1</span>)  </span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>class <span class="ot">=</span> <span class="fu">ifelse</span>(<span class="fu">runif</span>(n) <span class="sc">&lt;</span> prob_A, <span class="st">"A"</span>, <span class="st">"B"</span>)  </span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>df <span class="ot">=</span> <span class="fu">data.frame</span>(x, y, class)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>class))<span class="sc">+</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_function</span>(</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">fun=</span><span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">colour=</span><span class="st">"black"</span>)<span class="sc">+</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes1_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Clearly, if I want to GUESS the class <span class="math inline">\(A\)</span> or <span class="math inline">\(B\)</span> of a new data point, then I would guess class A if <span class="math inline">\(y &lt; x^2\)</span> and guess <span class="math inline">\(B\)</span> otherwise. This type of prediction rule is called a <em>Bayes Classifier</em><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. The error rate in our example should be about 10%. Let’s check it for our data:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>predict<span class="ot">=</span><span class="fu">ifelse</span>(df<span class="sc">$</span>y<span class="sc">&lt;</span>df<span class="sc">$</span>x<span class="sc">^</span><span class="dv">2</span>,<span class="st">"A"</span>,<span class="st">"B"</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(df<span class="sc">$</span>predict<span class="sc">!=</span>df<span class="sc">$</span>class)<span class="sc">/</span><span class="dv">1000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>predict<span class="ot">=</span><span class="fu">ifelse</span>(df<span class="sc">$</span>y<span class="sc">&lt;</span>df<span class="sc">$</span>x<span class="sc">^</span><span class="dv">2</span>,<span class="st">"A"</span>,<span class="st">"B"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(df<span class="sc">$</span>predict<span class="sc">!=</span>df<span class="sc">$</span>class)<span class="sc">/</span><span class="dv">1000</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.1</code></pre>
 </div>
@@ -421,14 +416,14 @@ ER = 1 - accuracy
 <p>Yep, pretty close to 0.1.</p>
 <p>However, the problem is we don’t usually get to see the parabola in real data sets. We instead just see</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>class))<span class="sc">+</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>class))<span class="sc">+</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes1_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -440,15 +435,15 @@ ER = 1 - accuracy
 <p>The K-Nearest Neighbors (KNN) algorithm predicts the class of a new observation by looking at the classes of it K-nearest neighbors in the training data and deciding its own class based on majority vote (i.e.&nbsp;adopting the most commonly occurring class among its neighbors). The hyper-parameter<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> <span class="math inline">\(K\)</span> can be any whole number from 1 up to the whole sample size and “nearest” is defined in terms of (Euclidean) distance.</p>
 <p>To illustrate the use of KNN, let’s split our fake data into training and testing sets using a 70/30 split. The KNN function will then apply KNN to predict the class of the testing set observations based on their nearest neighbors in the training set data. We’ll start with K=5 neighbors.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(class)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>,<span class="dv">700</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>df[s,]</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>df[<span class="sc">-</span>s,]</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>fake_knn<span class="ot">=</span><span class="fu">knn</span>(train[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>             test[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">cl=</span>train<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">5</span>)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(fake_knn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(class)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>,<span class="dv">700</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>df[s,]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>df[<span class="sc">-</span>s,]</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>fake_knn<span class="ot">=</span><span class="fu">knn</span>(train[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>             test[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">cl=</span>train<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">5</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(fake_knn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] A A B B B B
 Levels: A B</code></pre>
@@ -456,29 +451,29 @@ Levels: A B</code></pre>
 </div>
 <p>The head function shows the first six predictions of fake_knn. To compute the error rate,</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(fake_knn<span class="sc">!=</span>test<span class="sc">$</span>class)<span class="sc">/</span><span class="fu">length</span>(test<span class="sc">$</span>class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(fake_knn<span class="sc">!=</span>test<span class="sc">$</span>class)<span class="sc">/</span><span class="fu">length</span>(test<span class="sc">$</span>class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.1133333</code></pre>
 </div>
 </div>
 <p>Pretty close to the true expected error rate of 0.1<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>! Here is a more detailed plot of what we would predict if we use our original dataframe as the training set, but include a finer grid of points for the test set (this is called a plot of the decision region):</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="at">by=</span><span class="fl">0.01</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="at">by=</span><span class="fl">0.01</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    new_df <span class="ot">=</span> <span class="fu">expand.grid</span>(<span class="at">x=</span>x, <span class="at">y=</span>y)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    new_df<span class="sc">$</span>predict<span class="ot">=</span><span class="fu">knn</span>(df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                       new_df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>                       <span class="at">cl=</span>df<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">5</span>)</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    new_df <span class="sc">|&gt;</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>predict))<span class="sc">+</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))<span class="sc">+</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_function</span>(<span class="at">fun=</span><span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span>, </span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>                <span class="at">color=</span><span class="st">"black"</span>, <span class="at">linewidth=</span><span class="dv">1</span>, <span class="at">linetype=</span><span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="at">by=</span><span class="fl">0.01</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="at">by=</span><span class="fl">0.01</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    new_df <span class="ot">=</span> <span class="fu">expand.grid</span>(<span class="at">x=</span>x, <span class="at">y=</span>y)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    new_df<span class="sc">$</span>predict<span class="ot">=</span><span class="fu">knn</span>(df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                       new_df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>                       <span class="at">cl=</span>df<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">5</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    new_df <span class="sc">|&gt;</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>predict))<span class="sc">+</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))<span class="sc">+</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_function</span>(<span class="at">fun=</span><span class="cf">function</span>(x) x<span class="sc">^</span><span class="dv">2</span>, </span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                <span class="at">color=</span><span class="st">"black"</span>, <span class="at">linewidth=</span><span class="dv">1</span>, <span class="at">linetype=</span><span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes1_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -495,16 +490,16 @@ Levels: A B</code></pre>
 </ul>
 <p>In other words, the first case will predict the class based on looking at just one neighbor, the second will look at 5, and the last will look at half the data. We already fit the first, so lets do the other two.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fake_knn1<span class="ot">=</span><span class="fu">knn</span>(train[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>              test[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">cl=</span>train<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">1</span>)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>fake_knn350<span class="ot">=</span><span class="fu">knn</span>(train[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                test[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">cl=</span>train<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">350</span>)</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>e1<span class="ot">=</span><span class="fu">sum</span>(fake_knn1<span class="sc">!=</span>test<span class="sc">$</span>class)<span class="sc">/</span><span class="fu">length</span>(test<span class="sc">$</span>class)</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>e5<span class="ot">=</span><span class="fu">sum</span>(fake_knn<span class="sc">!=</span>test<span class="sc">$</span>class)<span class="sc">/</span><span class="fu">length</span>(test<span class="sc">$</span>class)</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>e350<span class="ot">=</span><span class="fu">sum</span>(fake_knn350<span class="sc">!=</span>test<span class="sc">$</span>class)<span class="sc">/</span><span class="fu">length</span>(test<span class="sc">$</span>class)</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"K=1 ER:"</span>,e1,<span class="st">"</span><span class="sc">\n</span><span class="st">K=5 ER:"</span>, e5,<span class="st">"</span><span class="sc">\n</span><span class="st">K=350 ER:"</span>,e350)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fake_knn1<span class="ot">=</span><span class="fu">knn</span>(train[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>              test[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">cl=</span>train<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">1</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>fake_knn350<span class="ot">=</span><span class="fu">knn</span>(train[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>                test[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">cl=</span>train<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">350</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>e1<span class="ot">=</span><span class="fu">sum</span>(fake_knn1<span class="sc">!=</span>test<span class="sc">$</span>class)<span class="sc">/</span><span class="fu">length</span>(test<span class="sc">$</span>class)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>e5<span class="ot">=</span><span class="fu">sum</span>(fake_knn<span class="sc">!=</span>test<span class="sc">$</span>class)<span class="sc">/</span><span class="fu">length</span>(test<span class="sc">$</span>class)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>e350<span class="ot">=</span><span class="fu">sum</span>(fake_knn350<span class="sc">!=</span>test<span class="sc">$</span>class)<span class="sc">/</span><span class="fu">length</span>(test<span class="sc">$</span>class)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"K=1 ER:"</span>,e1,<span class="st">"</span><span class="sc">\n</span><span class="st">K=5 ER:"</span>, e5,<span class="st">"</span><span class="sc">\n</span><span class="st">K=350 ER:"</span>,e350)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>K=1 ER: 0.1566667 
 K=5 ER: 0.1133333 
@@ -519,52 +514,23 @@ K=350 ER: 0.21</code></pre>
 <p>Maybe that’s all you need to know, but there is a lot more going on here in terms of the relationship between “model flexibility” and the “bias-variance trade-off”. This is the same bias-variance tradeoff we first encountered with histogram biwidths in Module 1! Since this will appear as a common theme throughout the course, we’ll spend a little extra time to break it down here.</p>
 <p>When K=1, the decision rule is extremely “flexible”: it tries very hard to contort itself to the training set at the expense of exploiting any patterns in generalizing A and B occurrence rates to larger regions. For example, let’s say I regenerate a new training set of size 1000 and look at the decision regions for the fake data with both K=1 models:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df2<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">x=</span><span class="fu">runif</span>(<span class="dv">1000</span>),<span class="at">y=</span><span class="fu">runif</span>(<span class="dv">1000</span>),<span class="at">class=</span><span class="cn">NA</span>)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>values<span class="ot">=</span><span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"B"</span>)</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>p1<span class="ot">=</span><span class="fu">c</span>(<span class="fl">0.9</span>,<span class="fl">0.1</span>)</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>p2<span class="ot">=</span><span class="fu">c</span>(<span class="fl">0.1</span>,<span class="fl">0.9</span>)</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>n1<span class="ot">=</span><span class="fu">sum</span>(df2<span class="sc">$</span>y <span class="sc">&lt;</span> df2<span class="sc">$</span>x<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>df2<span class="sc">$</span>class[df2<span class="sc">$</span>y <span class="sc">&lt;</span> df2<span class="sc">$</span>x<span class="sc">^</span><span class="dv">2</span>]<span class="ot">=</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample</span>(values,n1,<span class="at">prob=</span>p1,<span class="at">replace=</span><span class="cn">TRUE</span>)</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>df2<span class="sc">$</span>class[df2<span class="sc">$</span>y <span class="sc">&gt;=</span> df2<span class="sc">$</span>x<span class="sc">^</span><span class="dv">2</span>]<span class="ot">=</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample</span>(values,<span class="dv">1000</span><span class="sc">-</span>n1,<span class="at">prob=</span>p2,<span class="at">replace=</span><span class="cn">TRUE</span>)</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>new_df<span class="sc">$</span>predict11<span class="ot">=</span></span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">knn</span>(df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],new_df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],<span class="at">cl=</span>df<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">1</span>)</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>new_df<span class="sc">$</span>predict12<span class="ot">=</span></span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">knn</span>(df2[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],new_df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],<span class="at">cl=</span>df2<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">1</span>)</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>new_df <span class="sc">|&gt;</span> </span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>predict11))<span class="sc">+</span></span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>new_df <span class="sc">|&gt;</span> </span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>predict12))<span class="sc">+</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>They are both really holey, holey, holey<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> and prediction regions are all over the place. In this case, we say that the classification scheme has “high variance” since the decision regions vary widely between different data sets. In contrast, for K=350, the regions are almost identical:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>new_df<span class="sc">$</span>predict3501<span class="ot">=</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">knn</span>(df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],new_df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],<span class="at">cl=</span>df<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">350</span>)</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>new_df<span class="sc">$</span>predict3502<span class="ot">=</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">knn</span>(df2[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],new_df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],<span class="at">cl=</span>df2<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">350</span>)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>new_df <span class="sc">|&gt;</span> </span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>predict3501))<span class="sc">+</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>df2<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">x=</span><span class="fu">runif</span>(<span class="dv">1000</span>),<span class="at">y=</span><span class="fu">runif</span>(<span class="dv">1000</span>),<span class="at">class=</span><span class="cn">NA</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>values<span class="ot">=</span><span class="fu">c</span>(<span class="st">"A"</span>,<span class="st">"B"</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>p1<span class="ot">=</span><span class="fu">c</span>(<span class="fl">0.9</span>,<span class="fl">0.1</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>p2<span class="ot">=</span><span class="fu">c</span>(<span class="fl">0.1</span>,<span class="fl">0.9</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>n1<span class="ot">=</span><span class="fu">sum</span>(df2<span class="sc">$</span>y <span class="sc">&lt;</span> df2<span class="sc">$</span>x<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>df2<span class="sc">$</span>class[df2<span class="sc">$</span>y <span class="sc">&lt;</span> df2<span class="sc">$</span>x<span class="sc">^</span><span class="dv">2</span>]<span class="ot">=</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample</span>(values,n1,<span class="at">prob=</span>p1,<span class="at">replace=</span><span class="cn">TRUE</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>df2<span class="sc">$</span>class[df2<span class="sc">$</span>y <span class="sc">&gt;=</span> df2<span class="sc">$</span>x<span class="sc">^</span><span class="dv">2</span>]<span class="ot">=</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sample</span>(values,<span class="dv">1000</span><span class="sc">-</span>n1,<span class="at">prob=</span>p2,<span class="at">replace=</span><span class="cn">TRUE</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>new_df<span class="sc">$</span>predict11<span class="ot">=</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">knn</span>(df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],new_df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],<span class="at">cl=</span>df<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">1</span>)</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>new_df<span class="sc">$</span>predict12<span class="ot">=</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">knn</span>(df2[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],new_df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],<span class="at">cl=</span>df2<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">1</span>)</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>new_df <span class="sc">|&gt;</span> </span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>predict11))<span class="sc">+</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -572,14 +538,43 @@ K=350 ER: 0.21</code></pre>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>new_df <span class="sc">|&gt;</span> </span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>predict3502))<span class="sc">+</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>new_df <span class="sc">|&gt;</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>predict12))<span class="sc">+</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="notes1_files/figure-html/unnamed-chunk-12-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>They are both really holey, holey, holey<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> and prediction regions are all over the place. In this case, we say that the classification scheme has “high variance” since the decision regions vary widely between different data sets. In contrast, for K=350, the regions are almost identical:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>new_df<span class="sc">$</span>predict3501<span class="ot">=</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">knn</span>(df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],new_df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],<span class="at">cl=</span>df<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">350</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>new_df<span class="sc">$</span>predict3502<span class="ot">=</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">knn</span>(df2[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],new_df[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],<span class="at">cl=</span>df2<span class="sc">$</span>class,<span class="at">k=</span><span class="dv">350</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>new_df <span class="sc">|&gt;</span> </span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>predict3501))<span class="sc">+</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>new_df <span class="sc">|&gt;</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>x,<span class="at">y=</span>y,<span class="at">col=</span>predict3502))<span class="sc">+</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#E69F00"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-13-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -598,29 +593,29 @@ K=350 ER: 0.21</code></pre>
 K \approx \sqrt{n}
 \]</span> We’ll talk more about R functions for exploring optimal <span class="math inline">\(K\)</span> in Module 4 when we discuss cross-validation, but until then, here is a brute force approach to optimal K in this problem, using the original training testing set</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>maxK<span class="ot">=</span><span class="dv">50</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>fits<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">K=</span><span class="dv">1</span><span class="sc">:</span>maxK,<span class="at">er=</span><span class="cn">NA</span>)</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxK){</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>pred<span class="ot">=</span><span class="fu">knn</span>(train[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],test[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],<span class="at">cl=</span>train<span class="sc">$</span>class,<span class="at">k=</span>fits<span class="sc">$</span>K[i])  </span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a> fits<span class="sc">$</span>er[i]<span class="ot">=</span><span class="fu">sum</span>(pred<span class="sc">!=</span>test<span class="sc">$</span>class)<span class="sc">/</span><span class="fu">length</span>(test<span class="sc">$</span>class) </span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>fits <span class="sc">|&gt;</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>K,<span class="at">y=</span>er))<span class="sc">+</span></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Error Rate"</span>)<span class="sc">+</span></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept=</span>fits<span class="sc">$</span>K[<span class="fu">which.min</span>(fits<span class="sc">$</span>er)], </span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">color=</span><span class="st">"#e35205"</span>, <span class="at">linetype=</span><span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>maxK<span class="ot">=</span><span class="dv">50</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>fits<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">K=</span><span class="dv">1</span><span class="sc">:</span>maxK,<span class="at">er=</span><span class="cn">NA</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>maxK){</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>pred<span class="ot">=</span><span class="fu">knn</span>(train[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],test[,<span class="fu">c</span>(<span class="st">"x"</span>,<span class="st">"y"</span>)],<span class="at">cl=</span>train<span class="sc">$</span>class,<span class="at">k=</span>fits<span class="sc">$</span>K[i])  </span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a> fits<span class="sc">$</span>er[i]<span class="ot">=</span><span class="fu">sum</span>(pred<span class="sc">!=</span>test<span class="sc">$</span>class)<span class="sc">/</span><span class="fu">length</span>(test<span class="sc">$</span>class) </span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>fits <span class="sc">|&gt;</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>K,<span class="at">y=</span>er))<span class="sc">+</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Error Rate"</span>)<span class="sc">+</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept=</span>fits<span class="sc">$</span>K[<span class="fu">which.min</span>(fits<span class="sc">$</span>er)], </span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">color=</span><span class="st">"#e35205"</span>, <span class="at">linetype=</span><span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes1_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>It looks like</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fits<span class="sc">$</span>K[<span class="fu">which.min</span>(fits<span class="sc">$</span>er)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fits<span class="sc">$</span>K[<span class="fu">which.min</span>(fits<span class="sc">$</span>er)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 9</code></pre>
 </div>

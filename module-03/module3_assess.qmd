@@ -1,0 +1,51 @@
+---
+title: "Module 2 Assignment"
+author: "Your Name Here"
+format: 
+  html:
+    embed-resources: true
+    self-contained: true
+    math: mathjax
+editor: visual
+---
+
+## Introduction
+
+In this assignment you'll be working with the classic [Titanic dataset](https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/titanic.csv) which contains information about passengers aboard the RMS Titanic, including features such as passenger demographics (e.g., age, sex, and class), ticket details, and whether they survived or not. The goal is to predict the survival status of passengers based on other attributes in the dataset. Throughout this assignment, you will use _Survived_ as your outcome variable and the following as predictors: Passenger Class, Sex, Age, Siblings/Spouse Aboard, Parents/Children Aboard, and Fare. 
+
+Each problem will be graded on a 2-point scale with
+
+2 = solution is fully correct with proper coding and explanations
+
+1= solution is at least half correct with mostly proper coding and explanations
+
+0 = solution is less than half correct
+
+If you submit the assignment before the due date (not the accept until date), I will provide feedback and give you a chance to resubmit.
+
+## Problem 1
+
+Split the titanic data into training-testing sets using a 70-30 split and a random seed of 6534. Fit a KNN model to the resulting split using $K=1, 5, 10, 15, 20, 25, 30$. Calculate the accuracy and balanced accuracy for all models based on the test set and create a plot of the error rate vs $K$.  
+
+## Problem 2
+
+Fit a logistic model to the training data. Use the rule that "predict survival if probability > 0.5 rule" to calculate predictions for the test set and compare the accuracy/balanced accuracy of the predictions with the models from Problem 1. Can we beat the null model (where we always guess death)? 
+
+## Problem 3
+
+Examine the output of your logistic model. Which variables were significant predictors of _Survived_? Why do you think these variables may have impacted survival odds? Create a forest plot of the odds ratios with 95% confidence intervals to visualize the results. 
+
+## Problem 4
+
+Use the coefficients from your logistic model to answer the following questions:
+
+- What is the predicted odds ratio for males compared to females in terms of survival, assuming all other variables are held constant?
+- How does the odds ratio change if the Pclass is increased by one, while holding all other variables constant?
+
+## Problem 5
+
+Pick the model from Problems 1 and 2 which you feel best describes the data (justify your choice considering both predictive performance and interpretability). Calculate the confusion matrix for this model's predictions and calculate/interpret the following quantities: recall, precision, specificity, and balanced accuracy.  
+
+## Bonus
+
+Repeat Problem 1 averaging the test error rate over 20 different random splits per $K$ value. Does the optimal value change? What does this tell you about the reliability of a single train/test split?

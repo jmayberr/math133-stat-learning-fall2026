@@ -5,6 +5,13 @@ title: "Module 3.1: Intro to Classification"
 
 ## What is classification?
 
+```{r}
+#| warning: false
+#| message: false
+#| output: false
+library(tidyverse)
+```
+
 The womenShots.csv dataset contains positional and situational data on a collection of shots taken in several NCAA women's water polo games from the 2018-2019 seasons. 
 
 In this scenario, the variable we would like to predict is the binary variable Goal. Ultimately, we would like to build a model for predicting Goal based on all the other variables but we are going to start with just the variables xj and yj which contain the "jittered" positions of the shots. The coordinates are relative to the center of the goal with the positive y-axis pointing into the pool and the positive x-axis pointed right.  Our model will be of the form
@@ -22,7 +29,6 @@ where $G$ is some region of $(x,y)$ space and $\bar{G}$ is its complement. Such 
 Before building a formal model, let's first visualize the data to get a sences of whether classification is even feasible. Plotting shots based on position and coloring the points by whethere or not there was a goal, we can see there will be no perfect way to split the space into decision regions, but there are some clustering of orange and black so maybe we have some hope of beating the "always guess miss model". 
 
 ```{r}
-library(tidyverse)
 url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"
 shots=read.csv(url)
 shots |> 
@@ -43,11 +49,11 @@ To answer the first question, we need to define a metric for assessing how well 
 $$
 accuracy = \frac{1}{n} \sum_{i=1}^n (\hat{y}_i ==y_i) 
 $$
-The model with the highest accuracy wins. Usually, (to keep things consistent with regression where we looked to minimize the MSE) instead of maximizing the accuracy, we will talk in terms of minimizing the error rate
+The model with the highest accuracy wins. Sometimes (to keep things consistent with regression where we looked to minimize the MSE) instead of maximizing the accuracy, people talk in terms of minimizing the error rate:
 $$
 ER = 1 - accuracy
 $$ 
-We'll discuss some issues with this metric in 3.3 and Module 6, but use it for now.
+We'll discuss some issues with accuracy and error rate in 3.3 and Module 6, but use it for now.
 
 Second, to explain the "always guess miss model", note that the majority of shots were misses:
 
