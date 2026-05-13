@@ -1,0 +1,133 @@
+---
+title: "Module 3 Theory: Finding Coefficients for Logistic regression"
+author: "John Mayberry"
+output: html_document
+format: 
+  html:
+    embed-resources: true
+    self-contained: true
+    math: mathjax
+editor: visual
+---
+
+These notes require some familiarity with mathematical statistics and the idea of Maximum Likelihood Estimators (MLEs). 
+
+## MLEs for Parameters
+
+Suppose that we have a sequence of binary 0/1 outcomes $Y_1,..,Y_n$ where the success probability for outcome $i$ is 
+$$
+\phi((X \beta)_i) = \frac{1}{1+e^{-(X \beta)_i}}
+$$
+Because the parenthesis get out of control, we will write $\eta_i = (X\beta)_i$ for the rest of this section. 
+
+The likelihood function for the vector $\beta$ of coefficients is
+$$
+L(\beta) = \prod_{i=1}^n [\phi(\eta_i)]^{y_i}[1- \phi(\eta_i)]^{1-y_i}
+$$
+and the log likelihood is 
+$$
+\ell(\beta) = \sum y_i \log \phi(\eta_i) + (1-y_i) \log (1- \phi(\eta_i))
+$$
+Taking derivatives with respect to $\beta_j$ gives
+
+$$
+\frac{\partial \ell}{\partial \beta_j} = \sum y_i x_{ij}\phi'(\eta_i)/\phi(\eta_i) -x_{ij} (1-y_i) \phi'(\eta_i) /(1- \phi(\eta_i))
+$$
+
+Now we use the fact that 
+$$
+\phi' = \phi(1-\phi) 
+$$
+to get
+$$
+\frac{\partial \ell}{\partial \beta_j} = \sum y_i x_{ij} (1- \phi(\eta_i))  -x_{ij} (1-y_i) \phi(\eta_i) = \sum x_{ij} (y_i - \phi(\eta_i))
+$$
+
+In vector form, it looks nicer: 
+
+$$
+\nabla \ell = X^T (y - \phi(X\beta))
+$$
+
+Unfortunately, unlike with linear regression, there is no closed from solution to the equation $\nabla \ell = 0$ and hence you have to use numerical methods to solve for the MLEs of $\beta$. We'll demonstrate this approach using gradient descent (since we already introduced this in the Module 1 Supplement) although Newton-Raphson also works nicely for this scenario. 
+
+
+## Gradient Descent Revisited 
+
+Recall that gradient descent is an optimization algorithm used to minimize a loss function by iteratively adjusting parameters. In this case, the loss function we want to minimize is 
+$$
+d = - 2 \log \ell
+$$
+where $\ell$ is the log-likelihood. The negative is needed to turn the max into a min and the 2 is unnecessary but typically used because for a normal distribution
+$$
+-2 \log \ell = \sum(y_i - \eta_i)^2
+$$
+corresponds to the usual least squares loss function. The $d$ stands for deviance as this term is often called the residual deviance in logistic regression outputs. 
+
+We will demonstrate in the case where we only have a single predictor $X_1$ and generate some fake data to test the algorithm
+
+```{r setup}
+set.seed(45)
+n = 100
+phi=function(x){
+  1/(1+exp(-x))
+}
+x = seq(1, 10, length.out = n)
+b1 = .25
+b0 = -1
+y = rbinom(n,1,prob=phi(b0+b1*x))
+data = data.frame(x = x, y = y)
+plot(data$x,data$y,xlab="x",ylab="y")
+```
+
+The partial derivatives of the loss function are:
+
+$$
+\frac{\partial \ell}{\partial \beta_0}= -2\sum  (y_i - \phi(\eta_i))
+$$
+and 
+
+$$
+\frac{\partial \ell}{\partial \beta_1} = -2\sum x_i (y_i - \phi(\eta_i))
+$$
+where $\eta_i = \beta_0 + \beta_1 x_$. Here is the R implementation
+
+```{r}
+gradient_descent = function(x, y, learning_rate = 0.01, epochs = 1000) {
+  beta0 = 0 # Initial values give neutral p = 0.5
+  beta1 = 0 
+  n = length(y) # Number of data points
+  phi=function(x){
+      1/(1+exp(-x))
+    }
+  
+  for (i in 1:epochs) {
+    # Predicted probs
+    eta = phi(beta0 + beta1*x)
+    
+    # Gradients
+    gradient_0= -2 *sum(y - eta)
+    gradient_1 = -2 *sum(x*(y - eta))
+    
+    
+    # Update parameters
+    beta0 = beta0 - learning_rate * gradient_0
+    beta1 = beta1 - learning_rate * gradient_1
+    
+  }
+  
+  return(list(beta0 = beta0, beta1 = beta1))
+}
+
+# Run gradient descent
+gd_result <- gradient_descent(data$x, data$y, learning_rate = 0.001, epochs = 1000)
+gd_result
+```
+
+The results should roughly match those obtained by `glm`:
+
+```{r}
+glm(y~x,data=data,family="binomial")
+```
+
+I encourage you to play around with how convergence depends on the learning rate in this scenario!

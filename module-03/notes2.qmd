@@ -6,6 +6,13 @@ runtime: shiny
 
 ## Issue with KNN
 
+```{r}
+#| warning: false
+#| message: false
+#| output: false
+library(tidyverse)
+```
+
 In the last notes, we discussed how to use KNN to classify points. There are several issues with this method, some of which we already discussed
 
 * Choosing an optimal K can involve a lot of trial and error
@@ -167,7 +174,6 @@ $$
 The "triangular" boundary for this region^[Usually the boundary is linear but using absolute value turned it into a triangle] is shown with the shot data in the plot below:
 
 ```{r}
-library(tidyverse)
 x_range = 
   seq(min(shots$xj), max(shots$xj), 
       length.out = 100)
@@ -246,6 +252,6 @@ we see that there are two types of errors: predicting goal for not goal and pred
 
 The framingham.csv dataset contains information from a study in Framingham, MA on cardiovascular heart disease. You can view more information about the data [here](https://www.kaggle.com/datasets/dileep070/heart-disease-prediction-using-logistic-regression) Download this data and remove all subjects with missing data using the drop_na() command. 
 
-Fit a logistic regression model to the variable TenYearCHD based on all the other predictors in the dataset
-If you hold all other variables fixed, what is the percent change in odds for a Male vs Female getting heart disease?
-Suppose that a smoker decides to smoke one less pack per day ( about 20 less cigs per day), holding all other variables constant. What will be the percent changes in their odds of getting heart disease?
+1. Fit a logistic regression model to the variable TenYearCHD based on all the other predictors in the dataset
+2. If you hold all other variables fixed, what is the percent change in odds for a Male vs Female getting heart disease?
+3. Suppose that a smoker decides to smoke one less pack per day ( about 20 less cigs per day), holding all other variables constant. What will be the percent changes in their odds of getting heart disease?
