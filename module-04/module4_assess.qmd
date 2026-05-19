@@ -1,0 +1,56 @@
+---
+title: "Module 4 Assessment: Predicting College Graduation Rates"
+---
+
+## Introduction
+
+The [Colleges 2023 dataset](https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/main/Datasets/colleges2023.csv) contains information on graduation rates and institutional characteristics for approximately 1400 US universities, compiled from the [College Scorecard database](https://collegescorecard.ed.gov/data/). The dataset includes variables such as cost of attendance, financial aid rates, faculty characteristics, student demographics, and retention rates.
+
+Each problem will be graded on a 2-point scale with:
+
+- 2 = solution is fully correct with proper coding and explanations
+- 1 = solution is at least half correct with mostly proper coding and explanations  
+- 0 = solution is less than half correct
+
+If you submit the assignment before the due date (not the accept until date), I will provide feedback and give you a chance to resubmit.
+
+## Problem 1
+
+Load the dataset and split it into training and testing sets using a 70-30 split. Use `grad_rate_6yr` as your outcome variable and all other variables except `inst_name` as predictors. Fit a full linear model to the training set and discuss any significant predictors. Compute the test RMSE for this model. 
+
+## Problem 2
+
+Using the `leaps` package, perform an exhaustive search of all possible models on the training set. Answer the following:
+
+- How many predictors does the optimal model have according to BIC? Does it change for Cp?
+- Which variables are included in each of the optimal models?
+- Compute the test RMSE for both optimal models. 
+
+## Problem 3
+
+Fit an optimal lasso model to the training data using 10-fold cross-validation to select $\lambda$. Report:
+
+- The optimal value of $\lambda$
+- Which variables have nonzero coefficients in the final model
+- The test RMSE
+
+## Problem 4
+
+Fit an optimal ridge model to the training data using 10-fold cross-validation to select $\lambda$. Report:
+- The optimal value of $\lambda$
+- Which variables have most importance based on the standardized coefficients
+- The test RMSE
+
+## Problem 5
+
+Create a summary table comparing the test RMSE for all four models:
+
+| Model | Test RMSE |
+|-------|-----------|
+| Full OLS (all predictors) | |
+| Best OLS (Cp) | |
+| Best OLS (BIC) | |
+| Lasso | |
+| Ridge | |
+
+Which model performed best? Based on your preferred model, which variables appear to be the most important predictors of 6-year graduation rates? Does this make intuitive sense given what you know about higher education?

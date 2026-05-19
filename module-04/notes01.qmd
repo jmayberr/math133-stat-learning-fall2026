@@ -1,0 +1,263 @@
+---
+title: "Module 4.1: Cross-Validation"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
+library(tidyverse)
+```
+
+## Introduction
+
+In this Module, we will take a look at two different, but related problems in statistical learning:
+
+-   How do we filter out the most important predictors from a larger set of possibilities in a statistical model?
+-   How do we pick the hyperparameter in a statistical model (eg. $K$ in KNN) to best fit our data?
+
+The first is called *feature* (or *variable*) *selection* while the latter is called *hyperparameter tuning*. We'll focus on the former for the first couple section and start with an example that will in turn motivate the primary topic of this section: cross-validation.  
+
+
+## Issues Involved in Feature Selection
+
+In the practice problem from Module 2.1, you fit a full model to trump.vote using all other eight predictors from the data:
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016=read.csv(df_url)
+fit_full=lm(trump.vote ~ .,election2016[,2:10])
+summary(fit_full)
+```
+
+Some of these are insignificant and potentially redundant. We saw this in Section 2.3 when we examined pairs of correlations between predictors. Just to throw in another fun tool, you can get a quick snapshot using the ggcorr function which gives a heatmap of correlations between pairs of variables:
+
+```{r}
+library(GGally)
+ggcorr(election2016[, 2:10])
+```
+You can see, for example, that non.white and non.citizen are highly positively correlated while incom.ineq and high.school are negatively correlated. 
+
+We could fit a reduced model containing ONLY the significant predictors of median.income and high.school, but there are two problems with this approach. The first is that dropping all in significant predictors at once may drop too much from the model. We have previously seen that one variable may be significant but lose significance with the presence of additional variables due to colinearity. In fact, if we look at the model with the four predictors of lowest p-value: 
+
+```{r}
+fit_red=lm(trump.vote~median.income+high.school+income.ineq+non.white,election2016)
+summary(fit_red)
+```
+
+We can see that incom.ineq and non.white were significant and high.school was not!
+
+We can fix this issue by stepwise selection methods (discussed in the next notes), but the second issue is more serious. Any p-value based method for feature selection is deeply flawed as illustrated by the following example. Suppose we generate fake data of 100 observations with 10 predictors $X_1,...,X_{10}$ and a numeric response $Y$ which are all independent standard normal random variables.
+
+```{r}
+set.seed(40)
+fake=as_tibble(replicate(11,rnorm(100)))
+names(fake) = c("y",paste0("x",1:10))
+fake_lm=lm(y~.,data=fake)
+summary(fake_lm)
+```
+
+No matter what I choose for the seed, I pretty consistently get at least one significant predictor even though all the variables were chosen independently! And the $R^2$ value would have been worth considering in some disciplines (0.1--0.2 range) which should terrify you.  
+
+Looking for random relationships between a response and a large number of predictors is called data mining (or the more sinister term "data manipulation") and it can lead to very misleading results. In fact, data mining has been the downfall of more than one researcher over the years^[One of the most publicizied was the "food guy" Brian Wansink; [read more here](https://www.vox.com/science-and-health/2018/9/19/17879102/brian-wansink-cornell-food-brand-lab-retractions-jama)]. I have read plenty of papers myself that look at a bunch of random correlations, find some that are significant by chance, and move on, feeling good about themselves for discovering new false patterns in the universe.
+
+Now there is no inherent issue with p-values, but they are not ideal for feature selection in the world of "big data" where prediction is the key goal of statistical learning. They can lead to false associations and faulty extrapolations. On the other hand, if our goal is prediction and NOT inference, then maybe we don't really care about including potentially "insignificant" variables if the predictions are similar. What we really care about in such situations is minimizing the
+
+-   MSE (or equivalently, the RMSE), if $Y$ is quantitative
+-   The error rate (using the actual or balanced accuracy) if $Y$ is qualitative
+
+Furthermore, as we pointed out back in Module 1, we often want to minimize these quantities on testing sets that differ from the training sets we used to fit models in the first place. For example, suppose we use a 70-30 split in our fake data to compute a test RMSE:
+
+```{r}
+set.seed(44)
+s=sample(nrow(fake),0.7*nrow(fake))
+train=fake[s,]
+test=fake[-s,]
+train_lm=lm(y~.,data=train)
+yhat=predict(train_lm,newdata=test)
+RMSE_test=sqrt(mean((test$y-yhat)^2))
+cat("Test RMSE:",RMSE_test)
+```
+
+This is definitely better than the null error rate of
+
+```{r}
+RMSE_null=sqrt(sum((test$y-mean(test$y))^2)/nrow(test))
+cat("Null RMSE:",RMSE_null)
+```
+
+so I guess our model is okay, right?
+
+NO! We have again fooled ourselves into thinking we have a clever model when we don't and that is ignorant and dangerous. I claim that ANY GOOD procedure for feature selection should not show the above model as much better than the null since it isn't!
+
+The problem is that a single train/test split is itself subject to randomness: we got lucky (or unlucky) with how the data was divided. What we really want is a more reliable estimate of test error that doesn't depend on one arbitrary split. That's where cross-validation comes in.
+
+## Cross Validation: LOO vs K-Fold
+
+_Cross-Validation_ is a hyped up version of test set validation. Instead of just selecting ONE "hold out" testing set and fitting a model to ONE training set, it repeats this process multiple times and then looks at some kind of average error (or accuracy) across the results.
+
+_Leave-One-Out_ (LOO) cross-validation is the most intuitive form and works best when the sample size is relatively small. In LOO, we successively leave one observation out of the data, fit a model to the rest, and compute the prediction error for the left out loser. At the end, we average all the errors. It's easy to code with a for loop. Here is an example using the fake data:
+
+```{r}
+n=nrow(fake)
+yhat=numeric(n)
+for (j in 1:n){
+  train=fake[-j,]  # Leave out jth observations for training set
+  train_lm=lm(y~.,data=train)  # Fit model to remaining j-1 observations
+  yhat[j]=predict(train_lm,newdata=fake[j,]) #Calculate prediction on observation j
+}
+RMSE_loo=sqrt(mean((fake$y-yhat)^2))
+cat("LOO Test RMSE:",RMSE_loo)
+cat("\nNull RMSE:",RMSE_null)
+```
+
+Hmm, I like this already because remember, all the predictors in our fake model were bogus so the RMSE shouldn't be better than the null model and now it isn't!
+
+The second most common form of cross-validation, $K$-fold, is used for larger datasets where LOO is too computationally intensive. In this method, we split the data into $K$ equal groups (called _folds_) where $K$ is a factor (or at least close to a factor) of the sample size $n$. Common choices are $K=5, 10$ or $K=n$ (which gives LOO). Then we proceed to do training-testing set analysis on each of the folds. In other words, we start by using Fold 1 as the testing set and the other $K-1$ folds as the training set. We fit the model and compute the total sum of squared errors for Fold 1. Then we repeat using Fold 2 as the testing set and so on. At the end, we calculate the RMSE using all the errors from the different folds.
+
+This one is a little more complicated to code directly because you have to randomly split the data into K folds of roughly equal size^[They will be equal if $K$ divides $n$ but if not some folds may have an extra observation.]. We use the `cut` function for this purpose. Here is a demonstration with $K=10$:
+
+```{r}
+n = nrow(fake)
+K = 10
+SSE = numeric(K)
+s = sample(n) # Shuffle indices so fold assignment are random 
+fold_assignments = cut(1:n, breaks = K, labels = FALSE) # Assign indices to folds
+for (j in 1:K){
+  fold = s[fold_assignments == j]  # Indices for jth fold
+  train = fake[-fold,]
+  test = fake[fold,]
+  train_lm = lm(y~.,data=train)
+  yhat = predict(train_lm,newdata=test)
+  SSE[j] = sum((test$y-yhat)^2)
+}
+RMSE_kfold = sqrt(sum(SSE)/n)
+cat("10-Fold Test RMSE:", RMSE_kfold)
+```
+
+This gave CLOSE to the same answer as the LOO, but only required 10 iterations as opposed to 100.
+
+The moral of this story is that Cross-validation is not as susceptible to false positive model selection as either p-value approaches or one-time testing set validation. If the model is shitty, it will come out in the repetitions. Yay, now I can continue using it in peace.
+
+## Optional: Functions for Cross-Validation in `lm`
+
+To be efficient (and have some fun), we can turn the routines above into functions that can be applied to any formula/dataframe pair. The routine for LOO is a pretty easy extension of our previous code:
+
+```{r}
+looCV_lm=function(fla,df){
+# LOO cross-validation for linear models
+# Inputs: fla = formula, df = dataframe
+# Output: LOO RMSE
+yhat=numeric(nrow(df))
+for (j in 1:nrow(df)){
+  train=df[-j,]
+  fit=lm(fla,train)
+  yhat[j]=predict(fit,newdata=df[j,])
+}
+y=df[[all.vars(fla)[1]]]
+rmse=sqrt(mean((y-yhat)^2))
+return(rmse)
+}
+```
+
+To use it, you pass a formula and a dataframe:
+
+```{r}
+looCV_lm(as.formula('y~.'),fake)
+```
+
+The extension to k-fold isn't much more complicated:
+
+```{r}
+kfoldCV_lm = function(fla, df, k) {
+# K-fold cross-validation for linear models
+# Inputs: fla = formula, df = dataframe, k = number of folds
+# Output: K-fold RMSE
+  
+  n = nrow(df)
+  if (k > n) stop("k cannot be greater than the number of observations")
+  
+  s = sample(n)  
+  fold_assignments = cut(1:n, breaks = k, labels = FALSE)  
+  SSE = numeric(k)  
+
+  for (j in 1:k) {
+    fold = s[fold_assignments == j]  
+    train = df[-fold, ]  
+    test = df[fold, ]  
+
+    fit = lm(fla,train) 
+    yhat = predict(fit,test)  
+  
+    SSE[j] = sum((test[[all.vars(fla)[1]]] - yhat)^2)  
+  }
+ rmse=sqrt(sum(SSE) / n)
+ return(rmse)
+ }
+kfoldCV_lm(as.formula('y~.'),fake,20)
+```
+
+We can apply the routines above to compare different models based on CV RMSE. For example, let's return to our election2016 dataset and see how a full and reduced model compare based on LOOCV, with the null included as a baseline:
+
+```{r}
+
+full_fla=as.formula("trump.vote~.")
+red_fla=as.formula("trump.vote~median.income+income.ineq+non.white")
+null_fla=as.formula("trump.vote~1")
+full_RMSE=looCV_lm(full_fla,election2016[,2:10])
+red_RMSE=looCV_lm(red_fla,election2016)
+null_RMSE=looCV_lm(null_fla,election2016)
+cat("Full RMSE = ",full_RMSE,"\nReduced RMSE = ", red_RMSE,"\nNull RMSE = ",null_RMSE)
+
+```
+
+Notice that the both do better than baseline, but the reduced is slightly better than the full (even though the full is using more variables, it is over-fitting the data and that shows in the cross-validated RMSE). 10-Fold CV yields similar error rates:
+
+```{r}
+full_RMSE=kfoldCV_lm(full_fla,election2016[,2:10],10)
+red_RMSE=kfoldCV_lm(red_fla,election2016,10)
+null_RMSE=kfoldCV_lm(null_fla,election2016,10)
+cat("Full RMSE = ",full_RMSE,"\nReduced RMSE = ", red_RMSE,"\nNull RMSE = ",null_RMSE)
+```
+
+## Cross-Validation for Classification
+
+We can apply both LOO and Kfold CV to classification models as well by replacing `lm` with the appropriate model (eg. KNN or logistic regression) and RMSE with the appropriate metric for model validation (eg. accuracy or balanced accuracy). For example, let's suppose that instead of trump.vote as a number (fraction of people voting for Trump) we want to prediction election outcome as a binary (red vs blue). Here is a summary of the results
+
+```{r}
+table(election2016$outcome)
+```
+
+We can do this by fitting a logistic regression model using the usual eight predictors although we first need to one-hot encode outcome (we'll use Red = 1):
+
+```{r}
+election2016$outcome_bin=ifelse(election2016$outcome=="Red",1,0)
+outcome_glm=glm(outcome_bin~.,election2016[,c(2:9,12)],family="binomial")
+summary(outcome_glm)
+```
+
+We'll now evaluate this model using LOOCV and replacing the RMSE calculation with one for model accuracy. 
+
+```{r}
+n=nrow(election2016)
+yhat=rep(0,n)
+for (j in 1:n){
+  train=election2016[-j,]  
+  train_glm=outcome_glm=glm(outcome_bin~.,train[,c(2:9,12)],family="binomial")
+  prob=predict(train_glm,election2016[j,],type="response")
+  yhat[j]= ifelse(prob>0.5,1,0)  #Calculate prediction on observation j
+}
+acc_loo=sum(election2016$outcome_bin==yhat)/n
+cat("LOO Test Accuracy:",acc_loo)
+acc_null=sum(election2016$outcome_bin==1)/n # Guess most common class
+cat("\nNull Accuracy:",acc_null)
+```
+That's quite a bit better!
+
+I'll leave it to you to adapt the cross-validation code in the following practice exercise. 
+
+## Practice 
+
+Modify the K-Fold procedure to compute the cross-validated accuracy for the full logistic regression model fit to the Framingham data in Module 3. Compare with the null model accuracy (always guess 0).  
+
+_Bonus_: Modify the procedure to compute cross-validated balanced accuracy instead. Hint: Instead of accumulating SSE across folds, think about how to accumulate the confusion matrix components. 
+
+_Note_: If time permits, you might also want to apply LOOCV to the Framingham data, but beware because the it will take longer to run with the larger sample size. 

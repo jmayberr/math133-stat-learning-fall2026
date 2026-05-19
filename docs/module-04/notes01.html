@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Module 4.1: Cross-Validation – Statistical Learning Methods</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d4be639c637f3db3c684c66cefad7e0c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Statistical Learning Methods</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-1" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 1</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-1">    
+        <li>
+    <a class="dropdown-item" href="../module-01/notes1.html">
+ <span class="dropdown-text">Module 1.1: Introduction to Statistical Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes2.html">
+ <span class="dropdown-text">Module 1.2: Prediction for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes3.html">
+ <span class="dropdown-text">Module 1.3: Inference for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/supplement.html">
+ <span class="dropdown-text">Module 1 Theory: A deeper look at finding coefficients</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/rtools.html">
+ <span class="dropdown-text">Module 1 R Tools: Introduction to ggplot2 and tidyverse</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-2" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 2</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-2">    
+        <li>
+    <a class="dropdown-item" href="../module-02/notes1.html">
+ <span class="dropdown-text">Module 2.1: Multiple Regression Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes2.html">
+ <span class="dropdown-text">Module 2.2: Enriching Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes3.html">
+ <span class="dropdown-text">Module 2.3: Regression Diagnostics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes_bonus.html">
+ <span class="dropdown-text">Module 2 Bonus: The F Test</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/supplement.html">
+ <span class="dropdown-text">Module 2 Theory Supplement</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-3" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 3</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-3">    
+        <li>
+    <a class="dropdown-item" href="../module-03/notes1.html">
+ <span class="dropdown-text">Module 3.1: Introduction to Classification</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/notes2.html">
+ <span class="dropdown-text">Module 3.2: Logistic Regression</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/notes3.html">
+ <span class="dropdown-text">Module 3.3: Evaluating Classifiers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/supplement.html">
+ <span class="dropdown-text">Module 3 Theory Supplement: Finding Logistic Regression Coefficients</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-4" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 4</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-4">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-5" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 5</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-5">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-6" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 6</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-6">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-7" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 7</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-7">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-8" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 8</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-8">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Module 4.1: Cross-Validation</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>In this Module, we will take a look at two different, but related problems in statistical learning:</p>
+<ul>
+<li>How do we filter out the most important predictors from a larger set of possibilities in a statistical model?</li>
+<li>How do we pick the hyperparameter in a statistical model (eg. <span class="math inline">\(K\)</span> in KNN) to best fit our data?</li>
+</ul>
+<p>The first is called <em>feature</em> (or <em>variable</em>) <em>selection</em> while the latter is called <em>hyperparameter tuning</em>. We’ll focus on the former for the first couple section and start with an example that will in turn motivate the primary topic of this section: cross-validation.</p>
+</section>
+<section id="issues-involved-in-feature-selection" class="level2">
+<h2 class="anchored" data-anchor-id="issues-involved-in-feature-selection">Issues Involved in Feature Selection</h2>
+<p>In the practice problem from Module 2.1, you fit a full model to trump.vote using all other eight predictors from the data:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>fit_full<span class="ot">=</span><span class="fu">lm</span>(trump.vote <span class="sc">~</span> .,election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = trump.vote ~ ., data = election2016[, 2:10])
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-0.206819 -0.032463  0.000321  0.037770  0.118240 
+
+Coefficients:
+                Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)    3.078e+00  7.745e-01   3.974  0.00028 ***
+median.income -6.137e-06  2.243e-06  -2.737  0.00914 ** 
+unemployed    -1.250e+00  1.224e+00  -1.021  0.31326    
+metro         -1.076e-01  9.232e-02  -1.166  0.25038    
+high.school   -1.354e+00  6.181e-01  -2.190  0.03428 *  
+non.citizen   -5.026e-01  5.766e-01  -0.872  0.38843    
+white.pov     -1.173e+00  7.242e-01  -1.619  0.11305    
+income.ineq   -1.620e+00  8.283e-01  -1.956  0.05727 .  
+non.white     -1.813e-01  9.406e-02  -1.927  0.06091 .  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.06511 on 41 degrees of freedom
+Multiple R-squared:  0.651, Adjusted R-squared:  0.5829 
+F-statistic: 9.561 on 8 and 41 DF,  p-value: 2.39e-07</code></pre>
+</div>
+</div>
+<p>Some of these are insignificant and potentially redundant. We saw this in Section 2.3 when we examined pairs of correlations between predictors. Just to throw in another fun tool, you can get a quick snapshot using the ggcorr function which gives a heatmap of correlations between pairs of variables:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GGally)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggcorr</span>(election2016[, <span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes01_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>You can see, for example, that non.white and non.citizen are highly positively correlated while incom.ineq and high.school are negatively correlated.</p>
+<p>We could fit a reduced model containing ONLY the significant predictors of median.income and high.school, but there are two problems with this approach. The first is that dropping all in significant predictors at once may drop too much from the model. We have previously seen that one variable may be significant but lose significance with the presence of additional variables due to colinearity. In fact, if we look at the model with the four predictors of lowest p-value:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit_red<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>median.income<span class="sc">+</span>high.school<span class="sc">+</span>income.ineq<span class="sc">+</span>non.white,election2016)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_red)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = trump.vote ~ median.income + high.school + income.ineq + 
+    non.white, data = election2016)
+
+Residuals:
+      Min        1Q    Median        3Q       Max 
+-0.177042 -0.048210  0.002878  0.044981  0.141588 
+
+Coefficients:
+                Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)    2.653e+00  7.454e-01   3.560  0.00089 ***
+median.income -5.871e-06  1.714e-06  -3.425  0.00132 ** 
+high.school   -8.191e-01  6.079e-01  -1.347  0.18462    
+income.ineq   -2.322e+00  7.865e-01  -2.952  0.00500 ** 
+non.white     -2.255e-01  7.994e-02  -2.821  0.00709 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.06765 on 45 degrees of freedom
+Multiple R-squared:  0.5865,    Adjusted R-squared:  0.5498 
+F-statistic: 15.96 on 4 and 45 DF,  p-value: 3.328e-08</code></pre>
+</div>
+</div>
+<p>We can see that incom.ineq and non.white were significant and high.school was not!</p>
+<p>We can fix this issue by stepwise selection methods (discussed in the next notes), but the second issue is more serious. Any p-value based method for feature selection is deeply flawed as illustrated by the following example. Suppose we generate fake data of 100 observations with 10 predictors <span class="math inline">\(X_1,...,X_{10}\)</span> and a numeric response <span class="math inline">\(Y\)</span> which are all independent standard normal random variables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">40</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fake<span class="ot">=</span><span class="fu">as_tibble</span>(<span class="fu">replicate</span>(<span class="dv">11</span>,<span class="fu">rnorm</span>(<span class="dv">100</span>)))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fake) <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"y"</span>,<span class="fu">paste0</span>(<span class="st">"x"</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>fake_lm<span class="ot">=</span><span class="fu">lm</span>(y<span class="sc">~</span>.,<span class="at">data=</span>fake)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fake_lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = y ~ ., data = fake)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-2.1024 -0.6854  0.0604  0.6487  2.2430 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)   
+(Intercept)  0.04001    0.10260   0.390  0.69751   
+x1          -0.09438    0.09315  -1.013  0.31368   
+x2           0.10892    0.10538   1.034  0.30409   
+x3           0.10491    0.10105   1.038  0.30199   
+x4          -0.29826    0.10209  -2.921  0.00441 **
+x5          -0.01837    0.10346  -0.178  0.85946   
+x6          -0.19965    0.11516  -1.734  0.08644 . 
+x7           0.04862    0.10646   0.457  0.64903   
+x8           0.11966    0.10103   1.184  0.23941   
+x9          -0.09872    0.09582  -1.030  0.30565   
+x10         -0.09645    0.10681  -0.903  0.36897   
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.9713 on 89 degrees of freedom
+Multiple R-squared:  0.1664,    Adjusted R-squared:  0.07269 
+F-statistic: 1.776 on 10 and 89 DF,  p-value: 0.07655</code></pre>
+</div>
+</div>
+<p>No matter what I choose for the seed, I pretty consistently get at least one significant predictor even though all the variables were chosen independently! And the <span class="math inline">\(R^2\)</span> value would have been worth considering in some disciplines (0.1–0.2 range) which should terrify you.</p>
+<p>Looking for random relationships between a response and a large number of predictors is called data mining (or the more sinister term “data manipulation”) and it can lead to very misleading results. In fact, data mining has been the downfall of more than one researcher over the years<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. I have read plenty of papers myself that look at a bunch of random correlations, find some that are significant by chance, and move on, feeling good about themselves for discovering new false patterns in the universe.</p>
+<p>Now there is no inherent issue with p-values, but they are not ideal for feature selection in the world of “big data” where prediction is the key goal of statistical learning. They can lead to false associations and faulty extrapolations. On the other hand, if our goal is prediction and NOT inference, then maybe we don’t really care about including potentially “insignificant” variables if the predictions are similar. What we really care about in such situations is minimizing the</p>
+<ul>
+<li>MSE (or equivalently, the RMSE), if <span class="math inline">\(Y\)</span> is quantitative</li>
+<li>The error rate (using the actual or balanced accuracy) if <span class="math inline">\(Y\)</span> is qualitative</li>
+</ul>
+<p>Furthermore, as we pointed out back in Module 1, we often want to minimize these quantities on testing sets that differ from the training sets we used to fit models in the first place. For example, suppose we use a 70-30 split in our fake data to compute a test RMSE:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">44</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(<span class="fu">nrow</span>(fake),<span class="fl">0.7</span><span class="sc">*</span><span class="fu">nrow</span>(fake))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>fake[s,]</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>fake[<span class="sc">-</span>s,]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>train_lm<span class="ot">=</span><span class="fu">lm</span>(y<span class="sc">~</span>.,<span class="at">data=</span>train)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(train_lm,<span class="at">newdata=</span>test)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>RMSE_test<span class="ot">=</span><span class="fu">sqrt</span>(<span class="fu">mean</span>((test<span class="sc">$</span>y<span class="sc">-</span>yhat)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Test RMSE:"</span>,RMSE_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Test RMSE: 0.9809788</code></pre>
+</div>
+</div>
+<p>This is definitely better than the null error rate of</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>RMSE_null<span class="ot">=</span><span class="fu">sqrt</span>(<span class="fu">sum</span>((test<span class="sc">$</span>y<span class="sc">-</span><span class="fu">mean</span>(test<span class="sc">$</span>y))<span class="sc">^</span><span class="dv">2</span>)<span class="sc">/</span><span class="fu">nrow</span>(test))</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Null RMSE:"</span>,RMSE_null)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Null RMSE: 0.9904183</code></pre>
+</div>
+</div>
+<p>so I guess our model is okay, right?</p>
+<p>NO! We have again fooled ourselves into thinking we have a clever model when we don’t and that is ignorant and dangerous. I claim that ANY GOOD procedure for feature selection should not show the above model as much better than the null since it isn’t!</p>
+<p>The problem is that a single train/test split is itself subject to randomness: we got lucky (or unlucky) with how the data was divided. What we really want is a more reliable estimate of test error that doesn’t depend on one arbitrary split. That’s where cross-validation comes in.</p>
+</section>
+<section id="cross-validation-loo-vs-k-fold" class="level2">
+<h2 class="anchored" data-anchor-id="cross-validation-loo-vs-k-fold">Cross Validation: LOO vs K-Fold</h2>
+<p><em>Cross-Validation</em> is a hyped up version of test set validation. Instead of just selecting ONE “hold out” testing set and fitting a model to ONE training set, it repeats this process multiple times and then looks at some kind of average error (or accuracy) across the results.</p>
+<p><em>Leave-One-Out</em> (LOO) cross-validation is the most intuitive form and works best when the sample size is relatively small. In LOO, we successively leave one observation out of the data, fit a model to the rest, and compute the prediction error for the left out loser. At the end, we average all the errors. It’s easy to code with a for loop. Here is an example using the fake data:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(fake)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">numeric</span>(n)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  train<span class="ot">=</span>fake[<span class="sc">-</span>j,]  <span class="co"># Leave out jth observations for training set</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  train_lm<span class="ot">=</span><span class="fu">lm</span>(y<span class="sc">~</span>.,<span class="at">data=</span>train)  <span class="co"># Fit model to remaining j-1 observations</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  yhat[j]<span class="ot">=</span><span class="fu">predict</span>(train_lm,<span class="at">newdata=</span>fake[j,]) <span class="co">#Calculate prediction on observation j</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>RMSE_loo<span class="ot">=</span><span class="fu">sqrt</span>(<span class="fu">mean</span>((fake<span class="sc">$</span>y<span class="sc">-</span>yhat)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"LOO Test RMSE:"</span>,RMSE_loo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>LOO Test RMSE: 1.033456</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Null RMSE:"</span>,RMSE_null)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Null RMSE: 0.9904183</code></pre>
+</div>
+</div>
+<p>Hmm, I like this already because remember, all the predictors in our fake model were bogus so the RMSE shouldn’t be better than the null model and now it isn’t!</p>
+<p>The second most common form of cross-validation, <span class="math inline">\(K\)</span>-fold, is used for larger datasets where LOO is too computationally intensive. In this method, we split the data into <span class="math inline">\(K\)</span> equal groups (called <em>folds</em>) where <span class="math inline">\(K\)</span> is a factor (or at least close to a factor) of the sample size <span class="math inline">\(n\)</span>. Common choices are <span class="math inline">\(K=5, 10\)</span> or <span class="math inline">\(K=n\)</span> (which gives LOO). Then we proceed to do training-testing set analysis on each of the folds. In other words, we start by using Fold 1 as the testing set and the other <span class="math inline">\(K-1\)</span> folds as the training set. We fit the model and compute the total sum of squared errors for Fold 1. Then we repeat using Fold 2 as the testing set and so on. At the end, we calculate the RMSE using all the errors from the different folds.</p>
+<p>This one is a little more complicated to code directly because you have to randomly split the data into K folds of roughly equal size<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. We use the <code>cut</code> function for this purpose. Here is a demonstration with <span class="math inline">\(K=10\)</span>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">=</span> <span class="fu">nrow</span>(fake)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>K <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>SSE <span class="ot">=</span> <span class="fu">numeric</span>(K)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>s <span class="ot">=</span> <span class="fu">sample</span>(n) <span class="co"># Shuffle indices so fold assignment are random </span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>fold_assignments <span class="ot">=</span> <span class="fu">cut</span>(<span class="dv">1</span><span class="sc">:</span>n, <span class="at">breaks =</span> K, <span class="at">labels =</span> <span class="cn">FALSE</span>) <span class="co"># Assign indices to folds</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>K){</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  fold <span class="ot">=</span> s[fold_assignments <span class="sc">==</span> j]  <span class="co"># Indices for jth fold</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  train <span class="ot">=</span> fake[<span class="sc">-</span>fold,]</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  test <span class="ot">=</span> fake[fold,]</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  train_lm <span class="ot">=</span> <span class="fu">lm</span>(y<span class="sc">~</span>.,<span class="at">data=</span>train)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  yhat <span class="ot">=</span> <span class="fu">predict</span>(train_lm,<span class="at">newdata=</span>test)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  SSE[j] <span class="ot">=</span> <span class="fu">sum</span>((test<span class="sc">$</span>y<span class="sc">-</span>yhat)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>RMSE_kfold <span class="ot">=</span> <span class="fu">sqrt</span>(<span class="fu">sum</span>(SSE)<span class="sc">/</span>n)</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"10-Fold Test RMSE:"</span>, RMSE_kfold)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>10-Fold Test RMSE: 1.074088</code></pre>
+</div>
+</div>
+<p>This gave CLOSE to the same answer as the LOO, but only required 10 iterations as opposed to 100.</p>
+<p>The moral of this story is that Cross-validation is not as susceptible to false positive model selection as either p-value approaches or one-time testing set validation. If the model is shitty, it will come out in the repetitions. Yay, now I can continue using it in peace.</p>
+</section>
+<section id="optional-functions-for-cross-validation-in-lm" class="level2">
+<h2 class="anchored" data-anchor-id="optional-functions-for-cross-validation-in-lm">Optional: Functions for Cross-Validation in <code>lm</code></h2>
+<p>To be efficient (and have some fun), we can turn the routines above into functions that can be applied to any formula/dataframe pair. The routine for LOO is a pretty easy extension of our previous code:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>looCV_lm<span class="ot">=</span><span class="cf">function</span>(fla,df){</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="co"># LOO cross-validation for linear models</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Inputs: fla = formula, df = dataframe</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Output: LOO RMSE</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">numeric</span>(<span class="fu">nrow</span>(df))</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(df)){</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  train<span class="ot">=</span>df[<span class="sc">-</span>j,]</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  fit<span class="ot">=</span><span class="fu">lm</span>(fla,train)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  yhat[j]<span class="ot">=</span><span class="fu">predict</span>(fit,<span class="at">newdata=</span>df[j,])</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>df[[<span class="fu">all.vars</span>(fla)[<span class="dv">1</span>]]]</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>rmse<span class="ot">=</span><span class="fu">sqrt</span>(<span class="fu">mean</span>((y<span class="sc">-</span>yhat)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(rmse)</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To use it, you pass a formula and a dataframe:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">looCV_lm</span>(<span class="fu">as.formula</span>(<span class="st">'y~.'</span>),fake)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.033456</code></pre>
+</div>
+</div>
+<p>The extension to k-fold isn’t much more complicated:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>kfoldCV_lm <span class="ot">=</span> <span class="cf">function</span>(fla, df, k) {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co"># K-fold cross-validation for linear models</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Inputs: fla = formula, df = dataframe, k = number of folds</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Output: K-fold RMSE</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">=</span> <span class="fu">nrow</span>(df)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (k <span class="sc">&gt;</span> n) <span class="fu">stop</span>(<span class="st">"k cannot be greater than the number of observations"</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">=</span> <span class="fu">sample</span>(n)  </span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  fold_assignments <span class="ot">=</span> <span class="fu">cut</span>(<span class="dv">1</span><span class="sc">:</span>n, <span class="at">breaks =</span> k, <span class="at">labels =</span> <span class="cn">FALSE</span>)  </span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  SSE <span class="ot">=</span> <span class="fu">numeric</span>(k)  </span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k) {</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    fold <span class="ot">=</span> s[fold_assignments <span class="sc">==</span> j]  </span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    train <span class="ot">=</span> df[<span class="sc">-</span>fold, ]  </span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    test <span class="ot">=</span> df[fold, ]  </span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">=</span> <span class="fu">lm</span>(fla,train) </span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    yhat <span class="ot">=</span> <span class="fu">predict</span>(fit,test)  </span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    SSE[j] <span class="ot">=</span> <span class="fu">sum</span>((test[[<span class="fu">all.vars</span>(fla)[<span class="dv">1</span>]]] <span class="sc">-</span> yhat)<span class="sc">^</span><span class="dv">2</span>)  </span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a> rmse<span class="ot">=</span><span class="fu">sqrt</span>(<span class="fu">sum</span>(SSE) <span class="sc">/</span> n)</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a> <span class="fu">return</span>(rmse)</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a> }</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a><span class="fu">kfoldCV_lm</span>(<span class="fu">as.formula</span>(<span class="st">'y~.'</span>),fake,<span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.041508</code></pre>
+</div>
+</div>
+<p>We can apply the routines above to compare different models based on CV RMSE. For example, let’s return to our election2016 dataset and see how a full and reduced model compare based on LOOCV, with the null included as a baseline:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>full_fla<span class="ot">=</span><span class="fu">as.formula</span>(<span class="st">"trump.vote~."</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>red_fla<span class="ot">=</span><span class="fu">as.formula</span>(<span class="st">"trump.vote~median.income+income.ineq+non.white"</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>null_fla<span class="ot">=</span><span class="fu">as.formula</span>(<span class="st">"trump.vote~1"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>full_RMSE<span class="ot">=</span><span class="fu">looCV_lm</span>(full_fla,election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>red_RMSE<span class="ot">=</span><span class="fu">looCV_lm</span>(red_fla,election2016)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>null_RMSE<span class="ot">=</span><span class="fu">looCV_lm</span>(null_fla,election2016)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Full RMSE = "</span>,full_RMSE,<span class="st">"</span><span class="sc">\n</span><span class="st">Reduced RMSE = "</span>, red_RMSE,<span class="st">"</span><span class="sc">\n</span><span class="st">Null RMSE = "</span>,null_RMSE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Full RMSE =  0.07445253 
+Reduced RMSE =  0.07122243 
+Null RMSE =  0.1018416</code></pre>
+</div>
+</div>
+<p>Notice that the both do better than baseline, but the reduced is slightly better than the full (even though the full is using more variables, it is over-fitting the data and that shows in the cross-validated RMSE). 10-Fold CV yields similar error rates:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>full_RMSE<span class="ot">=</span><span class="fu">kfoldCV_lm</span>(full_fla,election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>],<span class="dv">10</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>red_RMSE<span class="ot">=</span><span class="fu">kfoldCV_lm</span>(red_fla,election2016,<span class="dv">10</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>null_RMSE<span class="ot">=</span><span class="fu">kfoldCV_lm</span>(null_fla,election2016,<span class="dv">10</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Full RMSE = "</span>,full_RMSE,<span class="st">"</span><span class="sc">\n</span><span class="st">Reduced RMSE = "</span>, red_RMSE,<span class="st">"</span><span class="sc">\n</span><span class="st">Null RMSE = "</span>,null_RMSE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Full RMSE =  0.0778182 
+Reduced RMSE =  0.07220365 
+Null RMSE =  0.1015811</code></pre>
+</div>
+</div>
+</section>
+<section id="cross-validation-for-classification" class="level2">
+<h2 class="anchored" data-anchor-id="cross-validation-for-classification">Cross-Validation for Classification</h2>
+<p>We can apply both LOO and Kfold CV to classification models as well by replacing <code>lm</code> with the appropriate model (eg. KNN or logistic regression) and RMSE with the appropriate metric for model validation (eg. accuracy or balanced accuracy). For example, let’s suppose that instead of trump.vote as a number (fraction of people voting for Trump) we want to prediction election outcome as a binary (red vs blue). Here is a summary of the results</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(election2016<span class="sc">$</span>outcome)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Blue  Red 
+  20   30 </code></pre>
+</div>
+</div>
+<p>We can do this by fitting a logistic regression model using the usual eight predictors although we first need to one-hot encode outcome (we’ll use Red = 1):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>election2016<span class="sc">$</span>outcome_bin<span class="ot">=</span><span class="fu">ifelse</span>(election2016<span class="sc">$</span>outcome<span class="sc">==</span><span class="st">"Red"</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>outcome_glm<span class="ot">=</span><span class="fu">glm</span>(outcome_bin<span class="sc">~</span>.,election2016[,<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>,<span class="dv">12</span>)],<span class="at">family=</span><span class="st">"binomial"</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(outcome_glm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = outcome_bin ~ ., family = "binomial", data = election2016[, 
+    c(2:9, 12)])
+
+Coefficients:
+                Estimate Std. Error z value Pr(&gt;|z|)  
+(Intercept)    8.792e+01  4.267e+01   2.061   0.0393 *
+median.income -3.452e-04  1.454e-04  -2.374   0.0176 *
+unemployed    -9.716e+01  6.619e+01  -1.468   0.1421  
+metro          3.234e+00  4.528e+00   0.714   0.4752  
+high.school   -2.513e+01  2.970e+01  -0.846   0.3975  
+non.citizen   -4.208e+01  3.180e+01  -1.323   0.1858  
+white.pov     -3.327e+01  3.866e+01  -0.861   0.3894  
+income.ineq   -8.751e+01  5.023e+01  -1.742   0.0815 .
+non.white      1.698e+00  5.304e+00   0.320   0.7489  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 67.301  on 49  degrees of freedom
+Residual deviance: 32.302  on 41  degrees of freedom
+AIC: 50.302
+
+Number of Fisher Scoring iterations: 6</code></pre>
+</div>
+</div>
+<p>We’ll now evaluate this model using LOOCV and replacing the RMSE calculation with one for model accuracy.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(election2016)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">rep</span>(<span class="dv">0</span>,n)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  train<span class="ot">=</span>election2016[<span class="sc">-</span>j,]  </span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  train_glm<span class="ot">=</span>outcome_glm<span class="ot">=</span><span class="fu">glm</span>(outcome_bin<span class="sc">~</span>.,train[,<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>,<span class="dv">12</span>)],<span class="at">family=</span><span class="st">"binomial"</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  prob<span class="ot">=</span><span class="fu">predict</span>(train_glm,election2016[j,],<span class="at">type=</span><span class="st">"response"</span>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  yhat[j]<span class="ot">=</span> <span class="fu">ifelse</span>(prob<span class="sc">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>)  <span class="co">#Calculate prediction on observation j</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>acc_loo<span class="ot">=</span><span class="fu">sum</span>(election2016<span class="sc">$</span>outcome_bin<span class="sc">==</span>yhat)<span class="sc">/</span>n</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"LOO Test Accuracy:"</span>,acc_loo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>LOO Test Accuracy: 0.78</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>acc_null<span class="ot">=</span><span class="fu">sum</span>(election2016<span class="sc">$</span>outcome_bin<span class="sc">==</span><span class="dv">1</span>)<span class="sc">/</span>n <span class="co"># Guess most common class</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Null Accuracy:"</span>,acc_null)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Null Accuracy: 0.6</code></pre>
+</div>
+</div>
+<p>That’s quite a bit better!</p>
+<p>I’ll leave it to you to adapt the cross-validation code in the following practice exercise.</p>
+</section>
+<section id="practice" class="level2">
+<h2 class="anchored" data-anchor-id="practice">Practice</h2>
+<p>Modify the K-Fold procedure to compute the cross-validated accuracy for the full logistic regression model fit to the Framingham data in Module 3. Compare with the null model accuracy (always guess 0).</p>
+<p><em>Bonus</em>: Modify the procedure to compute cross-validated balanced accuracy instead. Hint: Instead of accumulating SSE across folds, think about how to accumulate the confusion matrix components.</p>
+<p><em>Note</em>: If time permits, you might also want to apply LOOCV to the Framingham data, but beware because the it will take longer to run with the larger sample size.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>One of the most publicizied was the “food guy” Brian Wansink; <a href="https://www.vox.com/science-and-health/2018/9/19/17879102/brian-wansink-cornell-food-brand-lab-retractions-jama">read more here</a><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>They will be equal if <span class="math inline">\(K\)</span> divides <span class="math inline">\(n\)</span> but if not some folds may have an extra observation.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
