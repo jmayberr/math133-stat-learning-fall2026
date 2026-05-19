@@ -51,7 +51,14 @@ website:
             text: "Module 3 Theory Supplement: Finding Logistic Regression Coefficients"
       - text: "Module 4"
         menu:
-          - text: "Notes 1: ..."
+          - href: module-04/notes1.qmd
+            text: "Module 4.1: Cross Validation"
+          - href: module-04/notes2.qmd
+            text: "Module 4.2: Feature Selection"
+          - href: module-04/notes3.qmd
+            text: "Module 4.3: Regularization"
+          - href: module-04/rTools.qmd
+            text: "Module 4 R Tools: Tuning Hyperparameters with Tidymodels"
       - text: "Module 5"
         menu:
           - text: "Notes 1: ..."
