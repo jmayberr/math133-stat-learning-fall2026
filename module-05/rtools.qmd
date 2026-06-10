@@ -84,6 +84,7 @@ fviz_cluster(election_kmeans,
 ```
 
 We made a similar plot from scratch with ggplot in Module 5.2, but this one looks prettier. The points are plotted based on their first two PCS and the clusters are colored according to the k-means output. 
+
 You can also make scree plots to suggest an optimal number of clusters:
 
 ```{r}

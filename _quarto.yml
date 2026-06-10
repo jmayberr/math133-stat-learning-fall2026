@@ -69,7 +69,7 @@ website:
             text: "Module 5.3: Hierarchical Clustering"
           - href: module-05/supplement.qmd
             text: "Module 5 Theory Supplement: PCA vs SVD"
-          - href: module-05/rTools.qmd
+          - href: module-05/rtools.qmd
             text: "Module 5 R Tools: fviz-ness"
       - text: "Module 6"
         menu:
