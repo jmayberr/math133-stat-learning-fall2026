@@ -167,7 +167,7 @@ Testing set validation means to split off some fraction of your data (usually 20
 set.seed(45)
 n=nrow(election2016)
 p=0.7 # Decide on fraction to keep for training, in this case 70%
-train_rows=sample(n,round(n*0.7,0)) # Choose training row; round to ensure integer
+train_rows=sample(n,0.7*n) # Choose training rows
 train_df=election2016[train_rows,] # Extract training data
 test_df= election2016[-train_rows,] # Extract testing data
 ```
@@ -194,7 +194,7 @@ Every time we do the training-testing set split we will get a different value fo
 ```{r}
 n=nrow(election2016)
 p=0.7 
-train_rows=sample(n,round(n*0.7,0))  
+train_rows=sample(n,0.7*n)  
 train_df=election2016[train_rows,] 
 test_df= election2016[-train_rows,] 
 fit_lm_train=lm(trump.vote~non.white,data=train_df)

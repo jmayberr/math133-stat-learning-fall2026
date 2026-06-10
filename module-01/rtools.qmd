@@ -173,6 +173,33 @@ us_v_japan |>
   scale_color_manual(values=c("black","#E35205"), name="Country")
 ```
 
+One of my favorite discrete color schemes is the following colorblind friendly palette taken from [this site](https://jrnold.github.io/ggthemes/reference/colorblind.html):
+
+```{r}
+cb_palette <- c(
+  "#000000",  # black
+  "#E69F00",  # orange
+  "#56B4E9",  # sky blue
+  "#009E73",  # bluish green
+  "#F0E442",  # yellow
+  "#0072B2",  # blue
+  "#D55E00",  # vermillion
+  "#CC79A7"   # reddish purple
+)
+```
+
+Once defined, you can select colors by index:
+
+```{r}
+us_v_japan |>
+  ggplot(aes(x=year,y=lifeExp,col=country))+
+  geom_point()+
+  geom_line()+
+  labs(x="Year",y="Life Expectancy",
+       title="Life Expectancy vs Time")+
+  scale_color_manual(values=cb_palette[c(2,4)], name="Country")
+```
+
 You can also create separate plots for values of a discrete variable using facets.
 
 ```{r}
@@ -192,7 +219,9 @@ First, histograms. This is a useful tool for displaying the overall distribution
 ```{r}
 japan2 |>
   ggplot(aes(x=lifeExp))+
-  geom_histogram(fill="#009E73",col="black",breaks=seq(60,85,5))+
+  geom_histogram(fill=cb_palette[4],
+                 col="black",
+                 breaks=seq(60,85,5))+
   theme_bw()+
   labs(x="Life Expectancy",y="Year")
 ```
@@ -202,7 +231,9 @@ Note the use of the breaks command to manually define where the bins start and e
 ```{r}
 japan2 |>
   ggplot(aes(x=lifeExp))+
-  geom_histogram(fill="#009E73",col="black",breaks=seq(60,85,2.5))+
+  geom_histogram(fill=cb_palette[4],
+                 col="black",
+                 breaks=seq(60,85,2.5))+
   theme_bw()+
   labs(x="Life Expectancy",y="Year")
 ```
@@ -216,7 +247,7 @@ us_v_japan |>
   ggplot(aes(x=country,y=lifeExp,fill=country))+
       stat_boxplot(geom = "errorbar", width = 0.1) +
       geom_boxplot(color = "black", width = 0.3)+
-      scale_fill_manual(values=c("#F0E442","#E69F00")) +
+      scale_fill_manual(values=cb_palette[c(2,4)]) +
       labs(x="Country",y="Life Expectancy of Different Years") +
       theme(legend.position = "none")
 ```

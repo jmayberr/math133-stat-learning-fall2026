@@ -1,0 +1,130 @@
+---
+title: "Module 5 Theory Supplement: PCA vs SVD"
+---
+
+This section requires some background in linear algebra. 
+
+## PCA vs Singular Value Decomposition
+
+PCA is connected to the Singular Value Decomposition (SVD) of the data matrix $X$. To be precise, suppose that we have a set of centered predictor vectors $X_1, ...X_p$ all of length $n$ (if they are not centered, just subtract the column wise means). Define the data matrix $X = \begin{bmatrix} X_1 & X_2 & \cdots & X_p\end{bmatrix}$. The SVD of $X$ is
+$$
+X = U \Sigma V^T
+$$
+
+where $U,V$ are orthogonal matrices whose columns are called the left and right singular vectors of $X$, respectively, and $\Sigma$ is a diagonal matrix whose diagonal entries are called the singular values. Note that the singular values are the square roots of the eigenvalues of the symmetric matrix $X^TX$ since 
+$$
+X^TX = (V \Sigma^T U^T)(U\Sigma V^T) = V \Sigma^T \Sigma V^T
+$$
+The matrix $V$ is the corresponding matrix of eigenvectors. To get $U$, we take the eigenvectors of $XX^T$ instead.  
+
+The SVD can be rewritten as 
+$$
+XV = U \Sigma
+$$
+
+which has $j$th column
+
+$$
+Xv_j = \sigma_j u_j
+$$
+
+The $u_j$ (scaled by $\sigma_j$) are the Principal Component scores (orthogonal linear combinations of the columns of $X$) and the $v_j$ are the corresponding loadings. Therefore, $V$ is the rotation matrix and the PC scores are $U \Sigma$. 
+
+Now to understand the "proportion of variance part" requires going a little deeper. If our $X$ is $n\times p$ ($n$ data points, $p$ predictors), then its sample covariance matrix is^[The $n-1$ is because we estimate the mean from the data. True we are estimating $p$ means, one for each column, but there is only one mean vector.] 
+$$
+C= \frac{1}{n-1} X^TX
+$$
+
+The total variance in the $X_i$ would be the trace of this matrix: $tr(C) = \sum C_{ii}$. But also notice that
+$$
+C = \frac{1}{n-1} X^T X = V \left(\frac{1}{n-1}\Sigma^T\Sigma\right) V^T
+$$
+
+or
+
+$$
+CV= V \Lambda
+$$
+
+with $\Lambda = \Sigma^T\Sigma/(n-1)$. Behold, the eigenvalue-eigenvector equation emerges and the eigenvalues of $C$ are $\lambda_i = \sigma_i^2/(n-1)$: scaled versions of the singular values of $X$! 
+
+Furthermore, since $V$ is orthogonal, we have
+$$
+tr(C) = tr(V\Lambda V^T) = tr(\Lambda) 
+$$
+so the total variance is also
+$$
+\sum \lambda_i
+$$
+
+and the proportion coming from the $j$th term is 
+$$
+\frac{\lambda_j}{\sum \lambda_i }= \frac{\sigma_j^2}{\sum \sigma_i^2} 
+$$
+
+To summarize:
+
+* The principal component scores are the left singular vectors of $X$ multiplied by the corresponding singular values.
+* The loadings are the right singular vectors of $X$ (or equivalently, the eigenvectors of the covariance matrix of the centered data)
+* The variance of the PCs are the squared singular values of $X$ divided by $n-1$ (or equivalently, the eigenvalues of the covariance matrix)
+* The total variance is the sum of squared singular values divided by $n-1$ (or equivalently the sum of the eigenvalues of the covariance matrix) 
+
+Let's demonstrate by forming the data matrix for the election data directly and applying svd
+
+```{r}
+library(tidyverse)
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016=read.csv(df_url)
+n=nrow(election2016)
+X= as.matrix(scale(election2016[,2:9]))
+X_svd=svd(X)
+U=X_svd$u
+V=X_svd$v
+Sigma=X_svd$d
+
+```
+
+The proportions of explained variance are then
+
+```{r}
+sigma=Sigma^2/(n-1)
+
+sigma/(sum(sigma))
+```
+
+while the rotation matrix is 
+
+```{r}
+V
+```
+
+and the PC scores for the first few states are
+
+```{r}
+head(U %*% diag(Sigma))
+```
+
+## Connection to Biplots.
+
+The SVD $X=U\Sigma V^T$ gives us options on how to represent the row and column coordinates in the rotation matrix. In the printout from `prcomp()`, the rotation matrix is $V$ and the transformed PCs are $U \Sigma$. 
+
+In a distance biplot (scale = 0), this is essentially what is displayed. The observations are represented by $U \Sigma$ and the variables by $V$. This preserves distances between the observations as well as possible in the lower-dimensional projection (the data have merely been rotated by $V$ into PCs). The first two columns of $U \Sigma$ give the first two PCs and these are what `fviz_pca_ind` plots. 
+
+But if we instead choose to keep $\Sigma$ with $V$, we can represent the variables as $V \Sigma$ and the observations using $U$ instead. That is basically what we see in a correlation biplot (scale = 1). The covariance between the $i$th variable $X_i$ and the $j$th principle component $PC_j = (XV)_j$ is the $ij$th component of the matrix 
+$$
+cov(X,XV) = \frac{1}{n-1} X^TXV = \frac{1}{n-1} V \Sigma^T \Sigma
+$$
+
+Assuming the $X_i$ are scaled to have variance 1, this means the correlation between $X_i$ and $(XV)_j$ is
+$$
+\frac{\sigma_i^2 v_{ij}/(n-1)}{\sigma_i/\sqrt{n-1}} = \sigma_i v_{ij}/\sqrt{n-1}
+$$
+which explains why keeping the $\sigma$'s with the $V$ gives rise to the "correlation" biplot (or what is seen when running `fviz_pca_var()`). 
+
+To look at this another way, going back to the SVD
+$$
+X = U \Sigma V^T
+$$
+we could break apart $\Sigma = \Sigma^\alpha \Sigma^{1-\alpha}$ for any $0 \leq \alpha \leq 1$. (The power makes sense since $\Sigma$ is diagonal with nonnegative entries.) We can then choose to plot points as $U \Sigma^{1-\alpha}$ and variables as $\Sigma^{\alpha} V^T$. Taking $\alpha = 0$ gives distance, $\alpha = 1$ gives correlation, and $\alpha = 1/2$ leads to the balanced approach of `fviz_pca_biplot()`.
+
+

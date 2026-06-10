@@ -50,13 +50,17 @@ beerwings |>
   theme_classic()
 ```
 
-The standard way of incorporating *qualitative* or *categorical* variables like Gender into statistical models is via a process called *one-hot encoding*. If the variable is binary[^1], we choose one value to serve as the baseline for the model (R does this by alphabetical order so it will choose "F" in this example). The baseline value is *recoded* with a 0, and the other value with 1. In other words, we would define a new variable $$
+The standard way of incorporating *qualitative* or *categorical* variables like Gender into statistical models is via a process called *dummy coding*[^1]. If the variable is binary[^2], we choose one value to serve as the baseline for the model (R does this by alphabetical order so it will choose "F" in this example). The baseline value is *recoded* with a 0, and the other value with 1. In other words, we would define a new variable $$
 GenderM = \begin{cases}1 & \text{if  Gender == "Male"} \\ 0 & \text{if  Gender == "Female"} \end{cases}
 $$
 
-[^1]: Not to imply that Gender is binary, but there were only two values recorded in this dataset. It was Minnesota in the early 2000s.
+[^1]: Sometimes viewed as a special case of one-hot encoding where one creates a separate column of 0/1s for each possible value of a categorical variable.
 
-and then add this as a predictor in our SLM. We can *engineer* such variables in R using `ifelse`:
+[^2]: Not to imply that Gender is binary, but there were only two values recorded in this dataset. It was Minnesota in the early 2000s.
+
+and then add this as a predictor in our SLM.
+
+Variables constructed in this way are called *dummy variables*. We can *engineer* them in R using `ifelse`:
 
 ```{r}
 beerwings$GenderM = ifelse(beerwings$Gender=="M",1,0)
@@ -70,9 +74,9 @@ fit_lm=lm(Beer ~ GenderM,beerwings)
 summary(fit_lm)
 ```
 
-To interpret this, males (GenderM =1) consumed about 8.4 more wings on average than females (GenderM=0) although the result was only moderately significant[^2] (p-value = 0.0502)
+To interpret this, males (GenderM =1) consumed about 8.4 more wings on average than females (GenderM=0) although the result was only moderately significant[^3] (p-value = 0.0502)
 
-[^2]: The hypothesis test for nonzero slope is essentially equivalent to doing a two-sample t-test for comparing average beer consumption between genders except that the degrees of freedom is different.
+[^3]: The hypothesis test for nonzero slope is essentially equivalent to doing a two-sample t-test for comparing average beer consumption between genders except that the degrees of freedom is different.
 
 Engineering a new variable through one-hot encoding was intentionally tedious to illustrate the steps involved. In the future, we'll just have R do it automatically within the `lm` call:
 
@@ -103,7 +107,9 @@ summary(fit_lm)
 
 Notice that the output now shows two coefficients even though we only had one input variable. That is because both Suburban and Urban are being compared with the baseline of Rural. The coefficients say that Suburban and Urban students, respectively, are expected to have stress scores of $4.731$ and $3.672$ lower than Rural students although only Suburban had a moderately significant difference with Rural.
 
-One disadvantage of one-hot encoding this way is that we can't compare Suburban and Urban directly. To do so, we nee to recode *home_environment* so that Suburban comes first^[You can also set up contrasts between categories which allow you to interpret coefficients relative to the overall mean. Look up the documentation of `contrasts` for details.]:
+One disadvantage of one-hot encoding this way is that we can't compare Suburban and Urban directly. To do so, we nee to recode *home_environment* so that Suburban comes first[^4]:
+
+[^4]: You can also set up contrasts between categories which allow you to interpret coefficients relative to the overall mean. Look up the documentation of `contrasts` for details.
 
 ```{r}
 survey$home_environment <- relevel(factor(survey$home_environment), 
@@ -242,9 +248,9 @@ You can see that unlike in the beerwings example, the slopes of the regression l
 
 ## Polynomial Terms
 
-The final type of enrichment we'll discuss in this section is the addition of polynomial terms in linear models[^3]. To motivate this, lets look at the `mtcars` dataset which is built into R and has specs on 30 different makes of cars:
+The final type of enrichment we'll discuss in this section is the addition of polynomial terms in linear models[^5]. To motivate this, lets look at the `mtcars` dataset which is built into R and has specs on 30 different makes of cars:
 
-[^3]: It may seem strange to call polynomial models linear, but as you can see below, they are linear in the coefficients $\beta_i$. The nonlinearity only creates additional features to engineer.
+[^5]: It may seem strange to call polynomial models linear, but as you can see below, they are linear in the coefficients $\beta_i$. The nonlinearity only creates additional features to engineer.
 
 ```{r}
 glimpse(mtcars)
@@ -260,9 +266,9 @@ mtcars |>
               color="#D55E00")
 ```
 
-This doesn't look very linear[^4] even though we get a significant linear coefficient and decent $R^2$ :
+This doesn't look very linear[^6] even though we get a significant linear coefficient and decent $R^2$ :
 
-[^4]: We'll further discuss checking for nonlinearity Module 2.3
+[^6]: We'll further discuss checking for nonlinearity Module 2.3
 
 ```{r}
 fit_lm=lm(mpg~hp,mtcars)

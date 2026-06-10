@@ -61,7 +61,16 @@ website:
             text: "Module 4 R Tools: Tuning Hyperparameters with Tidymodels"
       - text: "Module 5"
         menu:
-          - text: "Notes 1: ..."
+          - href: module-05/notes1.qmd
+            text: "Module 5.1: Principal Component Analysis"
+          - href: module-05/notes2.qmd
+            text: "Module 5.2: K-means Clustering"
+          - href: module-05/notes3.qmd
+            text: "Module 5.3: Hierarchical Clustering"
+          - href: module-05/supplement.qmd
+            text: "Module 5 Theory Supplement: PCA vs SVD"
+          - href: module-05/rTools.qmd
+            text: "Module 5 R Tools: fviz-ness"
       - text: "Module 6"
         menu:
           - text: "Notes 1: ..."
