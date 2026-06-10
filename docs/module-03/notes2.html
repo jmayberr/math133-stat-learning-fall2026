@@ -259,7 +259,26 @@ window.Quarto = {
  <span class="menu-text">Module 5</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-module-5">    
-        <li class="dropdown-header">Notes 1: …</li>
+        <li>
+    <a class="dropdown-item" href="../module-05/notes1.html">
+ <span class="dropdown-text">Module 5.1: Principal Component Analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/notes2.html">
+ <span class="dropdown-text">Module 5.2: K-means Clustering</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/notes3.html">
+ <span class="dropdown-text">Module 5.3: Hierarchical Clustering</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/supplement.html">
+ <span class="dropdown-text">Module 5 Theory Supplement: PCA vs SVD</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/rTools.qmd">
+ <span class="dropdown-text">Module 5 R Tools: fviz-ness</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -562,7 +581,7 @@ P(Goal|(x,y)) &gt; 0.5
 <p>To compute the predictive power, use a training-testing split</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(shots)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(n,<span class="fu">round</span>(.<span class="dv">7</span><span class="sc">*</span>n,<span class="dv">0</span>))</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(n,<span class="fl">0.7</span><span class="sc">*</span>n)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>train_set<span class="ot">=</span>shots[s,]</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>test_set<span class="ot">=</span>shots[<span class="sc">-</span>s,]</span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>goal_train<span class="ot">=</span><span class="fu">glm</span>(Goal_1<span class="sc">~</span><span class="fu">abs</span>(xj)<span class="sc">+</span>yj,<span class="at">family=</span><span class="st">"binomial"</span>,<span class="at">data=</span>train_set)</span>
@@ -575,10 +594,41 @@ P(Goal|(x,y)) &gt; 0.5
 <span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>er_logistic<span class="ot">=</span><span class="fu">sum</span>(test_set<span class="sc">$</span>prediction<span class="sc">!=</span>test_set<span class="sc">$</span>Goal)<span class="sc">/</span><span class="fu">length</span>(test_set<span class="sc">$</span>Goal)</span>
 <span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>er_logistic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3526971</code></pre>
+<pre><code>[1] 0.3954451</code></pre>
 </div>
 </div>
 <p>For those of you who did the last group work, this should be close to the best knn model error rates you got.</p>
+</section>
+<section id="stratified-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="stratified-sampling">Stratified Sampling</h2>
+<p>When the classes of our outcome are imbalanced (meaning far fewer of one possible class than the other), reflecting this imbalance in our sample can be desirable. Many machine learning packages use what’s called “stratified sampling” to choose training-testing splits. This process selects proportionate samples from all possible classes of the outcome to form the split.</p>
+<p>We can perform stratified sampling on the water polo dataset, for example, by modifying our typical algorithm as follows:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>n0 <span class="ot">=</span> <span class="fu">sum</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>n1 <span class="ot">=</span> <span class="fu">sum</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>s0 <span class="ot">=</span> <span class="fu">sample</span>(<span class="fu">which</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">0</span>), <span class="fl">0.7</span> <span class="sc">*</span> n0)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>s1<span class="ot">=</span> <span class="fu">sample</span>(<span class="fu">which</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">1</span>), <span class="fl">0.7</span> <span class="sc">*</span> n1)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>s <span class="ot">=</span> <span class="fu">c</span>(s0, s1)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>train <span class="ot">=</span> shots[s, ]</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>test  <span class="ot">=</span> shots[<span class="sc">-</span>s, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now all the training and testing sets have rouhgly the same fraction of goals as the original data:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(shots<span class="sc">$</span>Goal_1<span class="sc">==</span><span class="dv">1</span>)<span class="sc">/</span>n</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3690106</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(train<span class="sc">$</span>Goal_1<span class="sc">==</span><span class="dv">1</span>)<span class="sc">/</span><span class="fu">nrow</span>(train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3692171</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(test<span class="sc">$</span>Goal_1<span class="sc">==</span><span class="dv">1</span>)<span class="sc">/</span><span class="fu">nrow</span>(test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.36853</code></pre>
+</div>
+</div>
 </section>
 <section id="what-else-we-need-to-say" class="level2">
 <h2 class="anchored" data-anchor-id="what-else-we-need-to-say">What else we need to say</h2>
@@ -590,12 +640,12 @@ P(Goal|(x,y)) &gt; 0.5
 </ul>
 <p>But there is one kind of strange issue here which is the use of 0.5 as a cutoff for class predictions. Since the classes Goal and Not Goal are imbalanced with roughly twice as many of the latter, could we actually do better by using a different cutoff? Furthermore, we haven’t look at the types of misclassifications. If we actually create a two-way table of predictions vs reality for our Goals:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(test_set<span class="sc">$</span>prediction,test_set<span class="sc">$</span>Goal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(test_set<span class="sc">$</span>prediction,test_set<span class="sc">$</span>Goal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          
            Goal Not Goal
-  Goal       31       21
-  Not Goal  149      281</code></pre>
+  Goal       22       21
+  Not Goal  170      270</code></pre>
 </div>
 </div>
 <p>we see that there are two types of errors: predicting goal for not goal and predicting not goal for goal.The second type of error is happening much more frequently. Is this desirable? Next notes we’ll talk about these two way confusion matrices in more detail and some other metrics one can use to talk about to assess the value of a classification scheme. We’ll also discuss incorporating qualitative predictors into our models and how we compare our logistic model with the “null”. Until then, love the ones you’re with.</p>

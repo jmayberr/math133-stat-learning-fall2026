@@ -216,7 +216,7 @@ To compute the predictive power, use a training-testing split
 
 ```{r}
 n=nrow(shots)
-s=sample(n,round(.7*n,0))
+s=sample(n,0.7*n)
 train_set=shots[s,]
 test_set=shots[-s,]
 goal_train=glm(Goal_1~abs(xj)+yj,family="binomial",data=train_set)
@@ -231,6 +231,32 @@ er_logistic
 ```
 
 For those of you who did the last group work, this should be close to the best knn model error rates you got. 
+
+## Stratified Sampling
+
+When the classes of our outcome are imbalanced (meaning far fewer of one possible class than the other), reflecting this imbalance in our sample can be desirable. Many machine learning packages use what's called "stratified sampling" to choose training-testing splits. This process selects proportionate samples from all possible classes of the outcome to form the split. 
+
+We can perform stratified sampling on the water polo dataset, for example, by modifying our typical algorithm as follows:
+
+```{r}
+n0 = sum(shots$Goal_1 == 0)
+n1 = sum(shots$Goal_1 == 1)
+s0 = sample(which(shots$Goal_1 == 0), 0.7 * n0)
+s1= sample(which(shots$Goal_1 == 1), 0.7 * n1)
+
+s = c(s0, s1)
+
+train = shots[s, ]
+test  = shots[-s, ]
+```
+
+Now all the training and testing sets have rouhgly the same fraction of goals as the original data:
+
+```{r}
+sum(shots$Goal_1==1)/n
+sum(train$Goal_1==1)/nrow(train)
+sum(test$Goal_1==1)/nrow(test)
+```
 
 ## What else we need to say
 

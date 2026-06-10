@@ -5,7 +5,7 @@ author: "John Mayberry"
 
 ## About This Course
 
-In this course you'll learn how to build and evaluate statistical models — essentially, how to use data to make predictions and uncover patterns. We'll cover two main types of problems: **regression** (predicting a number, like a house price) and **classification** (predicting a category, like whether an email is spam or not).
+In this course you'll learn how to build and evaluate statistical models for making predictions and uncovering patterns in data. We'll cover two main types of problems: **regression** (predicting a number, like a house price) and **classification** (predicting a category, like whether an email is spam or not).
 
 Along the way you'll get hands-on experience with a wide range of popular modeling techniques, from foundational methods like linear and logistic regression to more modern approaches like random forests and neural networks. You'll also learn how to figure out which model is actually the best fit for a given problem, a skill that's just as important as building the models themselves!
 
@@ -24,9 +24,9 @@ All of this will be done in **R**, a widely used programming language in statist
 This course is designed for an audience with some basic background in both coding and statistics, but you don't need to be an expert in either. Specifically we assume:
 
 -   **Coding:** You are familiar with fundamental programming concepts like variables, lists, and functions. Some prior experience with R is helpful but not required.
--   **Statistics:** You have some introductory statistics knowledge, such as familiarity with measures of center and dispersion (eg. mean, standard deviation), the normal distribution, and basic graphical displays (eg. histograms, scatterplots). We won't be starting from scratch on the statistical side but we also won't assume anything beyond the basics.
+-   **Statistics:** You have some introductory statistics knowledge, such as familiarity with measures of center and spread (eg. mean, standard deviation), the normal distribution, and basic graphical displays (eg. histograms, scatterplots). We won't be starting from scratch on the statistical side but we also won't assume anything beyond the basics.
 
-If that sounds like you, you're in the right place!
+If that sounds like you, you're in the right place! For students with a little more math background (calculus and linear algebra), we've also included some supplementary sections in each module to demonstrate the magical theoretical underpinnings of our algorithms.
 
 ## Where to find course materials
 

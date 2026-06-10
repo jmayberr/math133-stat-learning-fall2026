@@ -128,12 +128,12 @@ and we have to guess how to divide our space in the best way possible to minimiz
 
 The K-Nearest Neighbors (KNN) algorithm predicts the class of a new observation by looking at the classes of it K-nearest neighbors in the training data and deciding its own class based on majority vote (i.e. adopting the most commonly occurring class among its neighbors). The hyper-parameter^[Hyperparameters, as opposed to parameters, are values set before the training process begins. They are used to control the learning process itself, but they are not learned from the data and don't have any real world meaning for the variables in your dataset.] $K$ can be any whole number from 1 up to the whole sample size and "nearest" is defined in terms of (Euclidean) distance.  
 
-To illustrate the use of KNN, let's split our fake data into training and testing sets using a 70/30 split. The KNN function will then apply KNN to predict the class of the testing set observations based on their nearest neighbors in the training set data. We'll start with K=5 neighbors. 
+To illustrate the use of KNN, let's split our fake data into training and testing sets using a 70-30 split. The KNN function will then apply KNN to predict the class of the testing set observations based on their nearest neighbors in the training set data. We'll start with K=5 neighbors. 
 
 ```{r}
 library(class)
 
-s=sample(1:1000,700)
+s=sample(n,0.7*n)
 train=df[s,]
 test=df[-s,]
 fake_knn=knn(train[,c("x","y")],
@@ -283,6 +283,56 @@ fits$K[which.min(fits$er)]
 
 was the optimal value here. Different seeds might change the optimal $K$, values in the 7-25 range typically do OK^[I also increased $K$ to as much as 350 and the error rate continued to increase throughout this range, but it was too slow to compile.]. Note that for this dataset, $n=1000$ so $\sqrt{n} \approx 32$ is outside this range. 
 
+
+## Comment on Variable Scaling
+
+In the examples from this section, both predictors $x$ and $y$ are on the same scale, so Euclidean distance treats them comparably and does not unduly favor one variable over the other. In general, however, k-nearest neighbors is sensitive to the scale of the predictors: when variables are measured in different units or have very different ranges, those with larger scales can dominate the distance calculation. Intuitively, KNN “trusts” distance, so whichever variable spreads out more will disproportionately influence who counts as a “neighbor.” 
+
+For example, suppose we multiply the $x$ variable in our data by 1000. Here is how the error rates compare
+
+```{r}
+library(class)
+df=df |>
+  mutate(big_x = x*1000)
+n=1000
+s=sample(n,0.7*n)
+train=df[s,]
+test=df[-s,]
+
+knn_reg=knn(train[,c("x","y")],
+             test[,c("x","y")],
+             cl=train$class,k=5)
+
+knn_big = knn(train[, c("big_x","y")],
+               test[, c("big_x","y")],
+               cl = train$class,
+               k = 5)
+
+knn_reg_er = sum(knn_reg!=test$class)/n
+knn_big_er = sum(knn_big!=test$class)/n
+
+cat("Regular ER = ",knn_reg_er,"; Big  ER=",knn_big_er)
+
+```
+
+The one with big $x$ is twice as big! In such cases, centering and scaling the predictors (for example, using z-scores) before applying KNN can lead to substantial improvements in performance. To illustrate, the error rate after scaling in the big $x$ data is much better: 
+
+```{r}
+train_scaled = scale(train[, c("big_x","y")])
+test_scaled  = scale(test[, c("big_x","y")],
+                       center = attr(train_scaled, "scaled:center"),
+                       scale  = attr(train_scaled, "scaled:scale"))
+knn_big_scale = knn(train_scaled[, c("big_x","y")],
+               test_scaled[, c("big_x","y")],
+               cl = train$class,
+               k = 5)
+knn_scale_er = sum(knn_big_scale!=test$class)/n
+cat("Scaled ER:",knn_scale_er)
+```
+
+Although we will not explore this issue further here, it will reappear in Module 4 when we discuss regularization methods, where scaling plays a similarly important role.
+
+
 ## Next Up
 
 $K$-Nearest Neighbors generates some pretty pictures and it's a powerful idea, but it can be difficult to use it to gain insights into how your predictors are actually impacting your outcome. For comparison, in a linear model, the slopes $\beta_k$ tell you how the outcome responds to changes in the predictor. There are no direct analogs here because there aren't really any parameters estimated in KNN which is why it is referred to as a _nonparametric_ model. Next time we'll discuss logistic regression which models the odds of "success" in binary models as a function of the predictors.
@@ -298,3 +348,4 @@ As time permits, consider refining your solution in one of the following ways:
 - Average the test error rates over multiple different splits. 
 
 The third extension previews an idea we'll formalize in Module 4: a single train/test split can be misleading!
+
