@@ -224,7 +224,18 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Module 6</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-module-6">    
-        <li class="dropdown-header">Notes 1: …</li>
+        <li>
+    <a class="dropdown-item" href="./module-06/notes1.html">
+ <span class="dropdown-text">Module 6.1: Regression Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./module-06/notes2.html">
+ <span class="dropdown-text">Module 6.2: Classification Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./module-06/notes3.html">
+ <span class="dropdown-text">Module 6.3: Random Forests</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -285,19 +296,42 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="about-this-course" class="level2">
 <h2 class="anchored" data-anchor-id="about-this-course">About This Course</h2>
-<p>In this course you’ll learn how to build and evaluate statistical models for making predictions and uncovering patterns in data. We’ll cover two main types of problems: <strong>regression</strong> (predicting a number, like a house price) and <strong>classification</strong> (predicting a category, like whether an email is spam or not).</p>
-<p>Along the way you’ll get hands-on experience with a wide range of popular modeling techniques, from foundational methods like linear and logistic regression to more modern approaches like random forests and neural networks. You’ll also learn how to figure out which model is actually the best fit for a given problem, a skill that’s just as important as building the models themselves!</p>
-<p>All of this will be done in <strong>R</strong>, a widely used programming language in statistics and data science, so you’ll leave the course with both the conceptual understanding and the practical coding skills that are valued in industry and graduate school.</p>
+<p>In this course you’ll learn how to build and evaluate statistical models for making predictions and uncovering patterns in data. We’ll cover two main types of problems: <strong>regression</strong> (predicting a number, like a grade point average) and <strong>classification</strong> (predicting a category, like whether or not you pass a class).</p>
+<p>Along the way you’ll get hands-on experience with a wide range of popular modeling techniques, from foundational methods like linear and logistic regression to more modern approaches like random forests and neural networks. You’ll also learn how to figure out which model is actually the best fit for a given problem and how to create some nice visualizations to complement your analyses (after all, pictures speak louder than words…or models).</p>
 </section>
 <section id="what-will-we-cover" class="level2">
 <h2 class="anchored" data-anchor-id="what-will-we-cover">What Will We Cover?</h2>
+<p>The three primary learning objectives for this course are as follows:</p>
+<ol type="1">
+<li><p><strong>Describe, implement, and compare common predictive models in statistics (Develop Tools)</strong></p>
 <ul>
-<li>Regression and classification models (linear regression, logistic regression, K-nearest neighbors, decision trees, random forests, neural networks, and more)</li>
-<li>Dimension reduction and clustering (principal component analysis, clustering algorithms)</li>
-<li>Time series methods (random walks, autoregressive and moving average models)</li>
-<li>Model selection and validation (cross-validation, training/testing sets, stepwise selection)</li>
-<li>Data visualization and exploratory analysis</li>
-</ul>
+<li><p>Linear models, including ordinary least squares and logistic regression</p></li>
+<li><p>Shrinkage methods, such as Ridge and Lasso regression</p></li>
+<li><p>K-Nearest Neighbors regression and classification</p></li>
+<li><p>Classification and Regression Trees</p></li>
+<li><p>Principal Component Analysis</p></li>
+<li><p>Time series concepts and methods, including random walks, stationarity, autocorrelation, exponential smoothing, and autoregressive models</p></li>
+<li><p>Clustering algorithms</p></li>
+<li><p>Neural Networks</p></li>
+</ul></li>
+<li><p><strong>Select the most applicable statistical tool given a specified research objective (Select Tools)</strong></p>
+<ul>
+<li><p>Distinguishing between regression and classification problems</p></li>
+<li><p>Distinguishing between supervised and unsupervised algorithms</p></li>
+<li><p>Assessing model accuracy</p></li>
+<li><p>Model training and validation</p></li>
+<li><p>Resampling methods</p></li>
+<li><p>Variable selection</p></li>
+</ul></li>
+<li><p><strong>Communicate the results of predictive analyses with verbal, visual, and numerical descriptions</strong></p>
+<ul>
+<li><p>Calculate summary statistics and create tables in R</p></li>
+<li><p>Interpret model output in R</p></li>
+<li><p>Create appropriate figures using the <code>ggplot2</code> package in R</p></li>
+<li><p>Present results using notebooks style programs (eg. quarto, google collab)</p></li>
+</ul></li>
+</ol>
+<p>All of this will be done in <strong>R</strong>, a widely used programming language in statistics and data science, so you’ll leave the course with both the conceptual understanding and the practical coding skills that are valued in industry and graduate school.</p>
 </section>
 <section id="who-is-this-course-for" class="level2">
 <h2 class="anchored" data-anchor-id="who-is-this-course-for">Who Is This Course For?</h2>
@@ -315,6 +349,7 @@ ul.task-list li input[type="checkbox"] {
 <li><a href="https://github.com/jmayberr/math133-stat-learning-fall2026/tree/main/Datasets">Datasets</a></li>
 <li><a href="https://github.com/jmayberr/math133-stat-learning-fall2026/tree/main/module-01">Module 1 Code Files</a></li>
 </ul>
+<p>If you’re still here, let’s get cooking!</p>
 
 
 </section>

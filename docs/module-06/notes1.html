@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Decision Trees of Life – Statistical Learning Methods</title>
+<title>Module 6.1: Decision Trees of Life – Statistical Learning Methods</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -286,7 +286,18 @@ window.Quarto = {
  <span class="menu-text">Module 6</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-module-6">    
-        <li class="dropdown-header">Notes 1: …</li>
+        <li>
+    <a class="dropdown-item" href="../module-06/notes1.html">
+ <span class="dropdown-text">Module 6.1: Regression Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/notes2.html">
+ <span class="dropdown-text">Module 6.2: Classification Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/notes3.html">
+ <span class="dropdown-text">Module 6.3: Random Forests</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -322,7 +333,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Decision Trees of Life</h1>
+<h1 class="title">Module 6.1: Decision Trees of Life</h1>
 </div>
 
 
@@ -342,28 +353,16 @@ window.Quarto = {
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>The last module provided a brief introduction to unsupervised learning, focusing on principal component analysis (PCA) for dimensionality reduction and clustering techniques for identifying patterns in unlabeled data. While those methods help uncover structure without predefined labels, we now shift our focus back to supervised learning, where models are trained using labeled examples. In this module, we explore a powerful and intuitive class of supervised models based on decision trees. Decision trees form the foundation of many machine learning algorithms, offering a structured way to make predictions by recursively partitioning data based on feature values. We will examine how decision trees operate, their strengths and limitations, and how they serve as the building blocks for more advanced ensemble methods.</p>
-<p>As always, we begin by loading necessary shit.</p>
+</section>
+<section id="regression-tree-example" class="level2">
+<h2 class="anchored" data-anchor-id="regression-tree-example">Regression Tree Example</h2>
+<p>Decision trees can be used in both classification and regression problems. For this reason, they are often referred to with the acronym CART (Classification And Regression Trees) although RPART (Recursive PARTitioning) is one of the primary R packages to use when building such models. The “C” of CART is more natural to explain from an application perspective, but the “R” part is easier to explain mathematically so we will start with the latter. In contrast to the usual flow of mathematical exposition, we will actually start with an example and then explain how it works. In case you’re not sick of it yet, we’ll be using our favorite election dataset with trump.vote as the response</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">71</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>cb_palette <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"#000000"</span>,  <span class="co"># black</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"#E69F00"</span>,  <span class="co"># orange</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"#56B4E9"</span>,  <span class="co"># sky blue</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"#009E73"</span>,  <span class="co"># bluish green</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"#F0E442"</span>,  <span class="co"># yellow</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"#0072B2"</span>,  <span class="co"># blue</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"#D55E00"</span>,  <span class="co"># vermillion</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"#CC79A7"</span>   <span class="co"># reddish purple</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now we get down to it.</p>
-</section>
-<section id="regression-trees" class="level2">
-<h2 class="anchored" data-anchor-id="regression-trees">Regression Trees</h2>
-<p>Decision trees can be used in both classification and regression problems. For this reason, they are often referred to with the acronym CART (Classification And Regression Trees) although RPART (Recursive PARTitioning) is one of the primary R packages to use when building such models. The “C” of CART is more natural to explain from an application perspective, but the “R” part is easier to explain mathematically so we will start with the latter. In contrast to the usual flow of mathematical exposition, we will actually start with an example and then explain how it works. In case you’re not sick of it yet, we’ll be using our favorite election dataset with trump.vote as the response</p>
 <p>Pictures speak louder than words so let’s start with a visual. It requires loading three new packages, one which loads the name model building function <code>rpart()</code>, one which just loads the color brewer palettes, and one which loads the aptly named visualization function <code>fancyRpartplot()</code></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
@@ -432,8 +431,8 @@ node), split, n, deviance, yval
 <p>Makes sense<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
 <p>Now that you know how to read a tree, let’s talk a little bit about how it works. Next class we’ll discuss the corresponding classification problem.</p>
 </section>
-<section id="greedy-trees" class="level2">
-<h2 class="anchored" data-anchor-id="greedy-trees">Greedy Trees</h2>
+<section id="the-nitty-greedy-details" class="level2">
+<h2 class="anchored" data-anchor-id="the-nitty-greedy-details">The Nitty-Greedy Details</h2>
 <p>The end goal of a tree is to partition the sample into leaves that are as “similar” as possible, kind of like in K-means clustering. The difference between regression trees and K-means is what we mean by “similar”. In K-means (an unsupervised algorithm), “similar” means that the <span class="math inline">\(x\)</span> values are as close together as possible. In regression trees (a supervised algorithm) we want the <span class="math inline">\(y\)</span> values to be as close as possible. In other words, we are trying to find a set of <span class="math inline">\(K\)</span> leaves <span class="math inline">\(L_1,...,L_K\)</span> which minimizes the sum of squared errors<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>: <span class="math display">\[
 SSE =\sum_{j=1}^K \sum_{y_{ij} \in L_j} (y_{ij}-\bar{y}_j)^2
 \]</span> where <span class="math inline">\(\bar{y}_j\)</span> is the mean of all observations in leaf <span class="math inline">\(j\)</span>.</p>
@@ -512,22 +511,24 @@ metro             0    1 0.8600000     0.840 0.6315789</code></pre>
 </div>
 </div>
 <p>So at the second step, we would keep the split if an improvement of 0.13 seems worth it.</p>
+</section>
+<section id="prune-the-hedges" class="level2">
+<h2 class="anchored" data-anchor-id="prune-the-hedges">Prune the Hedges</h2>
 <p>Cp is the most common measure of how much we gain from each split and can be used in “pruning”” back a tree (see below). Note that rpart uses cp=0.01 as one of its stopping rules for when to quit attempting splits: as soon as there are no more splits which gain you more than 1% in relative error, they aren’t worth making according to rpart. The other stopping criteria is based on node sizes: rpart will not attempt a split on a node with fewer than 20 observations. Both of these criteria can be modified with the appropriate arguments in rpart; see the help file for more details.</p>
-<p>The fourth and fifth columns give the mean and std of the cross-validation errors from the model fit (using <span class="math inline">\(K=10\)</span> folds by default). You can plot these to see if it there is any over-fitting going on:</p>
+<p>The first step in pruning is to look back at the cp table:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(trump_tree,<span class="at">upper=</span><span class="st">"splits"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>trump_tree<span class="sc">$</span>cptable</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          CP nsplit rel error    xerror      xstd
+1 0.43688228      0 1.0000000 1.0742865 0.1651265
+2 0.13110774      1 0.5631177 0.7155531 0.1452760
+3 0.04364371      2 0.4320100 0.6967316 0.1494352
+4 0.01000000      3 0.3883663 0.7523601 0.1884560</code></pre>
 </div>
 </div>
-</div>
-<p>Notice that the trees with one or two splits have a lower cross validation error which suggests we “pruning” may want to avoid overfitting by “pruning back” the tree to one with a larger cp<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>. The dashed line in the plot shows one SD above the best model and some people prefer to use the simplest model which drops below this line. In our case, that would be the tree with only one split and this tree would correspond to any cp value between 0.43688228 (the first entry in the cp table) and 0.13110774 (the second). The function to obtain pruned trees is aptly named prune.</p>
+<p>The fourth and fifth columns give the mean and std of the cross-validation errors from the model fit (using <span class="math inline">\(K=10\)</span> folds by default). You can plot them to better visualize the trend:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>trump_prune<span class="ot">=</span><span class="fu">prune</span>(trump_tree,<span class="at">cp=</span>.<span class="dv">4</span>)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(trump_prune,<span class="at">sub=</span><span class="st">"Pruned Tree"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plotcp</span>(trump_tree,<span class="at">upper=</span><span class="st">"splits"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -536,10 +537,10 @@ metro             0    1 0.8600000     0.840 0.6315789</code></pre>
 </div>
 </div>
 </div>
-<p>We could also prune to the two split example</p>
+<p>Notice that the trees with one or two splits have a lower cross validation error which suggests we may want to “prune” back our tree to avoid overfitting by “pruning back” the tree to one with a larger cp<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>. The dashed line in the plot shows one SD above the best model and some people prefer to use the simplest model which drops below this line. In our case, that would be the tree with only one split and this tree would correspond to any cp value between 0.43688228 (the first entry in the cp table) and 0.13110774 (the second). The function to obtain pruned trees is aptly named prune.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>trump_prune2<span class="ot">=</span><span class="fu">prune</span>(trump_tree,<span class="at">cp=</span>.<span class="dv">09</span>)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(trump_prune2,<span class="at">sub=</span><span class="st">"Pruned Tree 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>trump_prune<span class="ot">=</span><span class="fu">prune</span>(trump_tree,<span class="at">cp=</span>.<span class="dv">4</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(trump_prune,<span class="at">sub=</span><span class="st">"Pruned Tree"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -548,11 +549,43 @@ metro             0    1 0.8600000     0.840 0.6315789</code></pre>
 </div>
 </div>
 </div>
-<p>or the three, but I think you get the point by now.</p>
+<p>To reiterate, the exact choice of cp isn’t critical so long as it is between the first two entries in the cp table. We could also prune to the two split example by choosing any number between the second two entries (eg. 0.09):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>trump_prune2<span class="ot">=</span><span class="fu">prune</span>(trump_tree,<span class="at">cp=</span>.<span class="dv">09</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(trump_prune2,<span class="at">sub=</span><span class="st">"Pruned Tree 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="up-next" class="level2">
-<h2 class="anchored" data-anchor-id="up-next">Up Next</h2>
-<p>Trees can also be used for classification problems and we’ll see how next class. In the meantime, if you want some more practice, try a regression tree on the mtcars data using mpg as the outcome (Group work 12).</p>
+<h2 class="anchored" data-anchor-id="up-next">Up next…</h2>
+<p>The “C” parts of CART. In the next section, we’ll see the more common use of decision trees as an intuitive interface for classifying observations. But first, some …</p>
+</section>
+<section id="practice" class="level2">
+<h2 class="anchored" data-anchor-id="practice">Practice</h2>
+<p>For these exercises you’ll be using the <code>mtcars</code> dataset from the base package:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(mtcars)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                   mpg cyl disp  hp drat    wt  qsec vs am gear carb
+Mazda RX4         21.0   6  160 110 3.90 2.620 16.46  0  1    4    4
+Mazda RX4 Wag     21.0   6  160 110 3.90 2.875 17.02  0  1    4    4
+Datsun 710        22.8   4  108  93 3.85 2.320 18.61  1  1    4    1
+Hornet 4 Drive    21.4   6  258 110 3.08 3.215 19.44  1  0    3    1
+Hornet Sportabout 18.7   8  360 175 3.15 3.440 17.02  0  0    3    2
+Valiant           18.1   6  225 105 2.76 3.460 20.22  1  0    3    1</code></pre>
+</div>
+</div>
+<ol type="1">
+<li>Create a regression tree using mpg as the outcome and all other variables as predictors. Plot the resulting tree.</li>
+<li>Describe the leafs in the tree. What are the characteristics of the most fuel efficient cars (highest mpg)?</li>
+<li>Look at the cp plot and table for your tree. Prune the tree to minimize cross-validation error and plot the result.</li>
+</ol>
 
 
 </section>

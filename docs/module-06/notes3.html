@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Module 6.3: Baggins and the Forest – Statistical Learning Methods</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d4be639c637f3db3c684c66cefad7e0c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Statistical Learning Methods</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-1" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 1</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-1">    
+        <li>
+    <a class="dropdown-item" href="../module-01/notes1.html">
+ <span class="dropdown-text">Module 1.1: Introduction to Statistical Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes2.html">
+ <span class="dropdown-text">Module 1.2: Prediction for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes3.html">
+ <span class="dropdown-text">Module 1.3: Inference for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/supplement.html">
+ <span class="dropdown-text">Module 1 Theory: A deeper look at finding coefficients</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/rtools.html">
+ <span class="dropdown-text">Module 1 R Tools: Introduction to ggplot2 and tidyverse</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-2" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 2</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-2">    
+        <li>
+    <a class="dropdown-item" href="../module-02/notes1.html">
+ <span class="dropdown-text">Module 2.1: Multiple Regression Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes2.html">
+ <span class="dropdown-text">Module 2.2: Enriching Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes3.html">
+ <span class="dropdown-text">Module 2.3: Regression Diagnostics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes_bonus.html">
+ <span class="dropdown-text">Module 2 Bonus: The F Test</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/supplement.html">
+ <span class="dropdown-text">Module 2 Theory Supplement</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-3" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 3</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-3">    
+        <li>
+    <a class="dropdown-item" href="../module-03/notes1.html">
+ <span class="dropdown-text">Module 3.1: Introduction to Classification</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/notes2.html">
+ <span class="dropdown-text">Module 3.2: Logistic Regression</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/notes3.html">
+ <span class="dropdown-text">Module 3.3: Evaluating Classifiers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/supplement.html">
+ <span class="dropdown-text">Module 3 Theory Supplement: Finding Logistic Regression Coefficients</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-4" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 4</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-4">    
+        <li>
+    <a class="dropdown-item" href="../module-04/notes1.html">
+ <span class="dropdown-text">Module 4.1: Cross Validation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-04/notes2.html">
+ <span class="dropdown-text">Module 4.2: Feature Selection</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-04/notes3.html">
+ <span class="dropdown-text">Module 4.3: Regularization</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-04/rTools.html">
+ <span class="dropdown-text">Module 4 R Tools: Tuning Hyperparameters with Tidymodels</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-5" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 5</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-5">    
+        <li>
+    <a class="dropdown-item" href="../module-05/notes1.html">
+ <span class="dropdown-text">Module 5.1: Principal Component Analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/notes2.html">
+ <span class="dropdown-text">Module 5.2: K-means Clustering</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/notes3.html">
+ <span class="dropdown-text">Module 5.3: Hierarchical Clustering</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/supplement.html">
+ <span class="dropdown-text">Module 5 Theory Supplement: PCA vs SVD</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/rtools.html">
+ <span class="dropdown-text">Module 5 R Tools: fviz-ness</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-6" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 6</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-6">    
+        <li>
+    <a class="dropdown-item" href="../module-06/notes1.html">
+ <span class="dropdown-text">Module 6.1: Regression Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/notes2.html">
+ <span class="dropdown-text">Module 6.2: Classification Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/notes3.html">
+ <span class="dropdown-text">Module 6.3: Random Forests</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-7" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 7</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-7">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-8" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 8</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-8">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Module 6.3: Baggins and the Forest</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="the-bootstrap" class="level2">
+<h2 class="anchored" data-anchor-id="the-bootstrap">The Bootstrap</h2>
+<p>Bagging and random forests are both attempts to remedy the problem illustrated at the end of the last section by growing a large number of trees and assigning predictions to new values by averaging over all trees. Bagging is a special case of random forests and to understand either method, it is helpful to first discuss another important idea in statistics called bootstrapping. And to understand bootstrapping, we need to go back, back in time to the beginning of statistics and re-discuss the core concept of random sampling.</p>
+<p>Suppose that we have a population in which a specific statistic (let’s say IQ scores) is normally distributed with a population mean of 100 and a population SD of 15. If we know this information ahead of time, then we can simulate a random sample of 100 IQ scores using a random number generator like</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>rand.IQ<span class="ot">=</span><span class="fu">rnorm</span>(<span class="dv">100</span>,<span class="at">mean=</span><span class="dv">100</span>,<span class="at">sd=</span><span class="dv">15</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(rand.IQ,<span class="at">xlab=</span><span class="st">"Sample IQ Scores"</span>,<span class="at">main=</span><span class="st">""</span>,<span class="at">breaks=</span><span class="fu">seq</span>(<span class="dv">50</span>,<span class="dv">150</span>,<span class="at">by=</span><span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>However, if we don’t know the population mean and SD (which is almost always the case in statistics), then we try to estimate them with the sample mean and Sd</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Sample mean:"</span>,<span class="fu">mean</span>(rand.IQ),<span class="st">"</span><span class="sc">\n</span><span class="st">Sample sd:"</span>,<span class="fu">sd</span>(rand.IQ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Sample mean: 101.6333 
+Sample sd: 13.47299</code></pre>
+</div>
+</div>
+<p>which are, of course, pretty close, but not exactly equal to the population values of 100 and 15. Usually we want to take this a step further and ask for the standard error of the sample mean, a measure of how close we believe the sample mean will be to the unknown population mean (see Module 1.3). If we assume that our sample is a true random sample (independent and identically distributed draws from the population of interest), the we can compute the standard error of the sample mean from standard probability theory (C…L….T!) via the formula <span class="math display">\[
+SE \approx s/\sqrt{n}
+\]</span> or in our example:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>SE<span class="ot">=</span><span class="fu">sd</span>(rand.IQ)<span class="sc">/</span><span class="fu">sqrt</span>(<span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can then use this SE to compute confidence intervals for the unknown population mean. For example an approximate 95% CI has endpoints <span class="math inline">\(\bar{x} \pm 2*SE\)</span>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="fu">mean</span>(rand.IQ)<span class="sc">-</span><span class="dv">2</span><span class="sc">*</span>SE,<span class="fu">mean</span>(rand.IQ)<span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>SE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  98.93871 104.32791</code></pre>
+</div>
+</div>
+<p>This means that we are 95% confident that the population mean lies between 98.94 and 104.33 based on our sample.</p>
+<p>But there are many sample statistics whose SEs are not provided by such nice formulas. One simple example is the sample median<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. Say we want to know how accurately the median of our sample predicts the median of the population. Without a formula, what do we do?</p>
+<p>To answer this question, recall the the standard error is actually a standard deviation of the sampling distribution of a sample statistic (Phew, that’s a mouthful). In other words, if 1000 different people all drew samples of size 100 from our IQ population and each computed a sample median, the standard error would be the standard deviation of the medians obtained. We can simulate this experiment in R using the replicate function</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>rand.Medians<span class="ot">=</span><span class="fu">replicate</span>(<span class="dv">1000</span>,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">median</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">rnorm</span>(<span class="dv">100</span>,<span class="at">mean=</span><span class="dv">100</span>,<span class="at">sd=</span><span class="dv">15</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                         )</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                       )</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(rand.Medians)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.856027</code></pre>
+</div>
+</div>
+<p>This last number is an approximation of the SE for the sample median of 100 observations in our population. (Note: The role played by the 100 and the 1000 is quite different in this example. The 100 is the sample size; the number of people each researcher is allowed to check. The 1000 is the number of replicates; the number of independent experiments performed. If you reverse their roles, you will get very different results).</p>
+<p>Now most researchers don’t have the time or resources to select 1000 different samples of size 100. Instead, they get one sample of size 100. Boostrapping is the idea that since we are already using this sample of size 100 to estimate population statistics, we might as well take it a step further and use it as a representation of the population itself. So instead of drawing 1000 samples of size 100 from the whole population, we draw 1000 samples of size 100 WITH REPLACEMENT from the sample. These are called bootstrapped (re)samples<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> Since our statistics should be as spread out in the sample as they are in the population, we can use the SEs from the bootstrap samples to estimate the true SEs.</p>
+<p>Here is an example based on our previously drawn sample of 100 IQ scores</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>boot.Medians<span class="ot">=</span><span class="fu">replicate</span>(<span class="dv">1000</span>, </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                       <span class="fu">median</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">sample</span>(rand.IQ,<span class="dv">100</span>,<span class="at">replace=</span><span class="cn">TRUE</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                              )</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                       )</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(boot.Medians)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2.117081</code></pre>
+</div>
+</div>
+<p>Not too far off from the SE we computed based on the actual population!</p>
+<p>The cool thing about bootstrapping is that it can be applied to estimate the SE of ANY sample statistic, no matter how complicated. That includes the SE of parameters in statistical models, which is the idea behind bagging.</p>
+</section>
+<section id="from-bagging-to-random-forests" class="level2">
+<h2 class="anchored" data-anchor-id="from-bagging-to-random-forests">From Bagging to Random Forests</h2>
+<p>Bagging is basically the concept of bootstrapping applied to trees: we fit a large number of trees (the default in most program is 500) to a series of bootstrapped samples. For example, with the election2016 data, we would take 50 random samples of states (with replacement), fit a tree, then select another random sample, fit a tree, and continue 500 times in total. At the end, we would obtain a whole bunch of trees and if we receive a new observation, we can assign it a predicted value (regression problem) or class (classification problem) based on the average assignment across all of them.</p>
+<p>The only difference between bagging and random forests is that the latter restricts the number of variables, <span class="math inline">\(m\)</span>, that you are allowed to use in each attempted split. This <span class="math inline">\(m\)</span> is a hyperparameter in the random forest model and when <span class="math inline">\(m=p\)</span>, we get bagging. The reason for NOT choosing <span class="math inline">\(m=p\)</span> is to de-correlate the constructed trees and allow each variable a chance to shine.</p>
+<p>To explain the last comment, suppose that there is one variable which dominates the tree fitting procedure like non.citizen in the election2016 example. This variable will likely show up in all trees and hence, these trees will be highly correlated. There are several other variables which may be useful surrogates for non.citizen (like metro and non.white), but which will not be displayed as important due to the fact that non.citizen steals their glory. However, if we randomize the number of predictors we try during each tree, these other variables will sometimes be present without non.citizen and show up in at least some fraction of the fitted trees.</p>
+<p>As another explanation from a probability perspective, suppose that we have <span class="math inline">\(n\)</span> identically distributed random variables <span class="math inline">\(X_1,...,X_n\)</span>, each with variance <span class="math inline">\(\sigma^2\)</span>. Then the variance of their sample mean <span class="math inline">\(\bar{X}\)</span> will be <span class="math inline">\(\sigma^2/n\)</span> if they are independent. Therefore, in the independent case, averaging our responses leads to a huge reduction in variance. However, if the <span class="math inline">\(X_i\)</span> are not independent, then <span class="math display">\[
+Var(\bar{X}) = \sum_{i,j=1}^n Cov(X_i,X_j)/n^2
+\]</span> This might look better at first glance because of the <span class="math inline">\(n^2\)</span> in the denominator, but then you must realize that the double sum has <span class="math inline">\(n^2\)</span> terms as well so if the covariances are all positive, then we will not get much reduction in variance from averaging.</p>
+<p>Conceptual rambling aside, let’s take a look at some examples in R</p>
+</section>
+<section id="random-forest-package" class="level2">
+<h2 class="anchored" data-anchor-id="random-forest-package">Random Forest Package</h2>
+<p>We will be using the <code>randomForest</code> package to fit random forests<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. Please install that package before running the codes below. In addition, let’s use 30 states for a training set and the remaining 20 for test</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">50</span>,<span class="dv">30</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>train_set<span class="ot">=</span>election2016[s,]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>test_set<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Then we will fit both a regression tree on trump:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rattle)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>trump_tree<span class="ot">=</span><span class="fu">rpart</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>train_set[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(trump_tree,<span class="at">palettes=</span><span class="fu">c</span>(<span class="st">"Reds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>and a classification tree for election outcome</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>outcome_tree<span class="ot">=</span><span class="fu">rpart</span>(outcome<span class="sc">~</span>.,<span class="at">data=</span>train_set[,<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>,<span class="dv">11</span>)])</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(outcome_tree,<span class="at">palettes=</span><span class="fu">c</span>(<span class="st">"Blues"</span>, <span class="st">"Reds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Wow, those are surprisingly boring and probably not that good for prediction. Let’s try anyways. First, root MSE (RMSE) for the test data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pred_reg<span class="ot">=</span><span class="fu">predict</span>(trump_tree,test_set)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((pred_reg<span class="sc">-</span>test_set<span class="sc">$</span>trump.vote)<span class="sc">^</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.0889538</code></pre>
+</div>
+</div>
+<p>and second, the error for the classification model</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pred_class<span class="ot">=</span><span class="fu">predict</span>(outcome_tree,test_set,<span class="at">type=</span><span class="st">"class"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(pred_class<span class="sc">!=</span>test_set<span class="sc">$</span>outcome)<span class="sc">/</span><span class="fu">length</span>(test_set<span class="sc">$</span>outcome)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.35</code></pre>
+</div>
+</div>
+<p>Now let’s try bagging. The argument “mtry = 8” means to use all <span class="math inline">\(p=8\)</span> predictors:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomForest)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>trump_bag<span class="ot">=</span><span class="fu">randomForest</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>train_set[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>],<span class="at">mtry=</span><span class="dv">8</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>outcome_bag<span class="ot">=</span><span class="fu">randomForest</span>(<span class="fu">as.factor</span>(outcome)<span class="sc">~</span>.,<span class="at">data=</span>train_set[<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>,<span class="dv">11</span>)],<span class="at">mtry=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s look at the regression result first<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>pred_bag_reg<span class="ot">=</span><span class="fu">predict</span>(trump_bag,test_set)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((pred_bag_reg<span class="sc">-</span>test_set<span class="sc">$</span>trump.vote)<span class="sc">^</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.06145483</code></pre>
+</div>
+</div>
+<p>Better than the tree based model! For classification:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>pred_bag_class<span class="ot">=</span><span class="fu">predict</span>(outcome_bag,test_set,<span class="at">type=</span><span class="st">"class"</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(pred_bag_class<span class="sc">!=</span>test_set<span class="sc">$</span>outcome)<span class="sc">/</span><span class="fu">length</span>(test_set<span class="sc">$</span>outcome)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3</code></pre>
+</div>
+</div>
+<p>Well…that was actually a little worse than the single tree. But remember, the predictors are highly correlated so we might not get much reduction in variance for bagging in this case. Let’s try a random forest model with the default values of <span class="math inline">\(m=3\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>trump_rf<span class="ot">=</span><span class="fu">randomForest</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>train_set[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>],<span class="at">mtry=</span><span class="dv">3</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>outcome_rf<span class="ot">=</span><span class="fu">randomForest</span>(<span class="fu">as.factor</span>(outcome)<span class="sc">~</span>.,<span class="at">data=</span>train_set[<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>,<span class="dv">11</span>)],<span class="at">mtry=</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For regression diagnostics</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>pred_rf_reg<span class="ot">=</span><span class="fu">predict</span>(trump_rf,test_set)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">mean</span>((pred_rf_reg<span class="sc">-</span>test_set<span class="sc">$</span>trump.vote)<span class="sc">^</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.06273066</code></pre>
+</div>
+</div>
+<p>Ok, not much better than bagging, but close. What about classification?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>pred_rf_class<span class="ot">=</span><span class="fu">predict</span>(outcome_rf,test_set,<span class="at">type=</span><span class="st">"class"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(pred_rf_class<span class="sc">!=</span>test_set<span class="sc">$</span>outcome)<span class="sc">/</span><span class="fu">length</span>(test_set<span class="sc">$</span>outcome)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2</code></pre>
+</div>
+</div>
+<p>That time we did a little better; it looks like the de-correlation of variables helped in this example.</p>
+<p>The moral here is that bagging and/or random forests can lead to some gains in predictive ability for regression and classification problems by reducing the variance of the resulting model via bootstrapping. But another advantage is that they can be used to measure the relative importance of all the features in your model.</p>
+</section>
+<section id="variable-importance-and-oob" class="level2">
+<h2 class="anchored" data-anchor-id="variable-importance-and-oob">Variable Importance and OOB</h2>
+<p>There are two other helpful outputs from a bag or random forest model. The first is variable importance. For a regression model, the _variable importance) of each predictor is calculated as the average reduction in MSE (called “IncNodePurity” in R) whenever that variable was used in a split. For our regression random forest, you can get these using either of the following commands:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>trump_rf<span class="sc">$</span>importance</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>              IncNodePurity
+median.income    0.06672638
+unemployed       0.01903721
+metro            0.05306040
+high.school      0.01814789
+non.citizen      0.05794949
+white.pov        0.02310844
+income.ineq      0.01515676
+non.white        0.03646641</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">varImpPlot</span>(trump_rf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>So the top five are median.income, non.citizen, metro,non.white, and white.pov. Note that the potential surrogates for non.citizen (metro and non.white) are given some props. That is the advantage of focusing on the whole forest! Also, you can see some advantages of the forest over plain bagging by comparing relative importance of variables:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">varImpPlot</span>(trump_bag)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here metro and non-white are much less important than non.citizen whereas the differences in variable importance from the random forest model were smaller.</p>
+<p>A second output of importance is the Out-of-Bag (OOB) error estimates. One advantage of bootstrapping is that you only use PART of your sample in each fit. In fact, one can show with some basic probability that if <span class="math inline">\(n\)</span> is large, each observation will be left out of about <span class="math inline">\(e^{-1} \approx\)</span> 0.3678794 of all samples<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. Whenever a sample is left out of a particular fit, it is said to be Out-of-Bag. You can estimate the average test error of your model by computing the average error made for all OOB samples. Its like a built in cross-validation mechanism!</p>
+<p>You can verify my claim about the average fraction of times that a particular sample is left out by using the oob.times output</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># oob.times gives a list of how many times each observation was left out of the bootstrap sample</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(trump_rf<span class="sc">$</span>oob.times)<span class="sc">/</span><span class="dv">500</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3586</code></pre>
+</div>
+</div>
+<p>You can also get the OOB estimate of the MSE by printing the output of your random forest</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>trump_rf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+ randomForest(formula = trump.vote ~ ., data = train_set[, 2:10],      mtry = 3) 
+               Type of random forest: regression
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+          Mean of squared residuals: 0.007479973
+                    % Var explained: 29.92</code></pre>
+</div>
+</div>
+<p>The %Var explained is a “pseudo” <span class="math inline">\(R^2\)</span> similar to the usual <span class="math inline">\(1-SSE/SST\)</span> where <span class="math inline">\(SSE\)</span> is the residual sum of squares for the OOBs. Note that using the MSE of 0.007 from the output, we have <span class="math inline">\(RMSE = \sqrt{MSE} \approx\)</span> 0.083666, which is close to test RMSE from before.</p>
+<p>For classification problems, the OOBs give you a confusion matrix and overall estimate of the error rate:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>outcome_rf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+ randomForest(formula = as.factor(outcome) ~ ., data = train_set[c(2:9,      11)], mtry = 3) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 30%
+Confusion matrix:
+     Blue Red class.error
+Blue    6   5   0.4545455
+Red     4  15   0.2105263</code></pre>
+</div>
+</div>
+<p>You can see here that the overall error rate is 30% while the recall and specificity are <span class="math inline">\(1-0.4545\)</span> and <span class="math inline">\(1-0.2105\)</span>, respectively (if we assume Blue is the positive class; otherwise reverse those numbers).</p>
+<p>Note that since random forests have the built in cross-validation functionality, when you have a smaller dataset, it might be better to use the whole dataset as the training data and just use the OOB stats to avoid overfitting. Just out of curiosity, if we refit the outcome model to the whole data:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>outcome_rf2<span class="ot">=</span><span class="fu">randomForest</span>(<span class="fu">as.factor</span>(outcome)<span class="sc">~</span>.,<span class="at">data=</span>election2016[<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>,<span class="dv">11</span>)],<span class="at">mtry=</span><span class="dv">3</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>outcome_rf2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+ randomForest(formula = as.factor(outcome) ~ ., data = election2016[c(2:9,      11)], mtry = 3) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 3
+
+        OOB estimate of  error rate: 28%
+Confusion matrix:
+     Blue Red class.error
+Blue   13   7   0.3500000
+Red     7  23   0.2333333</code></pre>
+</div>
+</div>
+<p>we end up with an OOB error rate of about 28% and a higher specificity than recall (blue states are apparently harder to predict).</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Random forests are bootstrapped trees and will exhibit reduced variances in their predictions as a result of the repeated sampling process. The disadvantage is that you get a kind of black box where you quite literally “lose the tree for the forest”, but by using the whole forest you get a better picture of what to expect from new growth and a better understanding of which variables are important. Ideally, I would recommend trying both and seeing how they complement each other in any given application. Trees are pretty to look at on their own, but the forest is richer in predictive value.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Actually, Laplace did derive an asymptotic formula for this, but it is not common “intro to stats”” knowledge or even common professor of stats quick recall knowledge.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The name was introduced in Efron’s 1979 paper on the “Bootstrap Method” when he comparing the process to the old phrase “pulling oneself up by one’s boostraps”. It seems like an impossible task to estimate the standard error of a statistic without more knowledge of the population and yet that is just what we do with this method.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>There is a newer package called <code>ranger</code> that has some advantages in terms of computational speed, efficiency, and handling missing values and also the default engine for <code>tidymodels</code>, but <code>randomForest</code> has been around longer so we’ll start there.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Note: If you do decide to use the ranger package, the predictions are stored in a different structure so you would need to do predict(trump_bag, data = test[, 2:10])$predictions instead.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Here is a short proof. In any particular bootstrap taken from a sample of size <span class="math inline">\(n\)</span>, the probability that a particular observation <span class="math inline">\(k\)</span> is not selected is <span class="math inline">\((1-1/n)^n \to e^{-1}\)</span> as <span class="math inline">\(n \to \infty\)</span>.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
