@@ -73,7 +73,12 @@ website:
             text: "Module 5 R Tools: fviz-ness"
       - text: "Module 6"
         menu:
-          - text: "Notes 1: ..."
+          - href: module-06/notes1.qmd
+            text: "Module 6.1: Regression Trees"
+          - href: module-06/notes2.qmd
+            text: "Module 6.2: Classification Trees"
+          - href: module-06/notes3.qmd
+            text: "Module 6.3: Random Forests"
       - text: "Module 7"
         menu:
           - text: "Notes 1: ..."

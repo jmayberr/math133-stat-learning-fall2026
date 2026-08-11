@@ -286,7 +286,18 @@ window.Quarto = {
  <span class="menu-text">Module 6</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-module-6">    
-        <li class="dropdown-header">Notes 1: …</li>
+        <li>
+    <a class="dropdown-item" href="../module-06/notes1.html">
+ <span class="dropdown-text">Module 6.1: Regression Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/notes2.html">
+ <span class="dropdown-text">Module 6.2: Classification Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/notes3.html">
+ <span class="dropdown-text">Module 6.3: Random Forests</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -594,7 +605,7 @@ P(Goal|(x,y)) &gt; 0.5
 <span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>er_logistic<span class="ot">=</span><span class="fu">sum</span>(test_set<span class="sc">$</span>prediction<span class="sc">!=</span>test_set<span class="sc">$</span>Goal)<span class="sc">/</span><span class="fu">length</span>(test_set<span class="sc">$</span>Goal)</span>
 <span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>er_logistic</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3954451</code></pre>
+<pre><code>[1] 0.3623188</code></pre>
 </div>
 </div>
 <p>For those of you who did the last group work, this should be close to the best knn model error rates you got.</p>
@@ -644,15 +655,15 @@ P(Goal|(x,y)) &gt; 0.5
 <div class="cell-output cell-output-stdout">
 <pre><code>          
            Goal Not Goal
-  Goal       22       21
-  Not Goal  170      270</code></pre>
+  Goal       30       23
+  Not Goal  152      278</code></pre>
 </div>
 </div>
 <p>we see that there are two types of errors: predicting goal for not goal and predicting not goal for goal.The second type of error is happening much more frequently. Is this desirable? Next notes we’ll talk about these two way confusion matrices in more detail and some other metrics one can use to talk about to assess the value of a classification scheme. We’ll also discuss incorporating qualitative predictors into our models and how we compare our logistic model with the “null”. Until then, love the ones you’re with.</p>
 </section>
 <section id="practice" class="level2">
 <h2 class="anchored" data-anchor-id="practice">Practice</h2>
-<p>The framingham.csv dataset contains information from a study in Framingham, MA on cardiovascular heart disease. You can view more information about the data <a href="https://www.kaggle.com/datasets/dileep070/heart-disease-prediction-using-logistic-regression">here</a> Download this data and remove all subjects with missing data using the drop_na() command.</p>
+<p>The <a href="&quot;https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/framingham.csv&quot;">framingham dataset</a> contains information from a study in Framingham, MA on cardiovascular heart disease. You can view more information about the data <a href="https://www.kaggle.com/datasets/dileep070/heart-disease-prediction-using-logistic-regression">here</a> Download this data and remove all subjects with missing data using the drop_na() command.</p>
 <ol type="1">
 <li>Fit a logistic regression model to the variable TenYearCHD based on all the other predictors in the dataset</li>
 <li>If you hold all other variables fixed, what is the percent change in odds for a Male vs Female getting heart disease?</li>

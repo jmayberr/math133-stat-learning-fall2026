@@ -5,19 +5,57 @@ author: "John Mayberry"
 
 ## About This Course
 
-In this course you'll learn how to build and evaluate statistical models for making predictions and uncovering patterns in data. We'll cover two main types of problems: **regression** (predicting a number, like a house price) and **classification** (predicting a category, like whether an email is spam or not).
+In this course you'll learn how to build and evaluate statistical models for making predictions and uncovering patterns in data. We'll cover two main types of problems: **regression** (predicting a number, like a grade point average) and **classification** (predicting a category, like whether or not you pass a class).
 
-Along the way you'll get hands-on experience with a wide range of popular modeling techniques, from foundational methods like linear and logistic regression to more modern approaches like random forests and neural networks. You'll also learn how to figure out which model is actually the best fit for a given problem, a skill that's just as important as building the models themselves!
-
-All of this will be done in **R**, a widely used programming language in statistics and data science, so you'll leave the course with both the conceptual understanding and the practical coding skills that are valued in industry and graduate school.
+Along the way you'll get hands-on experience with a wide range of popular modeling techniques, from foundational methods like linear and logistic regression to more modern approaches like random forests and neural networks. You'll also learn how to figure out which model is actually the best fit for a given problem and how to create some nice visualizations to complement your analyses (after all, pictures speak louder than words...or models).
 
 ## What Will We Cover?
 
--   Regression and classification models (linear regression, logistic regression, K-nearest neighbors, decision trees, random forests, neural networks, and more)
--   Dimension reduction and clustering (principal component analysis, clustering algorithms)
--   Time series methods (random walks, autoregressive and moving average models)
--   Model selection and validation (cross-validation, training/testing sets, stepwise selection)
--   Data visualization and exploratory analysis
+The three primary learning objectives for this course are as follows:
+
+1.  **Describe, implement, and compare common predictive models in statistics (Develop Tools)**
+
+    -   Linear models, including ordinary least squares and logistic regression
+
+    -   Shrinkage methods, such as Ridge and Lasso regression
+
+    -   K-Nearest Neighbors regression and classification
+
+    -   Classification and Regression Trees
+
+    -   Principal Component Analysis
+
+    -   Time series concepts and methods, including random walks, stationarity, autocorrelation, exponential smoothing, and autoregressive models
+
+    -   Clustering algorithms
+
+    -   Neural Networks
+
+2.  **Select the most applicable statistical tool given a specified research objective (Select Tools)**
+
+    -   Distinguishing between regression and classification problems
+
+    -   Distinguishing between supervised and unsupervised algorithms
+
+    -   Assessing model accuracy
+
+    -   Model training and validation
+
+    -   Resampling methods
+
+    -   Variable selection
+
+3.  **Communicate the results of predictive analyses with verbal, visual, and numerical descriptions**
+
+    -   Calculate summary statistics and create tables in R
+
+    -   Interpret model output in R
+
+    -   Create appropriate figures using the `ggplot2` package in R
+
+    -   Present results using notebooks style programs (eg. quarto, google collab)
+
+All of this will be done in **R**, a widely used programming language in statistics and data science, so you'll leave the course with both the conceptual understanding and the practical coding skills that are valued in industry and graduate school.
 
 ## Who Is This Course For?
 
@@ -34,3 +72,5 @@ All course notes will be posted here while all course assignments will be posted
 
 -   [Datasets](https://github.com/jmayberr/math133-stat-learning-fall2026/tree/main/Datasets)
 -   [Module 1 Code Files](https://github.com/jmayberr/math133-stat-learning-fall2026/tree/main/module-01)
+
+If you're still here, let's get cooking!

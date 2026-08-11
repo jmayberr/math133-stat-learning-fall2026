@@ -1,5 +1,5 @@
 ---
-title: "Decision Trees of Life"
+title: "Module 6.1: Decision Trees of Life"
 ---
 
 
@@ -7,30 +7,16 @@ title: "Decision Trees of Life"
 
 The last module provided a brief introduction to unsupervised learning, focusing on principal component analysis (PCA) for dimensionality reduction and clustering techniques for identifying patterns in unlabeled data. While those methods help uncover structure without predefined labels, we now shift our focus back to supervised learning, where models are trained using labeled examples. In this module, we explore a powerful and intuitive class of supervised models based on decision trees. Decision trees form the foundation of many machine learning algorithms, offering a structured way to make predictions by recursively partitioning data based on feature values. We will examine how decision trees operate, their strengths and limitations, and how they serve as the building blocks for more advanced ensemble methods. 
 
-As always, we begin by loading necessary shit. 
+## Regression Tree Example
+
+Decision trees can be used in both classification and regression problems. For this reason, they are often referred to with the acronym CART (Classification And Regression Trees) although RPART (Recursive PARTitioning) is one of the primary R packages to use when building such models. The "C" of CART is more natural to explain from an application perspective, but the "R" part is easier to explain mathematically so we will start with the latter. In contrast to the usual flow of mathematical exposition, we will actually start with an example and then explain how it works.  In case you're not sick of it yet, we'll be using our favorite election dataset with trump.vote as the response
 
 ```{r,warning=F,message=F}
 library(tidyverse)
 set.seed(71)
 df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
 election2016=read.csv(df_url)
-cb_palette <- c(
-  "#000000",  # black
-  "#E69F00",  # orange
-  "#56B4E9",  # sky blue
-  "#009E73",  # bluish green
-  "#F0E442",  # yellow
-  "#0072B2",  # blue
-  "#D55E00",  # vermillion
-  "#CC79A7"   # reddish purple
-)
 ```
-
-Now we get down to it. 
-
-## Regression Trees
-
-Decision trees can be used in both classification and regression problems. For this reason, they are often referred to with the acronym CART (Classification And Regression Trees) although RPART (Recursive PARTitioning) is one of the primary R packages to use when building such models. The "C" of CART is more natural to explain from an application perspective, but the "R" part is easier to explain mathematically so we will start with the latter. In contrast to the usual flow of mathematical exposition, we will actually start with an example and then explain how it works.  In case you're not sick of it yet, we'll be using our favorite election dataset with trump.vote as the response
 
 Pictures speak louder than words so let's start with a visual. It requires loading three new packages, one which loads the name model building function `rpart()`, one which just loads the color brewer palettes, and one which loads the aptly named visualization function `fancyRpartplot()`
 
@@ -82,7 +68,7 @@ Makes sense^[Although Maine is a bit of an outlier because their electoral votes
 Now that you know how to read a tree, let's talk a little bit about how it works. Next class we'll discuss the corresponding classification problem.
 
 
-## Greedy Trees
+## The Nitty-Greedy Details
 
 The end goal of a tree is to partition the sample into leaves that are as "similar" as possible, kind of like in K-means clustering. The difference between regression trees and K-means is what we mean by "similar". In K-means (an unsupervised algorithm), "similar" means that the $x$ values are as close together as possible. In regression trees (a supervised algorithm) we want the $y$ values to be as close as possible. In other words, we are trying to find a set of $K$ leaves $L_1,...,L_K$ which minimizes the sum of squared errors^[This is very similar to what we do in OLS except that here, the predictions are piecewise functions, defined on leaf $j$ as $\bar{y}_j$.]:
 $$
@@ -156,31 +142,51 @@ re2-re1
 
 So at the second step, we would keep the split if an improvement of 0.13 seems worth it. 
 
+## Prune the Hedges
+
 Cp is the most common measure of how much we gain from each split and can be used in "pruning"" back a tree (see below). Note that rpart uses cp=0.01 as one of its stopping rules for when to quit attempting splits: as soon as there are no more splits which gain you more than 1% in relative error, they aren't worth making according to rpart. The other stopping criteria is based on node sizes: rpart will not attempt a split on a node with fewer than 20 observations. Both of these criteria can be modified with the appropriate arguments in rpart; see the help file for more details. 
 
-The fourth and fifth columns give the mean and std of the cross-validation errors from the model fit (using $K=10$ folds by default). You can plot these to see if it there is any over-fitting going on:
+The first step in pruning is to look back at the cp table:
+
+```{r}
+trump_tree$cptable
+```
+
+The fourth and fifth columns give the mean and std of the cross-validation errors from the model fit (using $K=10$ folds by default). You can plot them to better visualize the trend:
 
 ```{r}
 plotcp(trump_tree,upper="splits")
 ```
 
-Notice that the trees with one or two splits have a lower cross validation error which suggests we  "pruning" may want to avoid overfitting by "pruning back" the tree to one with a larger cp^[Very confusingly, the cp on the x-axis here is not exactly the same as the cp in the table, but is the geometric mean of the last two cp values. Honestly, I don't really know why.]. The dashed line in the plot shows one SD above the best model and some people prefer to use the simplest model which drops below this line. In our case, that would be the tree with only one split and this tree would correspond to any cp value between 0.43688228 (the first entry in the cp table) and 0.13110774 (the second). The function to obtain pruned trees is aptly named prune. 
+Notice that the trees with one or two splits have a lower cross validation error which suggests we  may want to "prune" back our tree to avoid overfitting by "pruning back" the tree to one with a larger cp^[Very confusingly, the cp on the x-axis here is not exactly the same as the cp in the table, but is the geometric mean of the last two cp values. Honestly, I don't really know why.]. The dashed line in the plot shows one SD above the best model and some people prefer to use the simplest model which drops below this line. In our case, that would be the tree with only one split and this tree would correspond to any cp value between 0.43688228 (the first entry in the cp table) and 0.13110774 (the second). The function to obtain pruned trees is aptly named prune. 
 
 ```{r}
 trump_prune=prune(trump_tree,cp=.4)
 fancyRpartPlot(trump_prune,sub="Pruned Tree")
 ```
 
-We could also prune to the two split example
+To reiterate, the exact choice of cp isn't critical so long as it is between the first two entries in the cp table. We could also prune to the two split example by choosing any number between the second two entries (eg. 0.09): 
 
 ```{r}
 trump_prune2=prune(trump_tree,cp=.09)
 fancyRpartPlot(trump_prune2,sub="Pruned Tree 2")
 ```
 
-or the three, but I think you get the point by now. 
 
-## Up Next
 
-Trees can also be used for classification problems and we'll see how next class. In the meantime, if you want some more practice, try a regression tree on the mtcars data using mpg as the outcome (Group work 12).  
+## Up next...
 
+The "C" parts of CART. In the next section, we'll see the more common use of decision trees as an intuitive interface for classifying observations. But first, some ...  
+
+
+## Practice 
+
+For these exercises you'll be using the `mtcars` dataset from the base package:
+
+```{r}
+head(mtcars)
+```
+
+1. Create a regression tree using mpg as the outcome and all other variables as predictors. Plot the resulting tree.
+2. Describe the leafs in the tree. What are the characteristics of the most fuel efficient cars (highest mpg)?
+3. Look at the cp plot and table for your tree. Prune the tree to minimize cross-validation error and plot the result. 
