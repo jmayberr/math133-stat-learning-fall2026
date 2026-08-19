@@ -243,3 +243,12 @@ we end up with an OOB error rate of about 28% and a higher specificity than reca
 ## Conclusion
 
 Random forests are bootstrapped trees and will exhibit reduced variances in their predictions as a result of the repeated sampling process. The disadvantage is that you get a kind of black box where you quite literally "lose the tree for the forest", but by using the whole forest you get a better picture of what to expect from new growth and a better understanding of which variables are important. Ideally, I would recommend trying both and seeing how they complement each other in any given application. Trees are pretty to look at on their own, but the forest is richer in predictive value. 
+
+## Practice 
+
+Recall the `palmerpenguins` package from the Module 6.2 practice problems. Load this package into R and work with the `penguins` dataset to answer the questions below. 
+
+1. Drop all rows containing NA from the dataset and perform a 70-30 training split using `set.seed(55)` for consistency.
+2. Fit a classification bagged model to the training set using *species* as the response and all other variables as features. Compute the model accuracy on the test set. 
+3. Change to a random forest model with mtry=2. Compare the accuracy of this model with the bagged one. 
+4. Compare variable importance plots for the models in 2 and 3. 
