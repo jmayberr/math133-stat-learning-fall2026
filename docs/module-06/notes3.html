@@ -631,6 +631,16 @@ Red     7  23   0.2333333</code></pre>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
 <p>Random forests are bootstrapped trees and will exhibit reduced variances in their predictions as a result of the repeated sampling process. The disadvantage is that you get a kind of black box where you quite literally “lose the tree for the forest”, but by using the whole forest you get a better picture of what to expect from new growth and a better understanding of which variables are important. Ideally, I would recommend trying both and seeing how they complement each other in any given application. Trees are pretty to look at on their own, but the forest is richer in predictive value.</p>
+</section>
+<section id="practice" class="level2">
+<h2 class="anchored" data-anchor-id="practice">Practice</h2>
+<p>Recall the <code>palmerpenguins</code> package from the Module 6.2 practice problems. Load this package into R and work with the <code>penguins</code> dataset to answer the questions below.</p>
+<ol type="1">
+<li>Drop all rows containing NA from the dataset and perform a 70-30 training split using <code>set.seed(55)</code> for consistency.</li>
+<li>Fit a classification bagged model to the training set using <em>species</em> as the response and all other variables as features. Compute the model accuracy on the test set.</li>
+<li>Change to a random forest model with mtry=2. Compare the accuracy of this model with the bagged one.</li>
+<li>Compare variable importance plots for the models in 2 and 3.</li>
+</ol>
 
 
 </section>

@@ -1,6 +1,5 @@
 ---
 title: "Module 4 R Tools: Hyperparameter Tuning with Tidymodels"
-format: html
 ---
 
 ## One Ring to Rule Them All 

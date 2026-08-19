@@ -213,6 +213,6 @@ That is a very different tree! In the next section, we'll learn some sampling te
 
 The `palmerpenguins` package contains a famous dataset on adult penguins covering three species found on three islands in the Palmer Archipelago, Antarctica. Load this package into R and work with the `penguins` dataset to answer the questions below. 
 
-1. Perform a 70-30 training split on the Penguins dataset using `set.seed(55)` for consistency. Fit a classification tree to the training set and plot the resulting tree
+1. Perform a 70-30 training split on the Penguins dataset using `set.seed(55)` for consistency. Fit a classification tree to the training set using *species* as the response and all other variables as features. Plot the resulting tree
 2. What characteristics would predict each of the three species (Adelie, Chinstrap, Gentoo)?
 3. Calculate the predicted species of the observations in your test set. What is the model accuracy? 
