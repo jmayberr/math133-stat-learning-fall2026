@@ -1,12 +1,5 @@
 ---
 title: "Module 1.1: Introduction to Statistical Models"
-author: "Mayberry"
-format: 
-  html:
-    embed-resources: true
-    self-contained: true
-    math: mathjax
-editor: visual
 ---
 
 ```{r setup, include=FALSE}
@@ -15,13 +8,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Prediction
 
-Close your eyes and think of a time you tried to predict something. What was it it that you were trying to predict? Was it a number? Was it a binary outcome (like win/lose)? What information did you use to make your prediction? In this class, prediction will be our goal and we'll develop a toolbox of methods for predicting one variable (called an outcome, response or dependent variable) from others (called features, predictors, explanatory or independent variables).
-
 A *deterministic model* for prediction is a function $$
 Y = f(X_1,X_2,..X_p)
-$$ where $Y$ is the *outcome*, $X_1,...,X_p$ are the *features*, and $f$ is a function which relates the two. A *statistical* or *probabilistic* model allows us to add some random noise into the model and say $$
+$$ where $Y$ is called the *outcome* or *response* variable, $X_1,...,X_p$ are called the *features* or *predictors*, and $f$ is a function which relates the two. A *statistical* or *probabilistic* model allows us to add some random noise into the model and say $$
 Y = f(X_1,X_2,..X_p) + \varepsilon
-$$ where $\varepsilon$ is a random variable with mean zero (so the noise acts in an unbiased manner) and nonzero variance $\sigma$. In this framework, the function $f$ represents the *trend* and the error term $\varepsilon$ represents random fluctuations around the trend that are not captured by the features in your model. Because of Central Limit Theorem arguments, we often assume that $\varepsilon$ is a Normal random variable.
+$$ where $\varepsilon$ is a random variable with mean zero (so the noise acts in an unbiased manner) and nonzero variance $\sigma$. In this framework, the function $f$ represents the *trend* and the error term $\varepsilon$ represents random fluctuations in the outcome that are not captured by your features. Because of Central Limit Theorem arguments, we often assume that $\varepsilon$ is a Normal random variable.
 
 To demonstrate, here is an example of data that is generated according to the statistical model $$
 Y = X + Z
