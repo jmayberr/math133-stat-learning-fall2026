@@ -79,6 +79,8 @@ website:
             text: "Module 6.2: Classification Trees"
           - href: module-06/notes3.qmd
             text: "Module 6.3: Random Forests"
+          - href: module-06/rtools.qmd
+            text: "Module 6 R Tools: Return of Tidymodels"
       - text: "Module 7"
         menu:
           - text: "Notes 1: ..."
