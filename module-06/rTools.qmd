@@ -62,9 +62,9 @@ A few notes here:
 -   Unlike `rpart` which chooses default values, this formulation requires you make a choice about three parameters in the tree: `tree_depth` (the maximum allowable tree depth), `min_n` (the minimum number of data points required for a node to be split), and `cost_complexity` (the cp paramater from rpart). For now, I chose values above which roughly match the defaults (except for a smaller `tree_depth`).
 -   You can hypertune based on these three parameters. We won't do that in these notes, but see the next section where we exemplify the process for random forests.
 -   There are other engines available besides `rpart` that differ in their execution of the fitting algorithm; `spark` is a popular one.
--   For classification problems, obviously change the last line to "classification"
+-   For classification problems, obviously change the last line to `set_mode("classification")`
 
-Now we move onto
+Now we move onto the next steps:
 
 ```{r}
 # Step 2: Define resampling plan
@@ -108,7 +108,7 @@ One advantage of using tidymodels for random forests is that we can tune the "mt
 ```{r}
 # Step 1: Model specification
 rf_specs=rand_forest(mtry=tune()) |>
-  set_engine("ranger") |>  # can also use randomForest but ranger is usually preferred
+  set_engine("ranger") |>  # can also use randomForest but ranger is preferred
   set_mode("regression")
 
 # Step 2: Resampling procedure - switch to five folds for faster performance
@@ -119,7 +119,7 @@ cv_plan =vfold_cv(train_set[,4:19],v=5)
 # Set mtry_grid
 mtry_grid=grid_regular(
   finalize(mtry(),train_set[,5:19]), # This line gives mtry the range of 1 to max number of features
-  levels = 5)  #Sets how many values in the range to try, can do 14 but its slower.  
+  levels = 5)  #Sets how many values in the range to try, can do 15 but its slower.  
 
 rf_models=tune_grid(rf_specs,
                     popularity~.,
@@ -153,7 +153,3 @@ SSE=sum((test_set$popularity-rf_pred)^2)
 ```
 
 That was a lot better than the tree model!
-
-One note on variable importance...
-
-# `{r} # rf_spec <- rand_forest(mtry = best_mtry) |> #   set_engine("ranger", importance = "impurity") |> #   set_mode("regression")   #  #`

@@ -1,0 +1,35 @@
+[
+  {
+    "listing": "/modules.html",
+    "items": [
+      "/module-01/notes1.html",
+      "/module-01/notes2.html",
+      "/module-01/notes3.html",
+      "/module-01/quartoIntro.html",
+      "/module-01/rtools.html",
+      "/module-01/supplement.html",
+      "/module-02/notes1.html",
+      "/module-02/notes2.html",
+      "/module-02/notes3.html",
+      "/module-02/notes_bonus.html",
+      "/module-02/supplement.html",
+      "/module-03/notes1.html",
+      "/module-03/notes2.html",
+      "/module-03/notes3.html",
+      "/module-03/supplement.html",
+      "/module-04/notes1.html",
+      "/module-04/notes2.html",
+      "/module-04/notes3.html",
+      "/module-04/rTools.html",
+      "/module-05/notes1.html",
+      "/module-05/notes2.html",
+      "/module-05/notes3.html",
+      "/module-05/rtools.html",
+      "/module-05/supplement.html",
+      "/module-06/notes1.html",
+      "/module-06/notes2.html",
+      "/module-06/notes3.html",
+      "/module-06/rTools.html"
+    ]
+  }
+]

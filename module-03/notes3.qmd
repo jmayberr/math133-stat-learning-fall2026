@@ -34,7 +34,7 @@ sprintf("The odds of getting CHD are %.0f%% higher for males compared to females
         (exp(coef(chd_glm)["male1"]) - 1) * 100)
 ```
 
-We can also ask about the impact of reducing cigarette consumption. Suppose for example we want to know what happens if we reduce cigaratte consumption by 20 per day. This leads to teh following change in odds of developing CHD: 
+We can also ask about the impact of reducing cigarette consumption. Suppose for example we want to know what happens if we reduce cigaratte consumption by 20 per day. This leads to the following change in odds of developing CHD: 
 
 ```{r}
 exp(-20 * coef(chd_glm)["cigsPerDay"])
@@ -76,7 +76,7 @@ Each point is the estimated odds ratio for that predictor and the horizontal bar
 
 ## The Confusion Matrix and Classification Metrics
 
-Before we dive into evaluating our logistic regression model, we need to develop better tools for measuring classification performance. So far we have been using accuracy as our metric for classification performance. However, accuracy alone can be misleading, especially when the classes are imbalanced. To see why, let's start with a motivating example.
+So far we have been using accuracy as our metric for classification performance, but accuracy alone can be misleading, especially when the classes are imbalanced. To see why, let's start with a motivating example.
 
 ### A Medical Testing Example
 
@@ -111,7 +111,7 @@ $$balanced\ accuracy = \frac{0.938 + 0.960}{2} = 0.949$$
 **Precision (Positive Predictive Value)** — what is the probability that you actually have the disease given that you tested positive?
 $$precision = \frac{282}{282 + 388} = 0.421$$
 
-Notice something alarming: even though accuracy is 95.9%, if you test positive there is only a **42% chance** you actually have COVID! This happens because the disease is rare - most positive tests are false positives from the large pool of healthy people. This is why accuracy alone is misleading for imbalanced problems.
+Notice something alarming: even though accuracy is 95.9%, if you test positive there is only a **42% chance** you actually have COVID! This happens because the disease is rare; most positive tests are false positives from the large pool of healthy people. This is why accuracy alone is misleading for imbalanced problems.
 
 ### Precision vs Recall Tradeoff
 
@@ -264,7 +264,7 @@ calculate_metrics(yhat, y, "1")
 
 The specificity is smaller than what we got using the 0.5 cutoff, but this is offset by a rise in recall to create an overall gain in balanced accuracy.
 
-## Bonus: ROC curves
+## Bonus: ROC curves^[Yet another metric we won't cover in these notes are _Brier Scores_, defined as the MSE between the predicted probabilities and the actual binary values. I put the name here so you know what it is if you see it in future performance analysis ventures. ]
 
 Receiver Operator Characteristic (ROC) curves are a tool that machine learning has borrowed from signal processing as an alternative metric for measuring model success. In an ROC curve, we plot the recall (true positive rate) vs $1-$ sensitivity (false positive rate). This curve is compared with the line $y=x$ for reference. Here is what this looks like for the framingham model:
 

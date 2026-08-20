@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Module 4.3: Regularization – Statistical Learning Methods</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d4be639c637f3db3c684c66cefad7e0c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Statistical Learning Methods</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-1" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 1</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-1">    
+        <li>
+    <a class="dropdown-item" href="../module-01/notes1.html">
+ <span class="dropdown-text">Module 1.1: Introduction to Statistical Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes2.html">
+ <span class="dropdown-text">Module 1.2: Prediction for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes3.html">
+ <span class="dropdown-text">Module 1.3: Inference for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/supplement.html">
+ <span class="dropdown-text">Module 1 Theory: A deeper look at finding coefficients</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/rtools.html">
+ <span class="dropdown-text">Module 1 R Tools: Introduction to ggplot2 and tidyverse</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-2" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 2</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-2">    
+        <li>
+    <a class="dropdown-item" href="../module-02/notes1.html">
+ <span class="dropdown-text">Module 2.1: Multiple Regression Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes2.html">
+ <span class="dropdown-text">Module 2.2: Enriching Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes3.html">
+ <span class="dropdown-text">Module 2.3: Regression Diagnostics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes_bonus.html">
+ <span class="dropdown-text">Module 2 Bonus: The F Test</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/supplement.html">
+ <span class="dropdown-text">Module 2 Theory Supplement</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-3" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 3</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-3">    
+        <li>
+    <a class="dropdown-item" href="../module-03/notes1.html">
+ <span class="dropdown-text">Module 3.1: Introduction to Classification</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/notes2.html">
+ <span class="dropdown-text">Module 3.2: Logistic Regression</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/notes3.html">
+ <span class="dropdown-text">Module 3.3: Evaluating Classifiers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/supplement.html">
+ <span class="dropdown-text">Module 3 Theory Supplement: Finding Logistic Regression Coefficients</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-4" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 4</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-4">    
+        <li>
+    <a class="dropdown-item" href="../module-04/notes1.html">
+ <span class="dropdown-text">Module 4.1: Cross Validation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-04/notes2.html">
+ <span class="dropdown-text">Module 4.2: Feature Selection</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-04/notes3.html">
+ <span class="dropdown-text">Module 4.3: Regularization</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-04/rTools.html">
+ <span class="dropdown-text">Module 4 R Tools: Tuning Hyperparameters with Tidymodels</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-5" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 5</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-5">    
+        <li>
+    <a class="dropdown-item" href="../module-05/notes1.html">
+ <span class="dropdown-text">Module 5.1: Principal Component Analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/notes2.html">
+ <span class="dropdown-text">Module 5.2: K-means Clustering</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/notes3.html">
+ <span class="dropdown-text">Module 5.3: Hierarchical Clustering</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/supplement.html">
+ <span class="dropdown-text">Module 5 Theory Supplement: PCA vs SVD</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/rtools.html">
+ <span class="dropdown-text">Module 5 R Tools: fviz-ness</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-6" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 6</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-6">    
+        <li>
+    <a class="dropdown-item" href="../module-06/notes1.html">
+ <span class="dropdown-text">Module 6.1: Regression Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/notes2.html">
+ <span class="dropdown-text">Module 6.2: Classification Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/notes3.html">
+ <span class="dropdown-text">Module 6.3: Random Forests</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/rtools.qmd">
+ <span class="dropdown-text">Module 6 R Tools: Return of Tidymodels</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-7" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 7</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-7">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-8" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 8</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-8">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Module 4.3: Regularization</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Module 4.2 discussed variable selection methods that use either parameter adjusted penalties (Cp, BIC, etc) or cross validation to determine optimal models. In general, these are all “subset selection” methods and the only difference between them is the criteria used to select between linear models with different numbers of features. <em>Regularization</em> (also called <em>shrinkage</em>) methods, in contrast, create a penalty for large coefficients in linear models and hence “shrink” the size of estimated coefficients from the get go. We shall discuss the two most common shrinkage methods in these notes: Ridge and LASSO regression. After, we’ll combine them both into a class of models called elastic net and show how to train them using the glmnet package.</p>
+</section>
+<section id="ridge-vs-lasso-theory" class="level2">
+<h2 class="anchored" data-anchor-id="ridge-vs-lasso-theory">Ridge vs LASSO: Theory</h2>
+<p>To understand shrinkage methods, let’s first recall the ordinary least squares (henceforth OLS) method for estimating coefficients in a simple linear model: we choose a vector of <span class="math inline">\(p+1\)</span> coefficients <span class="math inline">\(\hat{\beta} = (\hat{\beta}_0,\hat{\beta}_1,...,\hat{\beta}_p)^T\)</span> such that the resulting prediction <span class="math inline">\(\hat{y} =X\hat{\beta}\)</span> minimizes the sum of squared errors <span class="math display">\[
+SSE = \sum (y_i - \hat{y}_i)^2.
+\]</span> or equivalently, <span class="math inline">\(MSE = RSS/n\)</span>.</p>
+<p>The concept of norms can greatly ease the notation involved in representing regression penalty functions. Given a vector <span class="math inline">\(x=(x_1,...,x_n)^T\)</span>, its <span class="math inline">\(\ell_2\)</span>-norm is defined as its (physics) magnitude <span class="math display">\[
+\|x\|_2 = \left(\sum_{i=1}^n x_i^2\right)^{1/2}
+\]</span> In contrast, the <span class="math inline">\(\ell_1\)</span>-norm is the sum of the absolute values of its components</p>
+<p><span class="math display">\[
+\|x\|_1 = \sum_{i=1}^n |x_i|
+\]</span></p>
+<p>The <span class="math inline">\(\ell_1\)</span>-norm is often called the “taxicab distance” because it measures the distance you would have to travel to get to <span class="math inline">\(x\)</span> if you could only travel at right angles (like on a city grid) from the origin.</p>
+<p>With the norm notation, we can rewrite MSE in terms of the <span class="math inline">\(\ell_2\)</span>-norm of the residuals</p>
+<p><span class="math display">\[
+MSE = \frac{1}{n} \| y-\hat{y} \|_2^2
+\]</span></p>
+<p>Ridge and lasso (LASSO = least absolute shrinkage and selection operator) regression both add penalties to the RSS for large parameters, but how they quantify largeness differs. Ridge uses the <span class="math inline">\(\ell_2\)</span>-norm; lasso uses the <span class="math inline">\(\ell_1\)</span>-norm. Each has a hyper-parameter <span class="math inline">\(\lambda\)</span>, called the tuning parameter, which decides how much weight to put on the size of the coefficients. More specifically, ridge regression attempts to minimize the function<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> <span class="math display">\[
+\frac{1}{2}MSE + \lambda \|\beta\|_2^2
+\]</span> while lasso tries to minimize <span class="math display">\[
+\frac{1}{2} MSE + \lambda \|\beta\|_1.
+\]</span> Note that in both methods, the intercept <span class="math inline">\(\beta_0\)</span> is excluded from the penalty because this coefficient has nothing to do with the relationship of our response to the predictors, but rather the average value of our response in the absence of any predictors. Also note that both ridge and lasso regression assume that all predictors are standardized<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> so that their coefficients are being calculated on the same scale and are not dependent on the predictors’ units.</p>
+<p>As mentioned above, the tuning parameter <span class="math inline">\(\lambda\)</span> describes how much weight to place on the coefficient sizes. When <span class="math inline">\(\lambda=0\)</span>, both ridge and lasso become ordinary least squares (the fit obtained in lm). Choosing the “right” lambda is usually done based on cross-validation:</p>
+<ul>
+<li>Choose a grid of <span class="math inline">\(\lambda\)</span> values and fit a model with each.</li>
+<li>Compute the cross-validation MSE (or RMSE) for each value of <span class="math inline">\(\lambda\)</span> and compare.</li>
+</ul>
+<p>This is the process of “hyperparameter tuning” earlier stated as a second major goal of this section. Yay, we did it. We will demonstrate with an example below.</p>
+</section>
+<section id="ridge-model-fit-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="ridge-model-fit-in-r">Ridge Model fit in R</h2>
+<p>The glmnet package contains a core function for implementing both ridge and lasso regression. Let’s start by loading this package along with the election2016 dataset</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmnet)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The primary function in glmnet is called…wait for it…glmnet and has four inputs: a matrix of predictors, a vector of responses, a value of “alpha”, and a grid of values to use for lambda cross-validation (the last of which you can usually leave off and let it default to choosing 100 lambdas). What is alpha you might ask? Well, glmnet actually can implement ridge/lasso hybrids (called <em>Elastic Net</em>) which minimizes <span class="math display">\[
+\frac{1}{2} MSE + \lambda\left[ \alpha \|\beta\|_1 + \left(\frac{1-\alpha}{2}\right) \|\beta\|_2^2 \right]
+\]</span> for any value of <span class="math inline">\(\alpha\)</span> between 0 and 1. When <span class="math inline">\(\alpha=0\)</span>, we get Ridge and when <span class="math inline">\(\alpha = 1\)</span>, we get Lasso. Taking <span class="math inline">\(\alpha = 1/2\)</span> would lead to an equal mixture of the two.In practice, you can also tune <span class="math inline">\(\alpha\)</span> <span class="math inline">\(\lambda\)</span> using cross-validation, which we’ll demonstrate in the next section. In these notes we’ll stick to lasso and ridge.</p>
+<p>Let’s start with applying ridge to the election2016 data. The format of glmnet is a little different because you have to input the outcome as a vector and the predictors as a matrix. The best way to do this in the right format is to first define your formula and then pass it to model.matrix (the “-1” removes the intercept because glmnet adds it automatically)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>election2016<span class="sc">$</span>trump.vote</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">=</span> <span class="fu">names</span>(election2016)[<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>formula <span class="ot">=</span> <span class="fu">reformulate</span>(predictors,<span class="at">response=</span><span class="st">"trump.vote"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>X<span class="ot">=</span><span class="fu">model.matrix</span>(formula,<span class="at">data=</span>election2016)[,<span class="sc">-</span><span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we’ll run glmnet with <span class="math inline">\(\alpha = 0\)</span> (corresponding to ridge). Note that glmnet automatically standardizes all the predictors prior to the fit so you don’t have to worry about that.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ridge.mod<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The ridge.mod object stores the estimated coefficients in Ridge regression models for 100 different values of <span class="math inline">\(\lambda\)</span>. It chooses them equally spaced on a logarithmic scale from about <span class="math inline">\(e^{-5}\)</span> to <span class="math inline">\(e^4\)</span>. You can see the largest by</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ridge.mod<span class="sc">$</span>lambda[<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 59.3588</code></pre>
+</div>
+</div>
+<p>and the smallest by</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ridge.mod<span class="sc">$</span>lambda[<span class="dv">100</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.00593588</code></pre>
+</div>
+</div>
+<p>The ridge.mod object stores 100 different models, one for each value of <span class="math inline">\(\lambda\)</span> The coefficients for these models are stored as columns in the coef matrix. Furthermore, even though the variables were standardized prior to fitting the model, the coefficients are returned on the original scale of the variables. The code below shows how to extract the coefficients for the first and last models, which correspond to the largest and smallest values of <span class="math inline">\(\lambda\)</span> respectively:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge.mod)[,<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">100</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>9 x 2 sparse Matrix of class "dgCMatrix"
+                         s0           s99
+(Intercept)    4.990000e-01  2.534829e+00
+median.income -6.624889e-42 -5.163246e-06
+unemployed    -2.629490e-37 -9.897817e-01
+metro         -3.189146e-37 -1.041906e-01
+high.school   -5.327744e-37 -1.042639e+00
+non.citizen   -1.958755e-36 -5.648079e-01
+white.pov      2.082825e-36 -6.638636e-01
+income.ineq   -9.804036e-37 -1.292282e+00
+non.white     -2.681367e-37 -1.446864e-01</code></pre>
+</div>
+</div>
+<p>Notice that the coefficients for large lambda (column 1) are orders of magnitude smaller than the coefficients for small lambda. You can also compare their <span class="math inline">\(\ell_2\)</span>-norms and see that the smaller value of <span class="math inline">\(\lambda\)</span> gives much larger coefficients.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="fu">sum</span>(<span class="fu">coef</span>(ridge.mod)[,<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span>),<span class="fu">sum</span>(<span class="fu">coef</span>(ridge.mod)[,<span class="dv">100</span>]<span class="sc">^</span><span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  0.249001 10.953628</code></pre>
+</div>
+</div>
+<p>Luckily, the predict function works with the output of glmnet as well. The only weirdness is that you have to specify which lambda to use by “s=…”. For example, if we want to predict trump.vote for the first five states in our dataset using the largest value of <span class="math inline">\(\lambda\)</span>, we use</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(ridge.mod,<span class="at">s=</span>ridge.mod<span class="sc">$</span>lambda[<span class="dv">1</span>], <span class="at">newx=</span>X[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  s=59.3588
+1     0.499
+2     0.499
+3     0.499
+4     0.499
+5     0.499</code></pre>
+</div>
+</div>
+<p>Notice that with this large value of <span class="math inline">\(\lambda\)</span>, the predictions are dominated by the intercept because the coefficients have been shrunk so much. We could say that this model has high bias, but low variance. In contrast, using the smallest value of <span class="math inline">\(\lambda\)</span>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(ridge.mod,<span class="at">s=</span>ridge.mod<span class="sc">$</span>lambda[<span class="dv">100</span>], <span class="at">newx=</span>X[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  s=0.00593588
+1    0.5829050
+2    0.4351506
+3    0.4713758
+4    0.5886517
+5    0.3925948</code></pre>
+</div>
+</div>
+<p>There is more variability in predictions (and less bias).</p>
+<p>One can also perform <span class="math inline">\(k\)</span>-Fold cross validation to obtain an optimal lambda using the cv.glmnet function (nfolds is the “k” from our previous work):</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>cv.ridge<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.ridge)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>So the optimal value of <span class="math inline">\(\lambda\)</span> appears to be on the smaller side ( below <span class="math inline">\(log \lambda \approx -4\)</span>. The first dashed line<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> on the left displays the minimum and the exact value can be found using the lambda.min command</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>cv.ridge<span class="sc">$</span>lambda.min</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.00593588</code></pre>
+</div>
+</div>
+<p>Now we can go back and use the minimum value of <span class="math inline">\(\lambda\)</span> to refit our model</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ridge.opt<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">lambda =</span> cv.ridge<span class="sc">$</span>lambda.min,<span class="at">alpha=</span><span class="dv">0</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge.opt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>9 x 1 sparse Matrix of class "dgCMatrix"
+                         s0
+(Intercept)    2.536158e+00
+median.income -5.157240e-06
+unemployed    -9.910443e-01
+metro         -1.044331e-01
+high.school   -1.044458e+00
+non.citizen   -5.640770e-01
+white.pov     -6.637537e-01
+income.ineq   -1.291939e+00
+non.white     -1.448079e-01</code></pre>
+</div>
+</div>
+</section>
+<section id="standardized-coefficients-and-variable-importance" class="level2">
+<h2 class="anchored" data-anchor-id="standardized-coefficients-and-variable-importance">Standardized Coefficients and Variable Importance</h2>
+<p>Unlike ordinary least squares (OLS), there are no standard significance tests (e.g., p-values) for assessing feature importance in ridge regression. Instead, variable importance is typically evaluated by examining the magnitude of the fitted coefficients. It is tempting to interpret the size of the resulting coefficients directly, but doing so can be misleading because variables with different units may have coefficients on different scales<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. Instead, if we want to say something about which variables the model considers most important, we SHOULD actually look at standardized coefficients.</p>
+<p>To see how to convert between the two, consider the simple linear model <span class="math display">\[
+Y = \beta_0 + \beta_1 X_1 + \varepsilon
+\]</span> We can standardize <span class="math inline">\(X\)</span> by adding and subtracting its mean and multiplying/dividing by its sample standard deviation <span class="math inline">\(s_x\)</span>: <span class="math display">\[
+\beta_0 + \beta_1 (X_1-\bar{x}+\bar{x})(\frac{s_x}{s_x}) = \tilde{\beta}_0 + \tilde{\beta_1} Z_x
+\]</span> where <span class="math inline">\(\tilde{\beta_1} = s_x \beta_1\)</span>. In other words, the standardized coefficient of <span class="math inline">\(X_1\)</span> is the unstandardized coefficient multiplied by the standard deviation.</p>
+<p>The case for multiple regression is similar with the standardized coefficient of variable <span class="math inline">\(j\)</span> being given by <span class="math display">\[
+\tilde \beta_j = s_{x_j} \beta_j
+\]</span> To compute them in R, first get the sample standard deviations using the apply function</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">apply</span>(X,<span class="dv">2</span>,sd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Then multiply by the corresponding coefficients in ridge.opt</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge.opt)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span> s <span class="co"># -1 takes out teh intercept</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>median.income    unemployed         metro   high.school   non.citizen 
+  -0.04697894   -0.01041591   -0.01878284   -0.03594825   -0.01744195 
+    white.pov   income.ineq     non.white 
+  -0.01581225   -0.02303562   -0.02321246 </code></pre>
+</div>
+</div>
+<p>Now THESE numbers are comparable. After sorting by absolute value, we can see that median.income had the largest standardized coefficients (sometimes referred to as effect sizes) followed by high.school, non.white, and income.ineq.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>std_coef<span class="ot">=</span><span class="fu">coef</span>(ridge.opt)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span> s</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">abs</span>(std_coef), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>median.income   high.school     non.white   income.ineq         metro 
+   0.04697894    0.03594825    0.02321246    0.02303562    0.01878284 
+  non.citizen     white.pov    unemployed 
+   0.01744195    0.01581225    0.01041591 </code></pre>
+</div>
+</div>
+</section>
+<section id="lasso-model-fit" class="level2">
+<h2 class="anchored" data-anchor-id="lasso-model-fit">LASSO model fit</h2>
+<p>To alternatively fit a lasso model, we just need to use <span class="math inline">\(\alpha=1\)</span> instead in our call to <code>glmnet</code>. For example, here are the CV errors for lasso models with different <span class="math inline">\(\lambda\)</span>’s:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>cv.lasso<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">1</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.lasso)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The numbers at the top tell you how many parameters are nonzero in the Lasso model. The optimal model coefficients are</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>lasso.opt<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">lambda =</span> cv.lasso<span class="sc">$</span>lambda.min,<span class="at">alpha=</span><span class="dv">1</span>)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(lasso.opt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>9 x 1 sparse Matrix of class "dgCMatrix"
+                         s0
+(Intercept)    9.913771e-01
+median.income -4.690459e-06
+unemployed     .           
+metro         -9.828080e-02
+high.school    .           
+non.citizen   -5.234457e-01
+white.pov      .           
+income.ineq   -2.566650e-01
+non.white     -6.004864e-02</code></pre>
+</div>
+</div>
+<p>Lasso chose a five variable model as optimal. If we compare the mean cross-validation errors for the optimal ridge and lasso models, they are almost identical:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"CV ridge = "</span>,<span class="fu">min</span>(cv.ridge<span class="sc">$</span>cvm),<span class="st">"</span><span class="sc">\n</span><span class="st">CV lasso = "</span>,<span class="fu">min</span>(cv.lasso<span class="sc">$</span>cvm))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>CV ridge =  0.005055525 
+CV lasso =  0.00556745</code></pre>
+</div>
+</div>
+<p>So it looks like both lasso and ridge found equally “good” models from a prediction perspective.</p>
+<p>Note that if you use a higher lambda (for example the 1se value), lasso drops additional terms and ends up with the three variable model from 4.2.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>lasso.opt2<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">lambda =</span> cv.lasso<span class="sc">$</span>lambda<span class="fl">.1</span>se,<span class="at">alpha=</span><span class="dv">1</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(lasso.opt2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>9 x 1 sparse Matrix of class "dgCMatrix"
+                         s0
+(Intercept)    6.872967e-01
+median.income -2.354857e-06
+unemployed     .           
+metro         -4.351861e-02
+high.school    .           
+non.citizen   -5.183860e-01
+white.pov      .           
+income.ineq    .           
+non.white      .           </code></pre>
+</div>
+</div>
+</section>
+<section id="from-model-to-predictions-start-to-finish" class="level2">
+<h2 class="anchored" data-anchor-id="from-model-to-predictions-start-to-finish">From Model to Predictions: Start to finish</h2>
+<p>I’ll give you that the previous sections are a bit convoluted if you just want the instruction manual of “how do I fit this shit”. You’ll probably recognize by now that I prefer a good story to a manual, but the latter has its place. So here is a more thoroughly worked out example of how we do a 60-40 training/testing split, tune for lambda in a ridge model (its similar for lasso except use alpha = 1), calculate predictions, and check the RMSE of the model on our test set</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load package</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmnet)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Training-Testing Split</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">44</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>p<span class="ot">=</span><span class="fl">0.6</span>  <span class="co"># Fraction for training set</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(election2016)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(n,<span class="fu">round</span>(p<span class="sc">*</span>n))</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[s,]</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Model matrices and outcome</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">=</span> <span class="fu">names</span>(election2016)[<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>formula <span class="ot">=</span> <span class="fu">reformulate</span>(predictors,<span class="at">response=</span><span class="st">"trump.vote"</span>)</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>X_train<span class="ot">=</span><span class="fu">model.matrix</span>(formula,train)[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>X_test<span class="ot">=</span><span class="fu">model.matrix</span>(formula,test)[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>y_train<span class="ot">=</span>train<span class="sc">$</span>trump.vote</span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>y_test<span class="ot">=</span>test<span class="sc">$</span>trump.vote</span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Find minimal cross validation error model</span></span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>ridge_cv<span class="ot">=</span><span class="fu">cv.glmnet</span>(X_train,y_train,<span class="at">alpha=</span><span class="dv">0</span>)</span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ridge_cv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Best lambda ="</span>,ridge_cv<span class="sc">$</span>lambda.min,<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Best lambda = 0.08690804 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build and view coefficients in final model</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>ridge_best<span class="ot">=</span><span class="fu">glmnet</span>(X_train,y_train,<span class="at">lambda=</span>ridge_cv<span class="sc">$</span>lambda.min,<span class="at">alpha=</span><span class="dv">0</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge_best)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>9 x 1 sparse Matrix of class "dgCMatrix"
+                         s0
+(Intercept)    1.246938e+00
+median.income -2.276298e-06
+unemployed    -1.140460e+00
+metro         -8.516417e-02
+high.school   -2.327344e-01
+non.citizen   -5.293952e-01
+white.pov      3.196627e-01
+income.ineq   -6.565793e-01
+non.white     -3.961335e-02</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Variable Importance</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">apply</span>(X_train,<span class="dv">2</span>,sd)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>coefs<span class="ot">=</span><span class="fu">sort</span>(<span class="fu">abs</span>(<span class="fu">coef</span>(ridge_best)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span>s),<span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"Absolute Value of Standardized Coefficients:"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Absolute Value of Standardized Coefficients:"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>coefs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>median.income         metro   non.citizen   income.ineq    unemployed 
+  0.021237808   0.017017384   0.016817739   0.012417499   0.011589830 
+  high.school     white.pov     non.white 
+  0.008439244   0.008299069   0.005664544 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict and check Test RMSE</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(ridge_best,<span class="at">newx=</span>X_test)</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RMSE of Best Ridge ="</span>,<span class="fu">sqrt</span>(<span class="fu">mean</span>((yhat<span class="sc">-</span>y_test)<span class="sc">^</span><span class="dv">2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RMSE of Best Ridge = 0.06596271</code></pre>
+</div>
+</div>
+<p>Note that we run cv.glmnet on the training set only. Using the full dataset would leak test information into our lambda selection and give an overly optimistic estimate of performance. Let’s compare with the best OLS model from the last notes (with three predictors)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>trump_lm_best<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>median.income<span class="sc">+</span>income.ineq<span class="sc">+</span>non.citizen,<span class="at">data=</span>train)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(trump_lm_best,test)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RMSE of best OLS ="</span>,<span class="fu">sqrt</span>(<span class="fu">mean</span>((yhat<span class="sc">-</span>y_test)<span class="sc">^</span><span class="dv">2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RMSE of best OLS = 0.05656374</code></pre>
+</div>
+</div>
+<p>Interesting, OLS did better! Haha, proves that ridge is a fucking waste of time, right?</p>
+</section>
+<section id="ridge-vs-lasso-general-comments" class="level2">
+<h2 class="anchored" data-anchor-id="ridge-vs-lasso-general-comments">Ridge vs Lasso: General Comments</h2>
+<p>Alright, not fully of I wouldn’t waste your time with it. I highly encourage you to read Secton 6.2.2 of the ISLR book for a full discussion on the topic of lasso vs ridge vs ols, but if you want the brief “CliffsNotes”” version:</p>
+<ul>
+<li>Lasso is better at picking out a small number of significant variables (the signal) mixed in with a large number of insignificant ones (the noise).</li>
+<li>Ridge is better at minimizing error when a large number of variables are actually significant.</li>
+<li>Lasso leads to more interpretable models since it tends to “zero out” more coefficients</li>
+<li>Ridge can lead to reduced variance in models with a large number of significant parameters and hence, may be better for prediction in such scenarios.</li>
+<li>OLS is just as good as either in most other scenarios.</li>
+</ul>
+<p>These are not hard and fast rules so when possible, it is always best to fit multiple models and compare the results on a test set, but we can see a few of the above features popping up in the previous example. For example, compare the two cross-validation plots from the previous sections. All the best ridge models include all eight variables, but lasso includes some pretty comparable models with only three variables (for example, the 1se model shown earlier). Thus, lasso models can indeed be more “interpretable”.</p>
+<p>As another example of an advantage of lasso, suppose that we generate fake data in which there is only one significant variable in a sea of 40 meaningless ones</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>fake<span class="ot">=</span><span class="fu">data.frame</span>(<span class="fu">replicate</span>(<span class="dv">41</span>,<span class="fu">rnorm</span>(<span class="dv">1000</span>)))</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fake) <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"x"</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">41</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>y<span class="ot">=</span><span class="dv">1</span><span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>fake<span class="sc">$</span>x21<span class="sc">+</span><span class="fu">rnorm</span>(<span class="dv">1000</span>,<span class="at">sd=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now if you run ridge, the MSE levels off at 41 variable models:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>fake<span class="sc">$</span>y</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>X<span class="ot">=</span><span class="fu">model.matrix</span>(y<span class="sc">~</span>.,<span class="at">data=</span>fake)</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>cv.ridge<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.ridge)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>But if you run LASSO, we can see the MSE is pretty much the same up until we get to 1 variable models:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>cv.lasso<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">1</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.lasso)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This shows how lasso can be better at finding a “needle in the haystack”.</p>
+<p>On the other hand, ridge deals better with correlated predictors. For example, suppose that our fake data this time has only two predictors that are highly correlated with the same coefficient:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>N <span class="ot">=</span> <span class="dv">100</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">runif</span>(N)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">=</span> x1 <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="at">sd =</span> <span class="fl">0.05</span>)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">rnorm</span>(N)</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>df<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">x1=</span>x1,<span class="at">x2=</span>x2,<span class="at">y=</span>y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Lasso gets the coefficient estimates wrong and places too much weight on one of the two:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>X<span class="ot">=</span><span class="fu">matrix</span>(<span class="fu">c</span>(x1,x2),<span class="at">nrow=</span>N,<span class="at">ncol=</span><span class="dv">2</span>)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>fake_lasso<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">1</span>)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fake_lasso,<span class="at">s=</span>fake_lasso<span class="sc">$</span>lambda.min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3 x 1 sparse Matrix of class "dgCMatrix"
+            s=0.01364724
+(Intercept)    0.2285919
+V1             1.5113405
+V2             .        </code></pre>
+</div>
+</div>
+<p>Ridge does a better job:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>fake_ridge<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>)</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fake_ridge,<span class="at">s=</span>fake_ridge<span class="sc">$</span>lambda.min)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>3 x 1 sparse Matrix of class "dgCMatrix"
+            s=0.1889988
+(Intercept)   0.2823328
+V1            0.7935931
+V2            0.6210358</code></pre>
+</div>
+</div>
+<p>Point for Ridge.</p>
+</section>
+<section id="practice" class="level2">
+<h2 class="anchored" data-anchor-id="practice">Practice</h2>
+<p>Recall that the <a href="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/credit.csv">Credit</a> dataset from Practice Problem 2.2 contains simulated data on customer credit card balance based on several predictors including income, limit, rating, cards, age, education, own, student, married, and region.</p>
+<ul>
+<li>Split the data into training-testing sets using a 70-30 split and <code>set.seed(44)</code> for reproducibility.</li>
+<li>Find the optimal ridge model for the training using 10-fold cross-validation.</li>
+<li>Find the optimal lasso model for the training using 10-fold cross-validation.</li>
+<li>Compare the test RMSE for both fits. Which is better?</li>
+<li>Compare standardized coefficients for both models. Which variables were the most important for predicting Balance? How does the variables importance ranking compare with the significant variables from 2.2 and selected features in 4.2?</li>
+</ul>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>The 1/2 is not important as you can always rescale <span class="math inline">\(\lambda\)</span>, but the R documentation and most descriptions of this include it so I left it in too. The main reason is because the more general version uses log-likelihoods and the log likelihood of a normal distribution has a 1/2 in there.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>I mentioned this idea earlier with KNN too. Standardizing usually means you convert each column to z-scores by subtracting the mean (centering) and dividing by the standard deviation (scaling).<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The second dashed line shows the largest lambda within one standard error of the minimum and can be found using cv.ridge$lambda.1se. This value is good to use if you want more regularization since higher lambda leads to a “simpler” model with smaller coefficients<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Recall I said that glmnet standardizes to fits but reports coefficients as unstandardized. Keep up!<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

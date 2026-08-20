@@ -5,9 +5,9 @@ author: "John Mayberry"
 
 ## About This Course
 
-In this course you'll learn how to build and evaluate statistical models for making predictions and uncovering patterns in data. We'll cover two main types of problems: **regression** (predicting a number, like a grade point average) and **classification** (predicting a category, like whether or not you pass a class).
+Close your eyes and think of a time you tried to predict something. What was it it that you were trying to predict? Was it a number? Was it a binary outcome (like win/lose)? What information did you use to make your prediction?
 
-Along the way you'll get hands-on experience with a wide range of popular modeling techniques, from foundational methods like linear and logistic regression to more modern approaches like random forests and neural networks. You'll also learn how to figure out which model is actually the best fit for a given problem and how to create some nice visualizations to complement your analyses (after all, pictures speak louder than words...or models).
+In this class, prediction will be our goal and we'll develop a toolbox of methods for predicting one variable (called an **outcome** or **response** variable) from others (called **features** or **predictors**). We'll cover two main types of problems: **regression** (predicting a number, like a grade point average) and **classification** (predicting a category, like whether or not you pass a class). Along the way, you'll get hands-on experience building and evaluating a wide range of popular models, from foundational ones like linear and logistic regression to more modern approaches like ensemble methods and neural networks.
 
 ## What Will We Cover?
 
@@ -19,17 +19,21 @@ The three primary learning objectives for this course are as follows:
 
     -   Shrinkage methods, such as Ridge and Lasso regression
 
-    -   K-Nearest Neighbors regression and classification
+    -   K-nearest neighbors regression and classification
 
-    -   Classification and Regression Trees
+    -   Classification and regression trees
 
     -   Principal Component Analysis
 
-    -   Time series concepts and methods, including random walks, stationarity, autocorrelation, exponential smoothing, and autoregressive models
-
     -   Clustering algorithms
 
-    -   Neural Networks
+    -   Random forests
+
+    -   Gradient boosted models
+
+    -   Neural networks
+
+    -   Models with serial correlation (eg. Random walks, autoregressive models, moving average models)
 
 2.  **Select the most applicable statistical tool given a specified research objective (Select Tools)**
 
@@ -37,20 +41,24 @@ The three primary learning objectives for this course are as follows:
 
     -   Distinguishing between supervised and unsupervised algorithms
 
-    -   Assessing model accuracy
+    -   Evaluating model performance
 
     -   Model training and validation
 
     -   Resampling methods
 
     -   Variable selection
+    
+    -   Hyperparameter tuning
+
+    -   Autocorrelation functions and stationarity
 
 3.  **Communicate the results of predictive analyses with verbal, visual, and numerical descriptions**
 
     -   Calculate summary statistics and create tables in R
-
+    
     -   Interpret model output in R
-
+    
     -   Create appropriate figures using the `ggplot2` package in R
 
     -   Present results using notebooks style programs (eg. quarto, google collab)
