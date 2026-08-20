@@ -69,7 +69,7 @@ website:
             text: "Module 5.3: Hierarchical Clustering"
           - href: module-05/supplement.qmd
             text: "Module 5 Theory Supplement: PCA vs SVD"
-          - href: module-05/rtools.qmd
+          - href: module-05/rTools.qmd
             text: "Module 5 R Tools: fviz-ness"
       - text: "Module 6"
         menu:
@@ -79,7 +79,7 @@ website:
             text: "Module 6.2: Classification Trees"
           - href: module-06/notes3.qmd
             text: "Module 6.3: Random Forests"
-          - href: module-06/rtools.qmd
+          - href: module-06/rTools.qmd
             text: "Module 6 R Tools: Return of Tidymodels"
       - text: "Module 7"
         menu:
