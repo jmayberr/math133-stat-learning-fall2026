@@ -1400,43 +1400,43 @@
     "text": "Footnotes\n\n\nThere are two related algorithms of clustering called Partitioning Around Medoids (PAM) and Clustering LARge Applications (CLARA). Both are implemented in the cluster package if you want to experiment with differences.↩︎\nBest meaning smallest within cluster sum of squared errors.↩︎\nThis is called the “elbow method” for choosing K↩︎\nAs an alternative, the factoextra package has a visualization tool called fviz_cluster which will plot the clustered points based on the first two principal components. This is different than what we did above where we calculated the clusters based off the first two PCs because it will cluster based on all eight but plot in the first two PCs. We’ll cover this package in the Module 5 R tools section.↩︎\nStats joke: Two statisticians are having a drink at a bar when Elon Musk walks in. One nudges the other and says, “On average, everyone here just got way richer!” They laugh—until they remember they lost their jobs because of DOGE and fall into despair.↩︎\nAKA the Eugenicist asshole.↩︎"
   },
   {
-    "objectID": "module-05/rtools.html",
-    "href": "module-05/rtools.html",
+    "objectID": "module-05/rTools.html",
+    "href": "module-05/rTools.html",
     "title": "Module 5 R Tools: fviz-ness",
     "section": "",
     "text": "The factoextra package has some great tools for obtaining additional visualizations of unsupervised method results. These notes will cover a few, many of which are just glorified and nicer looking versions of plots we have already made. Start by loading the package (installing first if needed) as well as the election2016 dataset:\nlibrary(factoextra)\nlibrary(tidyverse)\ndf_url=\"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv\"\nelection2016=read.csv(df_url)\ncb_palette &lt;- c(\n  \"#000000\",  # black\n  \"#E69F00\",  # orange\n  \"#56B4E9\",  # sky blue\n  \"#009E73\",  # bluish green\n  \"#F0E442\",  # yellow\n  \"#0072B2\",  # blue\n  \"#D55E00\",  # vermillion\n  \"#CC79A7\"   # reddish purple\n)"
   },
   {
-    "objectID": "module-05/rtools.html#tools-for-pca",
-    "href": "module-05/rtools.html#tools-for-pca",
+    "objectID": "module-05/rTools.html#tools-for-pca",
+    "href": "module-05/rTools.html#tools-for-pca",
     "title": "Module 5 R Tools: fviz-ness",
     "section": "Tools for PCA",
     "text": "Tools for PCA\nRecall that a scree plot shows the percentage of variation explained by component number. The command for recreating this is fviz_eig() (note that changing the row names of election2016 to the state names before computing PCs is the easiest way to ensure nice labeling in other plots below):\n\nrownames(election2016) &lt;- election2016$state\nelection_pc=prcomp(election2016[,2:9],scale=TRUE)\nfviz_eig(election_pc,addlabels = T)\n\n\n\n\n\n\n\n\nTo plot the first two principal components (alternative to what we did in Section 5.1 usig ggplot), we can use fviz_pca_ind():\n\nfviz_pca_ind(\n  election_pc,\n  geom = c(\"text\",\"point\")\n)\n\n\n\n\n\n\n\n\nOn nice feature of this is that you can add colors through the habillage1 argument. Just choose any categorical variable (like outcome) you want to group points by and throw it in there:\n\nfviz_pca_ind(\n  election_pc,\n  geom = c(\"text\",\"point\"),\n  habillage = election2016$outcome,\n  palette=c(\"#2166AC\", \"#B2182B\")\n)\n\n\n\n\n\n\n\n\nVariable correlations can be examined with a similar function2:\n\nfviz_pca_var(election_pc)\n\n\n\n\n\n\n\n\nThe arrows represent the correlation between the original variable and (PC1,PC2). Variables which are close together are themselves highly correlated. See Module 5.1 for additional interpretation.\nThe final function to cover for PCa is fviz_pca_biplot which shows a different type of biplot in which the variables and observations are given a balanced scaling3:\n\nfviz_pca_biplot(election_pc,\n                addEllipses=T,\n  habillage = election2016$outcome,\n  palette=c(\"#2166AC\", \"#B2182B\"),\n  col.var = \"black\")\n\n\n\n\n\n\n\n\nIt looks a little busy, but pretty. The ellipses are a confidence region for each group in (PC1,PC2) space. Any points in one ellipse but not the other are clearly predicted by the PCA, but points in the overlap are uncertain."
   },
   {
-    "objectID": "module-05/rtools.html#tools-for-k-means",
-    "href": "module-05/rtools.html#tools-for-k-means",
+    "objectID": "module-05/rTools.html#tools-for-k-means",
+    "href": "module-05/rTools.html#tools-for-k-means",
     "title": "Module 5 R Tools: fviz-ness",
     "section": "Tools for K-means",
     "text": "Tools for K-means\nThe most important one here is a cluster visualization:\n\nelection_kmeans=kmeans(scale(election2016[,2:9]),centers = 3,nstart=100)\nfviz_cluster(election_kmeans,\n             data=scale(election2016[,2:9]),\n  palette=cb_palette[2:4])\n\n\n\n\n\n\n\n\nWe made a similar plot from scratch with ggplot in Module 5.2, but this one looks prettier. The points are plotted based on their first two PCS and the clusters are colored according to the k-means output.\nYou can also make scree plots to suggest an optimal number of clusters:\n\nfviz_nbclust(scale(election2016[,2:9]),\n             kmeans, \n             method=\"wss\")\n\n\n\n\n\n\n\n\nUnfortunately, there are no functions for doing the center visualizations (eg. bar, heatmap) so you’ll still have to do that the longer way!"
   },
   {
-    "objectID": "module-05/rtools.html#tools-for-hierarchichal-clustering",
-    "href": "module-05/rtools.html#tools-for-hierarchichal-clustering",
+    "objectID": "module-05/rTools.html#tools-for-hierarchichal-clustering",
+    "href": "module-05/rTools.html#tools-for-hierarchichal-clustering",
     "title": "Module 5 R Tools: fviz-ness",
     "section": "Tools for Hierarchichal Clustering",
     "text": "Tools for Hierarchichal Clustering\nTo create a dendrogram with three groups colored by cluster, you can use\n\nelection_hc=hclust(dist(scale(election2016[,2:9])),method=\"complete\")\nfviz_dend(election_hc,\n          k=3,\n          color_labels_by_k = T,\n  palette=cb_palette[2:4])\n\n\n\n\n\n\n\n\nOne cool option is to turn this into a circle:\n\nfviz_dend(election_hc,\n          k=3,\n          color_labels_by_k = T,\n          type=\"circular\",\n  palette=cb_palette[2:4])\n\n\n\n\n\n\n\n\nAnother is to go bio on its ass and turn it into a phylogenic tree:\n\nfviz_dend(election_hc,\n          k=3,\n          color_labels_by_k = T,\n          type=\"phylogenic\",\n          repel=T,\n  palette=cb_palette[2:4])\n\n\n\n\n\n\n\n\nAnd now you know."
   },
   {
-    "objectID": "module-05/rtools.html#silhouette-diagrams",
-    "href": "module-05/rtools.html#silhouette-diagrams",
+    "objectID": "module-05/rTools.html#silhouette-diagrams",
+    "href": "module-05/rTools.html#silhouette-diagrams",
     "title": "Module 5 R Tools: fviz-ness",
     "section": "Silhouette Diagrams",
     "text": "Silhouette Diagrams\nWe do not cover these types of plots in Module 5.1-5.3, but they are a commonly used tool for validating a clustering and can be applied to either k-means or hierarchichal outputs. The idea is to assign each data point a number between \\(-1\\) and 1 called the Silhouette Width4 (Si). Si values closer to 1 indicate a point that is “well-clustered” while values closer to -1 indicate poor clustering.\n\nlibrary(cluster)\nelection_scaled = scale(election2016[,2:9])\nelection_sil=silhouette(election_kmeans$cluster,\n                        dist(election_scaled))\nrownames(election_sil) = election2016$state  # to display state names\nfviz_silhouette(election_sil,\n  palette=cb_palette[2:4],\n  label=T)\n\n  cluster size ave.sil.width\n1       1   11          0.35\n2       2   21          0.21\n3       3   18          0.35\n\n\n\n\n\n\n\n\n\nThe red dashed line shows the average Si across all observations so the higher the value, the better. In our example, only one state had a negative Si so our clustering seems to work pretty well at separating states.\nThe process only needs a slight modification for hierarchical clustering.\n\nhc_cut = hcut(election_scaled, k = 3,method=\"complete\")\nfviz_silhouette(hc_cut,\n  palette=cb_palette[2:4],\n  label=T)\n\n  cluster size ave.sil.width\n1       1    9          0.42\n2       2   24          0.17\n3       3   17          0.38\n\n\n\n\n\n\n\n\n\nThis looks both better and worse than the k-means. Clusters 1 and 2 contain mostly well separated states but Cluster 2 contains a lot of states which were hard to classify."
   },
   {
-    "objectID": "module-05/rtools.html#footnotes",
-    "href": "module-05/rtools.html#footnotes",
+    "objectID": "module-05/rTools.html#footnotes",
+    "href": "module-05/rTools.html#footnotes",
     "title": "Module 5 R Tools: fviz-ness",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nFrench for dressing or style.↩︎\nThe plot created here is basically what you get using base biplot function with scale = 1 except it doesn’t show the transformed points and hence is not really a “biplot”. ↩︎\nSee Module 5 Theory Supplement.↩︎\nIt is calculated as follows. First, calculate the average distance between point \\(i\\) and all other points in its cluster; call this distance \\(a_i\\). Then calculate the minimum distance between the point and all points outside its cluster; call this \\(b_i\\). The Si for point \\(i\\) is then \\((b_i-a_i)/\\max(a_i,b_i)\\). See this site for more on validation statistics.↩︎"
