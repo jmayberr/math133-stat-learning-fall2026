@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Booster Seats – Statistical Learning Methods</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-d4be639c637f3db3c684c66cefad7e0c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Statistical Learning Methods</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-1" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 1</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-1">    
+        <li>
+    <a class="dropdown-item" href="../module-01/notes1.html">
+ <span class="dropdown-text">Module 1.1: Introduction to Statistical Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes2.html">
+ <span class="dropdown-text">Module 1.2: Prediction for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/notes3.html">
+ <span class="dropdown-text">Module 1.3: Inference for Simple Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/supplement.html">
+ <span class="dropdown-text">Module 1 Theory: A deeper look at finding coefficients</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-01/rtools.html">
+ <span class="dropdown-text">Module 1 R Tools: Introduction to ggplot2 and tidyverse</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-2" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 2</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-2">    
+        <li>
+    <a class="dropdown-item" href="../module-02/notes1.html">
+ <span class="dropdown-text">Module 2.1: Multiple Regression Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes2.html">
+ <span class="dropdown-text">Module 2.2: Enriching Linear Models</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes3.html">
+ <span class="dropdown-text">Module 2.3: Regression Diagnostics</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/notes_bonus.html">
+ <span class="dropdown-text">Module 2 Bonus: The F Test</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-02/supplement.html">
+ <span class="dropdown-text">Module 2 Theory Supplement</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-3" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 3</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-3">    
+        <li>
+    <a class="dropdown-item" href="../module-03/notes1.html">
+ <span class="dropdown-text">Module 3.1: Introduction to Classification</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/notes2.html">
+ <span class="dropdown-text">Module 3.2: Logistic Regression</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/notes3.html">
+ <span class="dropdown-text">Module 3.3: Evaluating Classifiers</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-03/supplement.html">
+ <span class="dropdown-text">Module 3 Theory Supplement: Finding Logistic Regression Coefficients</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-4" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 4</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-4">    
+        <li>
+    <a class="dropdown-item" href="../module-04/notes1.html">
+ <span class="dropdown-text">Module 4.1: Cross Validation</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-04/notes2.html">
+ <span class="dropdown-text">Module 4.2: Feature Selection</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-04/notes3.html">
+ <span class="dropdown-text">Module 4.3: Regularization</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-04/rTools.html">
+ <span class="dropdown-text">Module 4 R Tools: Tuning Hyperparameters with Tidymodels</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-5" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 5</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-5">    
+        <li>
+    <a class="dropdown-item" href="../module-05/notes1.html">
+ <span class="dropdown-text">Module 5.1: Principal Component Analysis</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/notes2.html">
+ <span class="dropdown-text">Module 5.2: K-means Clustering</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/notes3.html">
+ <span class="dropdown-text">Module 5.3: Hierarchical Clustering</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/supplement.html">
+ <span class="dropdown-text">Module 5 Theory Supplement: PCA vs SVD</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-05/rTools.html">
+ <span class="dropdown-text">Module 5 R Tools: fviz-ness</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-6" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 6</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-6">    
+        <li>
+    <a class="dropdown-item" href="../module-06/notes1.html">
+ <span class="dropdown-text">Module 6.1: Regression Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/notes2.html">
+ <span class="dropdown-text">Module 6.2: Classification Trees</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/notes3.html">
+ <span class="dropdown-text">Module 6.3: Random Forests</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-06/rTools.html">
+ <span class="dropdown-text">Module 6 R Tools: Return of Tidymodels</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-7" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 7</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-7">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-module-8" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Module 8</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-module-8">    
+        <li class="dropdown-header">Notes 1: …</li>
+    </ul>
+  </li>
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Booster Seats</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Random Forests are a powerful technique for reducing variance in tree models, but they are kind of dense (pun totally intended) because they don’t learn from their own mistakes. Every tree in the forest provides its own predictions and these predictions are averaged at the end. In this module, we will cover some methods that are a little bit smarter about turning previous failures into future successes.</p>
+<p>Boosting is one such technique and the one most closely connected to our work in the previous module. It works by building a forest of trees on top of one another. On their own, these trees are little more than stumps, but together, they are strong. In these notes, we will focus on a specific type of boosting called gradient boosting methods (gbm for short). They are implemented using an R package of the same name so make sure you install it before knitting these notes.</p>
+</section>
+<section id="fun-analogies" class="level2">
+<h2 class="anchored" data-anchor-id="fun-analogies">Fun Analogies</h2>
+<p>I asked chatGPT to come up with an analogy for the difference between random forests and gradient boosting trees based on growing a forest vs refining a tree. This is what it came up with:</p>
+<blockquote class="blockquote">
+<p><em>Imagine you’re planting a whole forest. You toss a bunch of seeds across a wide area, and let hundreds of trees grow independently, each in slightly different soil, sunlight, and conditions (random subsets of data and features). Once they’re grown, you walk through and take the average height of all the trees to estimate the average height of trees in general. No one tree controls the outcome—it’s the wisdom of the crowd.</em></p>
+<p><em>Now imagine you’re a bonsai gardener. You start with one small tree. It’s not perfect, but you carefully observe its flaws. Then you add another bonsai, trained to correct just those flaws. And another. Each new tree is grown with careful pruning and wiring to fix what the previous ones missed. Over time, this deliberate sequence of trees shapes an elegant, intricate garden—a masterpiece of iteration and refinement.</em></p>
+</blockquote>
+<p>Nobody knows what that means, but its provocative<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. It also volunteered this one:</p>
+<blockquote class="blockquote">
+<p><em>Random Forests are like a group of independent decision-makers (trees), each giving their own opinion (prediction) based on different random subsets of the data. They all work in parallel, and the final decision is an average (or majority vote) of their outputs. The strength comes from diversity and aggregation.</em></p>
+</blockquote>
+<p>That makes a little more sense. Gradient Boosting is kind of like a sequential team of experts, where the first expert gives an initial guess, and each subsequent expert focuses specifically on fixing the errors made by the prior ones. But enough of this bull…oney. Let’s get down to business.</p>
+<p><strong>Warning</strong>: There is an unavoidable use of calculus in the explanation for how gbm works so here’s a quick recap of the things you need to know:</p>
+<ul>
+<li>Given a function of one variable <span class="math inline">\(y=f(x)\)</span>, its derivative <span class="math inline">\(f'(x)\)</span> tells you the rate of change of <span class="math inline">\(y\)</span> with respect to <span class="math inline">\(x\)</span>. If <span class="math inline">\(f\)</span> is linear, that the derivative is just the slope.</li>
+<li>The derivative is positive if the function is increasing and negative if the function is decreasing.</li>
+<li>If you want to find the value of <span class="math inline">\(x\)</span> at which <span class="math inline">\(f\)</span> achieves a local max or min, we look for places where the derivative is 0, i.e.&nbsp;we solve the equation <span class="math inline">\(f'(x) = 0\)</span> for <span class="math inline">\(x\)</span>.</li>
+<li>Given a function of more than one variable, the derivative is replaced by the gradient.</li>
+<li>The gradient points in the direction of “steepest ascent”.</li>
+</ul>
+<p>And if you don’t like any of this, then you can always skip ahead to the implementation.</p>
+</section>
+<section id="gradient-descent" class="level2">
+<h2 class="anchored" data-anchor-id="gradient-descent">Gradient Descent</h2>
+<p>Before diving into the details of gradient boosting, let’s briefly introduce/revisit a concept from the Module 1 supplement: gradient descent. To keep things simple, imagine we have data generated by a simple linear model (SLM) with no intercept: <span class="math display">\[
+Y = \beta X + \varepsilon
+\]</span></p>
+<p>This setup will help us explain how gradient descent works before connecting it to how boosting algorithms learn.</p>
+<p>In this model, the least squares estimate of <span class="math inline">\(\beta\)</span> will be the minimum of the quadratic cost function</p>
+<p><span class="math display">\[
+L(\beta) = \sum_{i=1}^n (y_i - \beta x_i)^2
+\]</span></p>
+<p>Here is a plot of this function for <span class="math inline">\(0 \leq \beta \leq 2\)</span> for some fake data generating using <span class="math inline">\(\beta = 1\)</span>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">410</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>x<span class="ot">=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="at">by=</span><span class="fl">0.01</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">length</span>(x)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>x<span class="sc">+</span><span class="fu">rnorm</span>(n,<span class="dv">0</span>,<span class="fl">0.1</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>cost<span class="ot">=</span><span class="cf">function</span>(b,x,y){</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  N<span class="ot">=</span><span class="fu">length</span>(b)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  out<span class="ot">=</span><span class="fu">numeric</span>(N)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>N){</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  out[i]<span class="ot">=</span><span class="fu">sum</span>((y<span class="sc">-</span>b[i]<span class="sc">*</span>x)<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(out)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>b<span class="ot">=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">2</span>,<span class="at">by=</span><span class="fl">0.1</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(b,<span class="fu">cost</span>(b,x,y),<span class="at">xlab=</span><span class="st">"Beta"</span>,<span class="at">ylab=</span><span class="st">"Cost"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The minimum here looks to be around <span class="math inline">\(\beta=1\)</span> as it should be.</p>
+<p>In this case, its possible to find an exact formula for the minimum of <span class="math inline">\(L\)</span> by solving <span class="math inline">\(L'(\beta) = 0\)</span>, but imagine we have a cost function <span class="math inline">\(L\)</span> that is more complicated and, although we can calculate its derivative <span class="math inline">\(L'\)</span>, we cannot solve the equation <span class="math inline">\(L'(\beta) = 0\)</span> analytically. Then what we could do is try to build a sequence of points <span class="math inline">\(b_0, b_1, ...\)</span> that converge to the minimum. To do so, we start by calculating <span class="math inline">\(L(b_0), L'(b_0)\)</span> for some random starting point <span class="math inline">\(b_0\)</span>. Since the derivative tells us the rate of change of <span class="math inline">\(L\)</span> at <span class="math inline">\(b_0\)</span>, we could use the following rule to choose a next guess <span class="math inline">\(b_1\)</span> for the minimum</p>
+<ul>
+<li>If <span class="math inline">\(L'(b_0)\)</span> is positive, move to the left.</li>
+<li>If <span class="math inline">\(L'(b_0)\)</span> is negative, move to the right.</li>
+</ul>
+<p>In other words, we want to move opposite the direction in which <span class="math inline">\(L'\)</span> is pointing. Also, we probably want to move proportional to <span class="math inline">\(|L'(b_0)|\)</span> since we want to move further for a rapidly changing function than a slowly changing one. We can control how far we move by introducing a parameter <span class="math inline">\(\gamma&gt;0\)</span> (called the learning rate or shrinkage). Then our next choice will be <span class="math display">\[
+b_1 = b_0 - \gamma L'(b_0)
+\]</span> or in general, <span class="math display">\[
+b_t = b_{t-1} - \gamma L'(b_{t-1})
+\]</span> This formula is the foundation for gradient descent in one-dimension. If the cost function is multidimensional, then the analog is <span class="math inline">\(b_t = b_{t-1} - \gamma \nabla L(b_{t-1})\)</span> where <span class="math inline">\(\nabla L\)</span> is the gradient of <span class="math inline">\(L\)</span>. Hence the name “gradient descent”.</p>
+<p>The figure below shows how this plays out with the above example using a learning rate of <span class="math inline">\(0.1\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>gradient_descent <span class="ot">=</span> <span class="cf">function</span>(x, y, <span class="at">beta0=</span><span class="dv">0</span>, <span class="at">gamma=</span><span class="fl">0.01</span>, <span class="at">n_iter=</span><span class="dv">1000</span>) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># x, y = data</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># beta0 = initial guess of slope</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># gamma = learning_rate</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># n_iter = number of iterations</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  beta<span class="ot">=</span><span class="fu">numeric</span>(n_iter) <span class="co"># List to store betas</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  beta[<span class="dv">1</span>] <span class="ot">=</span> beta0 <span class="co"># Initial slope</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">=</span> <span class="fu">length</span>(y) <span class="co"># Number of data points</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n_iter) {</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate derivative of cost function </span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    grad <span class="ot">=</span> (<span class="sc">-</span><span class="dv">2</span> <span class="sc">/</span> n) <span class="sc">*</span> <span class="fu">sum</span>(x <span class="sc">*</span> (y <span class="sc">-</span> beta[i<span class="dv">-1</span>] <span class="sc">*</span> x ))</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Update parameter</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    beta[i] <span class="ot">=</span> beta[i<span class="dv">-1</span>] <span class="sc">-</span> gamma <span class="sc">*</span> grad</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(beta)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>gd_result <span class="ot">=</span> <span class="fu">gradient_descent</span>(x, y,<span class="dv">0</span>,<span class="fl">0.1</span>,<span class="dv">100</span>)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gd_result,<span class="at">xlab=</span><span class="st">"Iteration"</span>,<span class="at">ylab=</span><span class="st">"Beta"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Notice the b’s converge to 1 relatively quickly. However, if the learning rate is too high, we fail to converge because we “jump over” the minimum:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>gd_result <span class="ot">=</span> <span class="fu">gradient_descent</span>(x, y,<span class="dv">0</span>,<span class="dv">10</span>,<span class="dv">10</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gd_result,<span class="at">xlab=</span><span class="st">"Iteration"</span>,<span class="at">ylab=</span><span class="st">"Beta"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If the learning rate is too small, it takes too long to converge.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>gd_result <span class="ot">=</span> <span class="fu">gradient_descent</span>(x, y,<span class="dv">0</span>,<span class="fl">0.001</span>,<span class="dv">1000</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(gd_result,<span class="at">xlab=</span><span class="st">"Iteration"</span>,<span class="at">ylab=</span><span class="st">"Beta"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In this example, it works well to choose the learning rate <span class="math inline">\(\gamma\)</span> on the order of <span class="math inline">\(|L'(b_0)|^{-1}\)</span>, since that gives updates that are roughly on the scale of integers. But this rule of thumb depends somewhat on how close your initial guess is to the minimum. If you’re starting far from the optimal value, a step size that’s too large might cause overshooting or oscillation, while one that’s too small could slow convergence to a crawl.</p>
+<p>In practice, there’s no one-size-fits-all choice for <span class="math inline">\(\gamma\)</span>. You usually have to experiment with several values to find one that balances speed and stability. Many modern algorithms use strategies like learning rate schedules or adaptive methods (e.g., shrinking the learning rate over time) to fine-tune this process automatically<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+</section>
+<section id="gradient-boosting." class="level2">
+<h2 class="anchored" data-anchor-id="gradient-boosting.">Gradient Boosting.</h2>
+<p>Now suppose that instead of an SLM, we are trying to fit a more general model <span class="math display">\[
+Y = f(X) + \varepsilon
+\]</span> Then the least squares approach tries to minimize the cost function <span class="math display">\[
+L(f)= \sum_{i=1}^n (y_i - f(x_i))^2
+\]</span></p>
+<p>Informally,</p>
+<p><span class="math display">\[
+\frac{\partial L}{\partial f} = -2 \sum_{i=1}^n (y_i - f(x_i)) = -2 \sum r_i
+\]</span></p>
+<p>where <span class="math inline">\(r_i\)</span> is the ith residual. Therefore, one way of thinking about gradient descent in the context of statistical modeling is that we are building a sequence of models <span class="math inline">\(f^0, f^1,..\)</span> by the recursive rule<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> <span class="math display">\[
+f^t = f^{t-1}  + \gamma \sum r_i^{t-1}
+\]</span> where the <span class="math inline">\(r_i^{t-1}\)</span> are the residuals from model <span class="math inline">\(t-1\)</span> and <span class="math inline">\(\gamma &gt; 0\)</span> is a constant<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> representing the learning rate (also called the shrinkage). This recursion is the basis of gradient boosting methods (gbm).</p>
+<p>When applied to trees, gbm work as follows:</p>
+<ul>
+<li>First, we fit a relatively simple tree to the data in which only a small number of splits are allowed. The allowed number of splits is a parameter called the <em>interaction depth</em>. Often, we set interaction depth = 1 and allow only one split. This type of tree is called a <em>stump</em>.</li>
+<li>Second, we calculate the residuals<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> from our first model and then fit a tree to the residuals, updating our prediction of <span class="math inline">\(y\)</span> by the gradient descent formula after we are done.</li>
+<li>Third, we repeat the second step over and over until we reach some specified number of trees^[Or the decrease in cost function for an additional tree is smaller than specified tolerance or we have some minimum number of observations per leaf; different implementations allow for different specifications of stopping criteria.).</li>
+</ul>
+</section>
+<section id="gbm-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="gbm-in-r">GBM in R</h2>
+<p>In R, this can be done using the gbm package which we apply below to the Election Data using a 60-40 split as in the bag forest notes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>trainSamp<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">50</span>,<span class="dv">30</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[trainSamp,]</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>trainSamp,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here’s gbm applied to the trump vote regression tree. There are a lot of parameters here which I’ll explain in a minute</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gbm)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>trump_gbm<span class="ot">=</span><span class="fu">gbm</span>(trump.vote<span class="sc">~</span>.,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">data=</span>train[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>],</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">distribution=</span><span class="st">"gaussian"</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">interaction.depth=</span><span class="dv">1</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">shrinkage=</span><span class="fl">0.01</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">n.trees=</span><span class="dv">500</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">cv.folds=</span><span class="dv">10</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">bag.fraction =</span> <span class="fl">0.8</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>                <span class="at">n.minobsinnode =</span> <span class="dv">5</span> )</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(trump_gbm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                        var    rel.inf
+median.income median.income 51.0890236
+metro                 metro 34.0996391
+non.citizen     non.citizen  7.7473098
+income.ineq     income.ineq  2.7283589
+high.school     high.school  1.7318827
+non.white         non.white  1.4691487
+white.pov         white.pov  0.6533253
+unemployed       unemployed  0.4813118</code></pre>
+</div>
+</div>
+<p>First, let’s talk about the output. The summary describes the relative influence of each variable in the boosted model. This is the same thing as variable importance in random forests and we can see that the top five here are similar.</p>
+<p>Second, let’s talk about the inputs.</p>
+<ul>
+<li>distribution = “gaussian” specifies regression; use “binomial” for classification</li>
+<li>interaction.depth = 1 says all the trees can have a max of one split (stumps)</li>
+<li>shrinkage = 0.01 specifies the learning rate</li>
+<li>n.trees = 500 specifies the total number of trees to fit</li>
+<li>cv.folds = 5 gives the number of cross-validation folds to use in model validation</li>
+<li>bag.fraction = 0.8 states the overall fraction of observations to use in each tree</li>
+<li>n.minobsinnode = 5 gives the minimum observations allowed per node (stopping criteria)</li>
+</ul>
+<p>All of these are parameters that you can train with tidymodels as well (I’ll show an example below).</p>
+<p>Third, how do we determine if our model fits the data? Well, first we can check the cross-validation error as a function of the number of trees to see if we start over-fitting.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gbm.perf</span>(trump_gbm, <span class="at">method =</span> <span class="st">"cv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 478</code></pre>
+</div>
+</div>
+<p>Here, the black curve shows the cv-error vs number of trees fit (iteration) while the green curve shows the OOB error vs number of trees. It looks like cv is decreasing across the range of iterations attempted while the OOB starts to level off sooner. We’ll investigate the optimal hyperparameter choices using tidymodels in the next section.</p>
+<p>We can also check the prediction error on the test set. It looks comparable to the random forest models:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pred<span class="ot">=</span><span class="fu">predict</span>(trump_gbm,test)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RMSE="</span>,<span class="fu">sqrt</span>(<span class="fu">mean</span>((pred<span class="sc">-</span>test<span class="sc">$</span>trump.vote)<span class="sc">^</span><span class="dv">2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RMSE= 0.07608506</code></pre>
+</div>
+</div>
+</section>
+<section id="training-with-tidymodels" class="level2">
+<h2 class="anchored" data-anchor-id="training-with-tidymodels">Training with Tidymodels</h2>
+<p>To explore the impact of number of trees and other parameters, we’ll use <code>tidymodels</code>. We will tune based on trees, tree_depth, and learn_rate, letting tidymodels pick 20 random combinations to try. Not that we are using the slightly better engine of <code>xgboost</code> for model fitting.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(xgboost)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Models specs</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>gbm_spec<span class="ot">=</span><span class="fu">boost_tree</span>(</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trees=</span><span class="fu">tune</span>(),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">tree_depth=</span><span class="fu">tune</span>(),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_rate=</span><span class="fu">tune</span>(),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_n=</span><span class="dv">5</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_size=</span><span class="fl">0.8</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"xgboost"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Resampling procedure </span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>cv_plan <span class="ot">=</span><span class="fu">vfold_cv</span>(train[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>],<span class="at">v=</span><span class="dv">5</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Tune Model</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>gbm_tune<span class="ot">=</span><span class="fu">tune_grid</span>(</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  gbm_spec,</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  trump.vote<span class="sc">~</span>.,</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  cv_plan,</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">grid=</span><span class="dv">20</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The optimal model appeared to use more trees and a slower learning rate compared with our earlier model:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>best_params<span class="ot">=</span><span class="fu">select_best</span>(gbm_tune,<span class="at">metric=</span><span class="st">"rmse"</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(best_params)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 4
+  trees tree_depth learn_rate .config         
+  &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt; &lt;chr&gt;           
+1   106          3     0.0280 pre0_mod02_post0</code></pre>
+</div>
+</div>
+<p>Now we fit the final model:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>gbm_final<span class="ot">=</span><span class="fu">finalize_model</span>(gbm_spec,best_params)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>gbm_fit<span class="ot">=</span><span class="fu">fit</span>(gbm_final,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>            trump.vote<span class="sc">~</span>.,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>            train[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>and check its predictions on the test set</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>gbm_pred<span class="ot">=</span><span class="fu">predict</span>(gbm_fit,test)<span class="sc">$</span>.pred</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RMSE is"</span>,<span class="fu">sqrt</span>(<span class="fu">mean</span>((test<span class="sc">$</span>trump.vote<span class="sc">-</span>gbm_pred)<span class="sc">^</span><span class="dv">2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RMSE is 0.08220717</code></pre>
+</div>
+</div>
+<p>This actually did improve the RMSE so way to go tidymodels!</p>
+<p>Note that if you actually want to specify the values for tuning parameters, you can use the grid_regular function but it take learn_rate on a log-scale. The following code would take <code>trees</code> values of 100,200,…1000, <code>tree_depth</code> of 1,2,3,4 and <code>learn_rates</code> of 0.001,0.01, and 0.1:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>tune_grid <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">trees</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">1000</span>)),</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tree_depth</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>)),</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">learn_rate</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="sc">-</span><span class="dv">1</span>)),  <span class="co"># log10 scale</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">4</span>, <span class="dv">3</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Quote Used without permission from Paramount. Shhh<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Like xgboost or adaboost, versions of the gbm algorithm we’ll use below<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>In gbm literature, it is common to use superscripts instead of subscripts for the iteration numbers (not powers) and subscripts for indices.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Note that we drop the two from the gradient since <span class="math inline">\(\gamma\)</span> can be anything.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Technically, we calculate modified residuals <span class="math inline">\(y_i - \gamma \hat{y}_i\)</span> to account for the learning rate.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

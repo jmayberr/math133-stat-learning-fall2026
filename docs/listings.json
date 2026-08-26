@@ -2,6 +2,7 @@
   {
     "listing": "/modules.html",
     "items": [
+      "/module-01/classCode08_26.html",
       "/module-01/notes1.html",
       "/module-01/notes2.html",
       "/module-01/notes3.html",
@@ -29,7 +30,8 @@
       "/module-06/notes1.html",
       "/module-06/notes2.html",
       "/module-06/notes3.html",
-      "/module-06/rTools.html"
+      "/module-06/rTools.html",
+      "/module-07/notes1.html"
     ]
   }
 ]
