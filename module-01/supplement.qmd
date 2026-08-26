@@ -12,9 +12,9 @@ editor: visual
 
 ## Introduction
 
-Gradient descent is an optimization algorithm used to minimize a loss function by iteratively adjusting parameters. The idea is that if your desired trend function $f$ depends on multiple parameters $\beta_i$, $i=1,..,p$, then you can look at the partial derivative of the loss function $\ell = \sum\_{i=1}\^n (y_i - f(x_i))\^2$ with respect to each parameter. Since the gradient vector, whose $i$th component is $$
+Gradient descent is an optimization algorithm used to minimize a loss function by iteratively adjusting parameters. The idea is that if your desired trend function $f$ depends on multiple parameters $\beta_i$, $i=1,..,p$, then you can look at the partial derivative of the loss function $\ell = \sum_{i=1}^n (y_i - f(x_i))^2$ with respect to each parameter. Since the gradient vector, whose $i$th component is $$
 \frac{\partial \ell}{\partial \beta_i}
-$$always points in the direction of maximum increase, subtracting a small enough multiple of the gradient vector from your current estimates will move towards the minimum of $\ell$ (which is what we want).
+$$ always points in the direction of maximum increase, subtracting a small enough multiple of the gradient vector from your current estimates will move towards the minimum of $\ell$ (which is what we want).
 
 In this tutorial, we'll use gradient descent to fit a line to data by minimizing the sum of squared errors (SSE) for SLM. For convenience, we'll use $m,b$ for the slope and intercept. After, we'll discuss an exact formula for the least squares coefficients as well as a formula for the standard error.
 

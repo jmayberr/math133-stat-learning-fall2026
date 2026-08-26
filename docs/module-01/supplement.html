@@ -5114,9 +5114,9 @@ window.Quarto = {
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Gradient descent is an optimization algorithm used to minimize a loss function by iteratively adjusting parameters. The idea is that if your desired trend function <span class="math inline">\(f\)</span> depends on multiple parameters <span class="math inline">\(\beta_i\)</span>, <span class="math inline">\(i=1,..,p\)</span>, then you can look at the partial derivative of the loss function <span class="math inline">\(\ell = \sum\_{i=1}\^n (y_i - f(x_i))\^2\)</span> with respect to each parameter. Since the gradient vector, whose <span class="math inline">\(i\)</span>th component is <span class="math display">\[
+<p>Gradient descent is an optimization algorithm used to minimize a loss function by iteratively adjusting parameters. The idea is that if your desired trend function <span class="math inline">\(f\)</span> depends on multiple parameters <span class="math inline">\(\beta_i\)</span>, <span class="math inline">\(i=1,..,p\)</span>, then you can look at the partial derivative of the loss function <span class="math inline">\(\ell = \sum_{i=1}^n (y_i - f(x_i))^2\)</span> with respect to each parameter. Since the gradient vector, whose <span class="math inline">\(i\)</span>th component is <span class="math display">\[
 \frac{\partial \ell}{\partial \beta_i}
-\]</span>always points in the direction of maximum increase, subtracting a small enough multiple of the gradient vector from your current estimates will move towards the minimum of <span class="math inline">\(\ell\)</span> (which is what we want).</p>
+\]</span> always points in the direction of maximum increase, subtracting a small enough multiple of the gradient vector from your current estimates will move towards the minimum of <span class="math inline">\(\ell\)</span> (which is what we want).</p>
 <p>In this tutorial, we’ll use gradient descent to fit a line to data by minimizing the sum of squared errors (SSE) for SLM. For convenience, we’ll use <span class="math inline">\(m,b\)</span> for the slope and intercept. After, we’ll discuss an exact formula for the least squares coefficients as well as a formula for the standard error.</p>
 </section>
 <section id="problem-setup" class="level2">

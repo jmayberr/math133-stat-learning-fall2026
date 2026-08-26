@@ -1,0 +1,67 @@
+---
+title: "Notes 08-26"
+format: html
+---
+
+## Loading Datasets
+
+Type additional instructions....\$\\hat y = f(x)\$
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/gapminder.csv"
+gapminder=read.csv(df_url)
+head(gapminder)
+```
+
+## Filtering
+
+```{r,warning=F,message=F}
+library(tidyverse)
+```
+
+```{r}
+gapminder2007=dplyr::filter(gapminder,year=="2007")
+head(gapminder2007)
+```
+
+Filtering using "pipes"
+
+```{r}
+gapminder2007=gapminder |>
+  dplyr::filter(year=="2007") |>
+  select(-year) |>
+  mutate(gdp_log=log(gdpPercap))
+head(gapminder2007)
+```
+
+## Plotting
+
+Plot of lifeExp vs gdpPercap
+
+```{r}
+gapminder2007 |>
+  ggplot(aes(x=gdp_log,y=lifeExp))+
+  geom_point(shape=2,color="#e35205")+
+  labs(x="GDP per Capita (log scale)",y="Life Expectancy")+
+  geom_smooth(method="lm",se=FALSE)
+```
+
+##  
+
+## Fitting and Evaluating Model
+
+Fit linear model
+
+```{r}
+lm(lifeExp~gdp_log,data=gapminder2007)
+```
+
+Evaluation
+
+```{r}
+x=gapminder2007$gdp_log # $ pulls variables
+yhat=4.950+7.203*x   # calculate predicted values
+y=gapminder2007$lifeExp
+SSE=sum((y-yhat)^2)
+print(SSE)
+```

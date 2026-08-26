@@ -153,3 +153,13 @@ SSE=sum((test_set$popularity-rf_pred)^2)
 ```
 
 That was a lot better than the tree model!
+
+## Practice
+
+Recall the `palmerpenguins` package from the Module 6.2 practice problems. Load this package into R and work with the `penguins` dataset to answer the questions below.
+
+As in Module 6.3, drop all rows containing NA from the dataset and perform a 70-30 training split using `set.seed(55)` for consistency.
+
+1. Use tidymodels to tune the parameter `mtry` using a tuning grid of values from 1:7. Which value was optimal based on `metric="accuracy"`?
+2. Compute the accuracy and confusion matrix for the optimal model on the test set. 
+

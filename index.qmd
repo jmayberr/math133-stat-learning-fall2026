@@ -48,7 +48,7 @@ The three primary learning objectives for this course are as follows:
     -   Resampling methods
 
     -   Variable selection
-    
+
     -   Hyperparameter tuning
 
     -   Autocorrelation functions and stationarity
@@ -56,9 +56,9 @@ The three primary learning objectives for this course are as follows:
 3.  **Communicate the results of predictive analyses with verbal, visual, and numerical descriptions**
 
     -   Calculate summary statistics and create tables in R
-    
+
     -   Interpret model output in R
-    
+
     -   Create appropriate figures using the `ggplot2` package in R
 
     -   Present results using notebooks style programs (eg. quarto, google collab)

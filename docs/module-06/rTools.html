@@ -533,6 +533,15 @@ $ track_genre      &lt;fct&gt; acoustic, acoustic, acoustic, acoustic, acoustic,
 </div>
 </div>
 <p>That was a lot better than the tree model!</p>
+</section>
+<section id="practice" class="level2">
+<h2 class="anchored" data-anchor-id="practice">Practice</h2>
+<p>Recall the <code>palmerpenguins</code> package from the Module 6.2 practice problems. Load this package into R and work with the <code>penguins</code> dataset to answer the questions below.</p>
+<p>As in Module 6.3, drop all rows containing NA from the dataset and perform a 70-30 training split using <code>set.seed(55)</code> for consistency.</p>
+<ol type="1">
+<li>Use tidymodels to tune the parameter <code>mtry</code> using a tuning grid of values from 1:7. Which value was optimal based on <code>metric="accuracy"</code>?</li>
+<li>Compute the accuracy and confusion matrix for the optimal model on the test set.</li>
+</ol>
 
 
 </section>
