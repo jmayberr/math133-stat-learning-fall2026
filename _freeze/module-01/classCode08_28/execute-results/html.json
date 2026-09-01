@@ -1,0 +1,15 @@
+{
+  "hash": "04ee553755f3b673ed161f65b9ae8098",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Notes for 08-28\"\nformat: html\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\ndf_url=\"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv\"\nelection2016=read.csv(df_url)\nhead(election2016)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n       state median.income unemployed metro high.school non.citizen white.pov\n1    Alabama         42278      0.060  0.64       0.821        0.02      0.12\n2     Alaska         67629      0.064  0.63       0.914        0.04      0.06\n3    Arizona         49254      0.063  0.90       0.842        0.10      0.09\n4   Arkansas         44922      0.052  0.69       0.824        0.04      0.12\n5 California         60487      0.059  0.97       0.806        0.13      0.09\n6   Colorado         60940      0.040  0.80       0.893        0.06      0.07\n  income.ineq non.white trump.vote outcome\n1       0.472      0.35       0.63     Red\n2       0.422      0.42       0.53     Red\n3       0.455      0.49       0.50     Red\n4       0.458      0.26       0.60     Red\n5       0.471      0.61       0.33    Blue\n6       0.457      0.31       0.44    Blue\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nset.seed(13)\nn=nrow(election2016)\np=0.7\nindices=sample(n,p*n)\ntrain_set=election2016[indices,]\ntest_set=election2016[-indices,]\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfit_lm=lm(trump.vote~income.ineq,data=train_set) #Fit model to training\nyhat=predict(fit_lm,test_set) #Predict test data\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nn= nrow(election2016)\ny=test_set$trump.vote #Actual test data responses\nSSE=sum((y-yhat)^2)\nMSE=SSE/n\nRMSE=sqrt(MSE)\nSST=sum((y-mean(y))^2)\nR2=1-SSE/SST\ncat(\"R^2 = \",R2, \", RMSE = \", RMSE)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nR^2 =  -0.1187292 , RMSE =  0.04526494\n```\n\n\n:::\n\n```{.r .cell-code}\ndata.frame(Metric=c(\"RMSE\",\"R2\"),Value=c(RMSE,R2))\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n  Metric       Value\n1   RMSE  0.04526494\n2     R2 -0.11872917\n```\n\n\n:::\n:::\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

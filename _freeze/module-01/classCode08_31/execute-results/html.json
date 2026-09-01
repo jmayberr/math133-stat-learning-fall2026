@@ -1,0 +1,17 @@
+{
+  "hash": "0c8e00688e26e58b929c6d4001de684a",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Notes for 08-31\"\nformat: html\n---\n\nSImulate 100 tosses\n\n\n::: {.cell}\n\n```{.r .cell-code}\nset.seed(3)\nvalues=c(\"H\",\"T\")\ntosses=sample(values,100,replace=TRUE)\n```\n:::\n\n\nCount number of heads\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsum(tosses==\"H\")\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 44\n```\n\n\n:::\n:::\n\n\nReplicating coin tosses\n\n\n::: {.cell}\n\n```{.r .cell-code}\ntosses=replicate(10000,\n          sum(sample(values,100,replace=TRUE)==\"H\")\n          )\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nhist(tosses)\n```\n\n::: {.cell-output-display}\n![](classCode08_31_files/figure-html/unnamed-chunk-4-1.png){width=672}\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsum(tosses>=60)/10000\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 0.0271\n```\n\n\n:::\n:::\n\n",
+    "supporting": [
+      "classCode08_31_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

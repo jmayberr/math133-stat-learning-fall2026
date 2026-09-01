@@ -1,0 +1,12 @@
+name: math133-stat-learning-fall2026
+title: math133-stat-learning-fall2026
+username: jmayberry
+account: jmayberry
+server: connect.posit.cloud
+hostUrl: https://api.connect.posit.cloud/v1
+appId: 01a04460-ab8f-30c1-6d60-af821d21510f
+bundleId:
+url: https://connect.posit.cloud/jmayberry/content/01a04460-ab8f-30c1-6d60-af821d21510f
+version: 1
+asMultiple: FALSE
+asStatic: TRUE
