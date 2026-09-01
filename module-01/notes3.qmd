@@ -1,13 +1,6 @@
 ---
 title: "Module 1.3: Inference for SLM"
 author: "John Mayberry"
-output: html_document
-format: 
-  html:
-    embed-resources: true
-    self-contained: true
-    math: mathjax
-editor: visual
 ---
 
 ```{r setup, include=FALSE}
@@ -29,9 +22,7 @@ data.frame(x=rnorm(30),y=rnorm(30)) |>
 
 The slope is pretty close to 0 which is what it theoretically should be since our model for generating the data above was just
 
-$$
-Y_i = 0 \times X_i + \varepsilon_i
-$$
+$$Y_i = 0 \times X_i + \varepsilon_i$$
 
 where $\varepsilon\_i$ is standard normal, but it is still negative and if we didn't know it was fake data, we might be tempted to conclude that there is a linear dependence between the variables $x$ and $y$ even though there really isn't.
 
@@ -95,9 +86,7 @@ If a computed slope falls outside this range, it would be considered unusual and
 
 In this case, we would say that the variable $x$ is a "significant" predictor of $y$. Its slope matters.
 
-Since we cannot rely on simulations like this for real data[^3], classical statistics gives us a formula for the standard error of $\hat \beta_1$[^4]: $$
-SE(\hat \beta_1)= \sigma/\sqrt{\sum (x_i-\bar{x})^2}
-$$
+Since we cannot rely on simulations like this for real data[^3], classical statistics gives us a formula for the standard error of $\hat \beta_1$[^4]: $$SE(\hat \beta_1)= \sigma/\sqrt{\sum (x_i-\bar{x})^2}$$
 
 [^3]: Although we will see later that there are techniques like bootstrapping that allow us to "cheat" a little and do just that.
 
@@ -114,7 +103,7 @@ fit_lm=lm(trump.vote~non.white,data=election2016)
 summary(fit_lm)
 ```
 
-There's a lot here and we'll get to more of it later, but for now look at the Estimate and Std Error columns. The estimate $-0.2656$ next to *non.white* is the estimated slope and 0.08230 is the corresponding standard error. This means that even though our estimate of the slope is $-0.2656$, we are only confident in that value being accurate up to 2 or 3 times 0.08230. This is often phrased in terms of what we call confidence intervals: a 95% confidence interval is roughly equal to the estimate +/- 2 SE[^6]. In our example, the 95% confidence interval would be
+There's a lot here and we'll get to more of it later, but for now look at the Estimate and Std Error columns. The estimate $-0.2656$ next to *non.white* is the estimated slope and $0.08230$ is the corresponding standard error. This means that even though our estimate of the slope is $-0.2656$, we are only confident in that value being accurate up to 2 or 3 times $0.08230$. This is often phrased in terms of what we call confidence intervals: a 95% confidence interval is roughly equal to the estimate $\pm 2\times$SE[^6]. In our example, the 95% confidence interval would be
 
 [^6]: Although this approximation is not great for small sample sizes.
 
@@ -128,12 +117,13 @@ The p-value is the probability of obtaining a slope of magnitude as large as the
 sum(abs(slopes)>0.5)/1000
 ```
 
-of all our our slopes are as big as 0.5 so the p-value of 0.5 would be about 0.008. Since this number is small 0.5 would be a "significantly nonzero" slope in this scenario. Visually, the p-value is the relative size of the shaded area to the total area shown below:
+of all our our slopes are as big as $0.5$ so the p-value of $0.5$ would be about $0.008$. Since this number is small, $0.5$ would be a "significantly nonzero" slope in this scenario. Visually, the p-value is the relative size of the shaded area to the total area shown below:
 
 ```{r}
-hist_data <- hist(slopes, plot = FALSE)
+hist_data = hist(slopes, plot = FALSE)
 
-plot(hist_data, col = ifelse(abs(hist_data$mids) > 0.5, "steelblue", "lightgray"),
+plot(hist_data, 
+     col = ifelse(abs(hist_data$mids) > 0.5, "steelblue", "lightgray"),
      main = "Null Sampling Distribution of Slope",
      xlab = "Slope",
      border = "white")
@@ -141,17 +131,17 @@ plot(hist_data, col = ifelse(abs(hist_data$mids) > 0.5, "steelblue", "lightgray"
 text(0.5, max(hist_data$counts) * 0.5, "Area = 0.008", col = "steelblue", cex = 0.9)
 ```
 
-On the other hand, if we look at the fraction of slopes greater than 0.1 in absolute value, we see that
+On the other hand, if we look at the fraction of slopes greater than $0.1$ in absolute value, we see that
 
 ```{r}
 sum(abs(slopes)>0.1)/1000
 ```
 
-of all slopes were greater than 0.1 so the p-value of 0.1 would be 0.608 . This number is pretty high (there's a 60% change of generating a slope this large by chance) so 0.1 is not a significantly nonzero slope.
+of all slopes were greater than $0.1$ so the p-value of $0.1$ would be $0.608$ . This number is pretty high (there's a 60% change of generating a slope this large by chance) so $0.1$ is not a significantly nonzero slope.
 
-The smaller the p-value, the more surprising it would be to get a slope as extreme as we observed due to chance, providing more evidence of a significant linear relationship. By convention, a p-value below 0.05 is considered statistically significant, below 0.001 is considered highly significant, and between 0.05 and 0.1 is considered moderately significant, though these are guidelines rather than hard rules.
+The smaller the p-value, the more surprising it would be to get a slope as extreme as we observed due to chance, providing more evidence of a significant linear relationship. By convention, a p-value below $0.05$ is considered statistically significant, below $0.001$ is considered highly significant, and between $0.05$ and $0.1$ is considered moderately significant, though these are guidelines rather than hard rules.
 
-Looking back at the output of of model above, the stated p-value for our slope was $0.0027< 0.05$ so we can say that non.white is a statistically significant predictor of trump.vote (even though we say in the last notes its a bad predictor) and since the slope is negative, states with a higher proportion of non-white residents tended to have lower Trump vote.
+Looking back at the output of the model above, the stated p-value for our slope was $0.0027< 0.05$ so we can say that non.white is a statistically significant predictor of trump.vote (even though we say in the last notes its a bad predictor) and since the slope is negative, states with a higher proportion of non-white residents tended to have lower Trump vote.
 
 ## Type I and Type II Errors
 
@@ -160,13 +150,13 @@ Its important to remember that when talking about statistical significance, ther
 1.  Concluding that a relationship is significant when it is not
 2.  Failing to identify a significant relationship
 
-The first is called a Type I error and the second a Type II error. If we look at our experiment from earlier and use a $2\times SE$ rule for significance, here is how many Type I errors we would make
+The first is called a Type I error and the second a Type II error. If we look at our experiment from earlier and use a $2\times$SE rule for significance, here is how many Type I errors we would make
 
 ```{r}
 sum(abs(slopes)>2*sd(slopes))
 ```
 
-That's an error rate of 43/1000=0.043. Using a 2SE rule, the answer will usually be close to 0.05. In contrast, if I am testing a situation where the actual slope exists but is small (say 0.1), then I would probably make a Type II error since the estimated slope of
+That's an error rate of $43/1000=0.043$. Using a 2SE rule, the answer will usually be close to $0.05$. In contrast, if I am testing a situation where the actual slope exists but is small (say 0.1), then I would probably make a Type II error since the estimated slope of
 
 ```{r}
 set.seed(44)
@@ -221,18 +211,18 @@ To summarize the difference:
 
 - **Confidence interval for the mean** at $x_i$: how uncertain are we about the *average* value of $Y$ at this $x_i$? This only accounts for uncertainty in estimating the line.
 
-- **Prediction interval** at $x_i$: how uncertain are we about a *single new observation* $Y$ at this $x_i$? This accounts for uncertainty in estimating the line *plu\* the irreducible noise $\sigma$ of any individual observation.
+- **Prediction interval** at $x_i$: how uncertain are we about a *single new observation* $Y$ at this $x_i$? This accounts for uncertainty in estimating the line \*plus\* the irreducible noise $\sigma$ of any individual observation.
 
-## Practice 
+## Practice
 
-Import the dataset [Beerwings.csv](https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Beerwings.csv) (Source: [Mathematical Statistics with Resampling and R](https://bcs.wiley.com/he-bcs/Books?action=index&itemId=1119874033&bcsId=12641)) and complete the following steps. Note that _Beer_ measures beer consumed in ounces and _Hotwings_ measures number of hotwings consumed per individual.
+Import the dataset [Beerwings.csv](https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Beerwings.csv) (Source: [Mathematical Statistics with Resampling and R](https://bcs.wiley.com/he-bcs/Books?action=index&itemId=1119874033&bcsId=12641)) and complete the following steps. Note that *Beer* measures beer consumed in ounces and *Hotwings* measures number of hotwings consumed per individual.
 
-1. Create a scatterplot of _Beer_ (y-axis) vs _Hotwings_ (x-axis) with nicely labeled axes titles and an added trendline (you may have already done this if you read the rtools supplement)
-2. Fit an SLM to these two variables using _Beer_ as the outcome. Display the summary. 
-3. Identify the standard error and p-value of the slope. Is hotwing consumption a significant predictor of beer? 
-4. Calculate both a confidence and prediction interval for the amount of beer consumed by a customer who buys a 12 pack of hotwings. Write sentences interpreting both. 
+1.  Create a scatterplot of *Beer* (y-axis) vs *Hotwings* (x-axis) with nicely labeled axes titles and an added trendline (you may have already done this if you read the rtools supplement)
+2.  Fit an SLM to these two variables using *Beer* as the outcome. Display the summary.
+3.  Identify the standard error and p-value of the slope. Is hotwing consumption a significant predictor of beer?
+4.  Calculate both a confidence and prediction interval for the amount of beer consumed by a customer who buys a 12 pack of hotwings. Write sentences interpreting both.
 
 If time permits, review the previous notes as well by completing the following
 
-a. Partition the data into training-testing sets using a 70-30 split. 
-b. Fit an SLM to the training data and calculate $R^2$ on the testing data. Interpret the results.  
+a.  Partition the data into training-testing sets using a 70-30 split.
+b.  Fit an SLM to the training data and calculate $R^2$ on the testing data. Interpret the results.

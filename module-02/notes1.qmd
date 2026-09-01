@@ -16,23 +16,13 @@ cat("Non.white R2:",summary(fit_lm1)$r.squared,
     "\nMedian.income R2:",summary(fit_lm2)$r.squared)
 ```
 
-The natural question is: why not just include both predictors in our model if they are significant? In other wordswhy not look at a model of the form $$
-Y = f(X_1, X_2) +\varepsilon
-$$ where \$X_1 = \$ *non.white* and \$X_2 = \$ median.income?
+The natural question is: why not just include both predictors in our model if they are significant? In other words, why not look at a model of the form $$Y = f(X_1, X_2) +\varepsilon$$ where $X_1=$ *non.white* and $X_2=$ median.income?
 
-Multiple regression models do just that. They are the natural extension of simple linear models where we are allowed to include more than one predictor $X$ in our systematic information, but still assume it is a linear function of our parameters. In particular, if we have $p$ predictors $X_1,...X_p$, then a multiple regression model is one of the form $$
-Y = \beta_0  + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
-$$
+Multiple regression models do just that. They are the natural extension of simple linear models where we are allowed to include more than one predictor $X$ in our systematic information, but still assume it is a linear function of our parameters. In particular, if we have $p$ predictors $X_1,...X_p$, then a multiple regression model is one of the form $$Y = \beta_0  + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon$$ where as before $\varepsilon$ is mean zero normal random variable with standard deviation $\sigma$.
 
-where as before $\varepsilon \sim Normal(0,\sigma)$.
+Our main goal today will be to see how to fit and interpret multiple regression models in R. But before we get to that, a note on notation. Multiple Regression models are often written in the simplified matrix-vector form $$Y = X \beta + \varepsilon$$ where $$X = \begin{bmatrix} 1 & X_1 & \cdots & X_p\end{bmatrix}$$ is what we call the *model matrix* and $$\beta = \begin{bmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_p \end{bmatrix}$$ is the *coefficient vector*. Notice that under this representation, $\varepsilon$ is what we call a multivariate normal random variable, but if we continue to assume that the errors are independent, you can just think of it as a vector of $n$ independent normal random variables with the same standard deviation. The matrix-vector formulation leads to a nifty trick for estimating $\beta$ and other deeper connections to linear transformations[^1] but in these notes, we'll mainly just use the matrix-vector formulation as a notational tool.
 
-Our main goals today will be to see how to fit and interpret multiple regression models in R. But before we get to that, a note on notation. Multiple Regression models are often written in the simplified matrix-vector form $$
-Y = X \beta + \varepsilon
-$$ where $$
-X = \begin{bmatrix} 1 & X_1 & \cdots & X_p\end{bmatrix}
-$$ is what we call the *model matrix* and $$
-\beta = \begin{bmatrix} \beta_0 \\ \beta_1 \\ \vdots \\ \beta_p \end{bmatrix}
-$$ is the *coefficient vector*. Notice that under this representation, $\varepsilon$ is technically what we call a multivariate normal random variable, but if we continue to assume that the errors are independent, you can treat it as $n$ independent normals with the same standard deviation. Please see the Module 2 Theory Supplement for further details about solving for $\beta$ using the matrix-vector formulation of the least squares problem. In the notes, we'll mainly just use the matrix-vector formulation as a notational tool.
+[^1]: See the Module 2 Theory Supplement for a glimpse although a course in linear algebra is required for the full effect.
 
 ## Fitting Multiple Regression with R
 
@@ -67,9 +57,7 @@ summary(fit_lm)
 
 But instead of picking which model to use, let's try to fit a multiple regression model of the form
 
-$$
-sales = \beta_0 + \beta_1 \times TV + \beta_2 \times radio + \beta_3 \times newspaper + \varepsilon
-$$ The `lm` function is easily modified to accomplish this task:
+$$sales = \beta_0 + \beta_1 \times TV + \beta_2 \times radio + \beta_3 \times newspaper + \varepsilon$$ The `lm` function is easily modified to accomplish this task:
 
 ```{r}
 fit_lm_full=lm(sales~TV+radio+newspaper,data=advertising)
@@ -83,7 +71,7 @@ sales_lm_full=lm(sales~.,data=advertising)
 summary(sales_lm_full)
 ```
 
-Well, that definitely improved on the $R^2$ value of our model over the individual SLMs, jacking it up to almost 90%! (We'll talk about the difference between multiple and adjusted $R^2$ later.) Notice now that we also get a p-value for each of the three predictors. These can be interpreted in the same way as in a SLM; small values correspond to significant predictors. The p-values for both TV and radio are really small and hence, we conclude that their slopes are significantly nonzero. They are important linear predictors. Newspaper, by contrast, has a high p-value; if newspaper had no effect on sales, we would expect a coefficient as large as 0.001 in absolute value about 86% of the time. Therefore, we conclude that newspaper does NOT have a significant linear association with sales and we can safely remove it from our model. The `update` function is a slick way to pull that off (although you can also just build it from scratch):
+Well, that definitely improved on the $R^2$ value of our model over the individual SLMs, jacking it up to almost 90%! (We'll talk about the difference between multiple and adjusted $R^2$ later.) Notice now that we also get a p-value for each of the three predictors. These can be interpreted in the same way as in an SLM; small values correspond to significant predictors. The p-values for both TV and radio are really small and hence, we conclude that their slopes are significantly nonzero. They are important linear predictors. Newspaper, by contrast, has a high p-value; if newspaper had no effect on sales, we would expect a coefficient as large as 0.001 in absolute value about 86% of the time. Therefore, we conclude that newspaper does NOT have a significant linear association with sales and we can safely remove it from our model. The `update` function is a slick way to pull that off (although you can also just build it from scratch):
 
 ```{r}
 sales_lm_reduced=update(sales_lm_full,.~.-newspaper)
@@ -150,7 +138,7 @@ train_lm_red=lm(sales~radio+TV,data=train_set)
 Comparing the $R^2$ values on the test set:
 
 ```{r}
-calculate_r2=function(y,yhat){
+get_r2=function(y,yhat){
   sse=sum((y-yhat)^2)
   sst=sum((y-mean(y))^2)
   1-sse/sst
@@ -158,8 +146,8 @@ calculate_r2=function(y,yhat){
 y=test_set$sales
 yhat_full=predict(train_lm_full,test_set)
 yhat_red=predict(train_lm_red,test_set)
-cat("R2 full: ", calculate_r2(y,yhat_full),
-  "R2 reduced: ", calculate_r2(y,yhat_red))
+cat("R2 full: ", get_r2(y,yhat_full),
+  "R2 reduced: ", get_r2(y,yhat_red))
 ```
 
 We can see that the reduced model is slightly better and even though the difference is small in this example, you can imagine that it could be A LOT bigger in other situations (more on this in Module 4).
@@ -168,9 +156,7 @@ To summarize, don't waste space for irrelevant variables in your model. Simple e
 
 ## Visualizing the Fit
 
-Visualizing a multiple regression model with two variables requires a 3D plot since the equation $$
-\hat{y} = \beta_0 + \beta_1 x_1 + \beta_2 x_2
-$$defines a plane (think $z = a + bx + cy$). Unfortunately, ggplot doesn't do well with 3D plots. For that we need a new package plotly. Install it first and then run the following
+Visualizing a multiple regression model with two variables requires a 3D plot since the equation $$\hat{y} = \beta_0 + \beta_1 x_1 + \beta_2 x_2$$ defines a plane (think $z = a + bx + cy$). Unfortunately, ggplot doesn't do well with 3D plots. For that we need a new package plotly. Install it first and then run the following
 
 ```{r}
 library(plotly)
@@ -185,33 +171,36 @@ This shows the points $(TV,radio,sales)$. To show the fitted plane we get from o
 summary(advertising[,c("TV","radio")])
 ```
 
-Notice that TV goes from 0 to around 300 while radio goes from 0 to around 50. We'll use these as the endpoints of our grid and then space out points by 10 and 5, respectively[^1]
+Notice that TV goes from 0 to around 300 while radio goes from 0 to around 50. We'll use these as the endpoints of our grid[^2]
 
-[^1]: Technically we only need two points in each direction here because the function is linear, but its better practice to include more gridpoints for nonlinear functions
+[^2]: We only need two points in each direction here because the function is linear, but with nonlinear functions you would need to define a sequence of equally spaced values in teh x and y directions (eg. `x=seq(0,300, by=10)`).
 
 ```{r}
-x_values=seq(0,300, by=10)
-y_values=seq(0,50,by=5)
+x_values=c(0,300)
+y_values=c(0,50)
 xy_grid=expand.grid(TV=x_values,radio=y_values)
+print(xy_grid)
 ```
 
 We then fit our model and calculated the predicted y-values, storing the result as a matrix.
 
 ```{r}
-yhat=matrix(predict(sales_lm_reduced,xy_grid),
+yhat=predict(sales_lm_reduced,xy_grid)
+z_values=matrix(yhat,
          nrow=length(x_values),ncol=length(y_values))
+print(z_values)
 ```
 
-Finally, we plot the predicted values on the z-axis alongside our grid. Note the "t" stands for transpose and flips the yhat matrix so that it matches up with the x- and y-values correctly[^2]:
+Finally, we plot the predicted values on the z-axis alongside our grid. Note the "t" stands for transpose and flips the yhat matrix so that it matches up with the x- and y-values correctly[^3]:
 
-[^2]: The axes labeling and colors is unfortunately rather clunky in plotly but I guess if you want nice 3D graphics, you have to deal with it
+[^3]: The axes labeling and colors is unfortunately rather clunky in plotly but I guess if you want nice 3D graphics, you have to deal with it
 
 ```{r}
 adv_3d |> 
   add_markers(marker = list(color = "black", size = 3)) |>
   add_surface(x = ~x_values, 
               y = ~y_values, 
-              z = ~t(yhat),
+              z = ~t(z_values),
               colorscale = "Viridis",
               opacity = 0.7) |>
   layout(scene = list(
@@ -228,11 +217,11 @@ Wait a second, does it? Personally, I just want to get in there and peal it down
 
 ## Partial Regression Plots
 
-An *added variable* or *partial regression* plot shows the relationship between the outcome and each predictors individually after removing the influence of the other predictors from both[^3]. Added variable plots are implemented in the `car` package[^4]:
+An *added variable* or *partial regression* plot shows the relationship between the outcome and each predictors individually after removing the influence of the other predictors from both[^4]. Added variable plots are implemented in the `car` package[^5]:
 
-[^3]: More precisely, to get the added variable plot for $X_j$, we regress $X_j$ on the other predictors to get predicted values $\hat X_j$ and calculate the errors $X_j - \hat X_j$ from our model and do the same for $Y$. Then we fit an SLM to the errors $Y-\hat Y$ based on $X_j - \hat X_j$
+[^4]: More precisely, to get the added variable plot for $X_j$, we regress $X_j$ on the other predictors to get predicted values $\hat X_j$ and calculate the errors $X_j - \hat X_j$ from our model and do the same for $Y$. Then we fit an SLM to the errors $Y-\hat Y$ based on $X_j - \hat X_j$
 
-[^4]: Here `car` is actually an acronym for "Classification and Regression". Its a package that contains additional diagnostic tools for model fitting which we'll see again in Section 2.3 and other random places throughout the course.
+[^5]: Here `car` is actually an acronym for "Classification and Regression". Its a package that contains additional diagnostic tools for model fitting which we'll see again in Section 2.3 and other random places throughout the course.
 
 ```{r}
 library(car)

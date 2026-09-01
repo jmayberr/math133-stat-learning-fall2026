@@ -1,0 +1,34 @@
+---
+title: "Notes for 08-31"
+format: html
+---
+
+SImulate 100 tosses
+
+```{r}
+set.seed(3)
+values=c("H","T")
+tosses=sample(values,100,replace=TRUE)
+```
+
+Count number of heads
+
+```{r}
+sum(tosses=="H")
+```
+
+Replicating coin tosses
+
+```{r}
+tosses=replicate(10000,
+          sum(sample(values,100,replace=TRUE)=="H")
+          )
+```
+
+```{r}
+hist(tosses)
+```
+
+```{r}
+sum(tosses>=60)/10000
+```
