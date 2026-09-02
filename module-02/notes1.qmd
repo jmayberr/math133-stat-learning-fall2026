@@ -193,15 +193,15 @@ print(z_values)
 
 Finally, we plot the predicted values on the z-axis alongside our grid. Note the "t" stands for transpose and flips the yhat matrix so that it matches up with the x- and y-values correctly[^3]:
 
-[^3]: The axes labeling and colors is unfortunately rather clunky in plotly but I guess if you want nice 3D graphics, you have to deal with it
+[^3]: You can ignore the last `layout` command if you dont' care about changing the axes labels. Also [look here](https://plotly.com/r/builtin-colorscales/) for a list of named colorscales that you can use.  
 
 ```{r}
 adv_3d |> 
-  add_markers(marker = list(color = "black", size = 3)) |>
+  add_markers(color = I("black"), size = 3) |>
   add_surface(x = ~x_values, 
               y = ~y_values, 
               z = ~t(z_values),
-              colorscale = "Viridis",
+              colorscale = "Portland",
               opacity = 0.7) |>
   layout(scene = list(
     xaxis = list(title = "TV"),
