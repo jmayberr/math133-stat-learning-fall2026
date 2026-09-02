@@ -268,3 +268,5 @@ tune_grid <- grid_regular(
   levels = c(10, 4, 3)
 )
 ```
+
+## Practice Problems
