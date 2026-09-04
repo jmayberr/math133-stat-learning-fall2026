@@ -1,0 +1,56 @@
+---
+title: "Class Notes for 09-04"
+format: html
+---
+
+```{r}
+library(tidyverse)
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Beerwings.csv"
+beerwings=read.csv(df_url) |>
+  select(-ID)
+head(beerwings)
+```
+
+Model for Beer \~ Hotwings
+
+```{r}
+beer_lm=lm(Beer~Hotwings,data=beerwings)
+```
+
+```{r}
+wings12=which(beerwings$Hotwings==12)
+pred_values=predict(beer_lm,interval="confidence")
+pred_values[wings12,]
+```
+
+```{r}
+new_df=data.frame(Hotwings=12)
+predict(beer_lm,new_df,interval="confidence")
+```
+
+Gender Plot
+
+```{r}
+beerwings |>
+  ggplot(aes(x=Gender,y=Beer,fill=Gender))+
+  stat_boxplot(geom="errorbar",width=0.2)+
+  geom_boxplot(width=0.5)+
+  scale_fill_manual(values=c("cyan","deeppink"))
+```
+
+Including Gender in Model
+
+```{r}
+beer_lm2=lm(Beer~Gender,data=beerwings)
+summary(beer_lm2)
+```
+
+Gender and Hotwings
+
+```{r}
+beerwings |>
+  ggplot(aes(x=Hotwings,y=Beer,color=Gender))+
+  geom_point()+
+  geom_smooth(method=lm,se=FALSE)+
+  scale_color_manual(values=c("#e35205","steelblue"))
+```

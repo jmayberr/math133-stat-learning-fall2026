@@ -179,7 +179,7 @@ First, let's talk about the output. The summary describes the relative influence
 
 Second, let's talk about the inputs.
 
-- distribution = "gaussian" specifies regression; use "binomial" for classification
+- distribution = "gaussian" specifies regression; use "bernoulli" for binary classification or "multinomial" for more than two categories.
 - interaction.depth = 1 says all the trees can have a max of one split (stumps)
 - shrinkage = 0.01 specifies the learning rate
 - n.trees = 500 specifies the total number of trees to fit
@@ -269,4 +269,18 @@ tune_grid <- grid_regular(
 )
 ```
 
-## Practice Problems
+## Practice
+
+Recall the `palmerpenguins` package from several Module practice problems. Load this package into R and work with the `penguins` dataset to answer the questions below.
+
+As in Module 6.3, drop all rows containing NA from the dataset and perform a 70-30 training split using `set.seed(55)` for consistency.
+
+1.  Fit a model to this data using the default settings in `gbm` (don't forget to use `distribution="multinomial"`). Look at the model summary and identify the most important variables.
+
+2.  Calculate the accuracy and balanced accuracy of your model on the test set. **Note**: Predict is a bit funky for multinomial distributions and gbm. It will return a 3D array of class probabilities. To instead get class predictions, apply tyhe following two commands to your gbm model output:
+
+    `class_probs=predict(species_gbm,test_set,type="response")[,,1]`
+
+    `pred_class = colnames(class_probs)[max.col(class_probs)]`
+
+3.  (Bonus)

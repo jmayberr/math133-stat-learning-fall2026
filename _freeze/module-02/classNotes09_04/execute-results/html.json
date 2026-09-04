@@ -1,0 +1,17 @@
+{
+  "hash": "a24ba4b19582764bbd833cf537b2465c",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Class Notes for 09-04\"\nformat: html\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\ndf_url=\"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/Beerwings.csv\"\nbeerwings=read.csv(df_url) |>\n  select(-ID)\nhead(beerwings)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n  Hotwings Beer Gender\n1        4   24      F\n2        5    0      F\n3        5   12      F\n4        6   12      F\n5        7   12      F\n6        7   12      F\n```\n\n\n:::\n:::\n\n\nModel for Beer \\~ Hotwings\n\n\n::: {.cell}\n\n```{.r .cell-code}\nbeer_lm=lm(Beer~Hotwings,data=beerwings)\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nwings12=which(beerwings$Hotwings==12)\npred_values=predict(beer_lm,interval=\"confidence\")\npred_values[wings12,]\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n        fit      lwr      upr\n14 26.32938 23.53193 29.12684\n15 26.32938 23.53193 29.12684\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nnew_df=data.frame(Hotwings=12)\npredict(beer_lm,new_df,interval=\"confidence\")\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n       fit      lwr      upr\n1 26.32938 23.53193 29.12684\n```\n\n\n:::\n:::\n\n\nGender Plot\n\n\n::: {.cell}\n\n```{.r .cell-code}\nbeerwings |>\n  ggplot(aes(x=Gender,y=Beer,fill=Gender))+\n  stat_boxplot(geom=\"errorbar\",width=0.2)+\n  geom_boxplot(width=0.5)+\n  scale_fill_manual(values=c(\"cyan\",\"deeppink\"))\n```\n\n::: {.cell-output-display}\n![](classNotes09_04_files/figure-html/unnamed-chunk-5-1.png){width=672}\n:::\n:::\n\n\nIncluding Gender in Model\n\n\n::: {.cell}\n\n```{.r .cell-code}\nbeer_lm2=lm(Beer~Gender,data=beerwings)\nsummary(beer_lm2)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n\nCall:\nlm(formula = Beer ~ Gender, data = beerwings)\n\nResiduals:\n   Min     1Q Median     3Q    Max \n -30.4   -6.4    2.0    7.4   17.6 \n\nCoefficients:\n            Estimate Std. Error t value Pr(>|t|)    \n(Intercept)   22.000      2.902   7.580 2.95e-08 ***\nGenderM        8.400      4.104   2.047   0.0502 .  \n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 11.24 on 28 degrees of freedom\nMultiple R-squared:  0.1301,\tAdjusted R-squared:  0.09906 \nF-statistic: 4.189 on 1 and 28 DF,  p-value: 0.05019\n```\n\n\n:::\n:::\n\n\nGender and Hotwings\n\n\n::: {.cell}\n\n```{.r .cell-code}\nbeerwings |>\n  ggplot(aes(x=Hotwings,y=Beer,color=Gender))+\n  geom_point()+\n  geom_smooth(method=lm,se=FALSE)+\n  scale_color_manual(values=c(\"#e35205\",\"steelblue\"))\n```\n\n::: {.cell-output-display}\n![](classNotes09_04_files/figure-html/unnamed-chunk-7-1.png){width=672}\n:::\n:::\n\n",
+    "supporting": [
+      "classNotes09_04_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
