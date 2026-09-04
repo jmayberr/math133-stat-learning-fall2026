@@ -6,11 +6,11 @@ title: "Module 2.2: Enriching Linear Models"
 
 This section will focus on three additions to the multiple regression models discussed in the last section:
 
--   Qualitative predictors
+- Qualitative predictors
 
--   Interaction terms
+- Interaction terms
 
--   Polynomial terms
+- Polynomial terms
 
 All three topics are examples of feature engineering: building new input variables from existing ones to capture relationships that a raw linear model would miss. Despite these enrichments, the model remains linear in its coefficients, so everything we have learned so far still applies.
 
@@ -30,15 +30,11 @@ head(beerwings)
 
 In the practice problem, you were asked to fit a SLM
 
-$$
-Beer = \beta_0 + \beta_1 \times Wings + \varepsilon
-$$
+$$Beer = \beta_0 + \beta_1 \times Wings + \varepsilon$$
 
 We also might want to look at the relationship between Gender and Beer consumption by considering a model of the form
 
-$$
-Beer = \beta_0 + \beta_1 \times Gender + \varepsilon
-$$
+$$Beer = \beta_0 + \beta_1 \times Gender + \varepsilon$$
 
 as it seems there is definitely a difference in beer consumption between the two groups:
 
@@ -50,9 +46,8 @@ beerwings |>
   theme_classic()
 ```
 
-The standard way of incorporating *qualitative* or *categorical* variables like Gender into statistical models is via a process called *dummy coding*[^1]. If the variable is binary[^2], we choose one value to serve as the baseline for the model (R does this by alphabetical order so it will choose "F" in this example). The baseline value is *recoded* with a 0, and the other value with 1. In other words, we would define a new variable $$
-GenderM = \begin{cases}1 & \text{if  Gender == "Male"} \\ 0 & \text{if  Gender == "Female"} \end{cases}
-$$
+The standard way of incorporating *qualitative* or *categorical* variables like Gender into statistical models is via a process called *dummy coding*[^1]. If the variable is binary[^2], we choose one value to serve as the baseline for the model (R does this by alphabetical order so it will choose "F" in this example). The baseline value is *recoded* with a 0, and the other value with 1. In other words, we would define a new variable
+$$GenderM = \begin{cases}1 & \text{if  Gender == "Male"} \\ 0 & \text{if  Gender == "Female"} \end{cases}$$
 
 [^1]: Sometimes viewed as a special case of one-hot encoding where one creates a separate column of 0/1s for each possible value of a categorical variable.
 
@@ -86,9 +81,8 @@ lm(Beer ~ Gender,beerwings)
 
 Notice that it adds "M" at the end of Gender to tell us which value is treated as a "1" in the encoding. You can directly use such calls in the future.
 
-For qualitative predictors with $k \geq 2$ categories, the idea is similar. We choose one category to serve as baseline and then we create $k-1$ binary variables for the other categories of the form $$
-X_j = \begin{cases}1 & \text{if  Category ==} j \\ 0 & \text{if  Category !=} j\end{cases}
-$$
+For qualitative predictors with $k \geq 2$ categories, the idea is similar. We choose one category to serve as baseline and then we create $k-1$ binary variables for the other categories of the form
+$$X_j = \begin{cases}1 & \text{if  Category ==} j \\ 0 & \text{if  Category !=} j\end{cases}$$
 
 Note that `!=` is R language for "not equal to". The $X_j$ are called *indicator* or (group) *dummy* variables. Again, `lm` is built to handle this kind of stuff. Let's illustrate using the Math 37 survey dataset from the Module 1 Assessment
 
@@ -144,19 +138,14 @@ There are two separate questions we could ask
 
 The first can be answered by considering a multiple regression model of the form
 
-$$
-Beer = \beta_0 + \beta_1 \times Gender + \beta_2 \times Hotwings + \varepsilon
-$$
+$$Beer = \beta_0 + \beta_1 \times Gender + \beta_2 \times Hotwings + \varepsilon$$
 
 The $\beta_1$ serves as the "shift" in intercept between Gender = 0 (F) and Gender = 1 (M) because if Gender = 0 we get
 
-$$
-Beer = \beta_0  + \beta_2 \times Hotwings + \varepsilon
-$$ and if Gender = 1, we get
+$$Beer = \beta_0  + \beta_2 \times Hotwings + \varepsilon$$
+and if Gender = 1, we get
 
-$$
-Beer = (\beta_0 + \beta_1)  + \beta_2 \times Hotwings + \varepsilon
-$$
+$$Beer = (\beta_0 + \beta_1)  + \beta_2 \times Hotwings + \varepsilon$$
 
 so $\beta_1$ is the difference in intercepts. This is just another application of multiple regression
 
@@ -167,15 +156,12 @@ summary(fit_lm)
 
 Note that the coefficient of GenderM was not significant (although interestingly, it was negative!) so we conclude that the intercepts for Male and Female were not significantly different. To test for a difference in slopes, we can add an *interaction term* and consider the model
 
-$$
-Beer = \beta_0 + \beta_1 (Gender) + \beta_2 (Hotwings) + \beta_3 (Gender \times Hotwings)+  \varepsilon
-$$
+$$Beer = \beta_0 + \beta_1 (Gender) + \beta_2 (Hotwings) + \beta_3 (Gender \times Hotwings)+  \varepsilon$$
 
-To see why this works, note that if Gender = 0, the model becomes $$
-Beer = \beta_0 + \beta_2 (Hotwings)+  \varepsilon
-$$ while if Gender = 1, we get $$
-Beer = \beta_0 + \beta_1 + (\beta_2+\beta_3)  (Hotwings)+  \varepsilon
-$$
+To see why this works, note that if Gender = 0, the model becomes
+$$Beer = \beta_0 + \beta_2 (Hotwings)+  \varepsilon$$
+while if Gender = 1, we get
+$$Beer = \beta_0 + \beta_1 + (\beta_2+\beta_3)  (Hotwings)+  \varepsilon$$
 
 So $\beta_3$ is the difference in the slopes and $\beta_1$ is still the difference in the intercepts.
 
@@ -188,13 +174,11 @@ summary(fit_lm_int)
 
 In this case, the coefficient of *GenderM:Hotwings* tells us the estimate of $\beta_3$. In this case it is negative, but insignificant so we conclude that gender does not impact beer consumption after accounting for wings consumption (i.e. if you have two people consume the same number of wings, our model would predict the same beer consumption regardless of gender).
 
-We can also include interactions between numeric predictors like in the advertising dataset. Remember that 3D plot we showed in Module 2.1 and my comment about wanting to peal down the surface? Well we can do that if we consider the model $$
-sales = \beta_0 + \beta_1 (TV) + \beta_2 (radio) + \beta_3 (TV \times radio) + \varepsilon
-$$
+We can also include interactions between numeric predictors like in the advertising dataset. Remember that 3D plot we showed in Module 2.1 and my comment about wanting to peal down the surface? Well we can do that if we consider the model
+$$sales = \beta_0 + \beta_1 (TV) + \beta_2 (radio) + \beta_3 (TV \times radio) + \varepsilon$$
 
-which creates an estimation function of the form $$
-\hat y = a + b_1 x_1 + b_2 x_2 + b_3 x_1x_2
-$$
+which creates an estimation function of the form
+$$\hat y = a + b_1 x_1 + b_2 x_2 + b_3 x_1x_2$$
 
 It turns out the interaction between TV and radio is significant:
 
@@ -209,18 +193,18 @@ Even more rewarding is to re-examine the 3D plot with this new model:
 
 ```{r}
 library(plotly)
-x_values=seq(0,300, by=10)
-y_values=seq(0,50,by=5)
+x_values=c(0,300)
+y_values=c(0,50)
 xy_grid=expand.grid(TV=x_values,radio=y_values)
-yhat=matrix(predict(sales_lm_int,xy_grid),
-         nrow=length(x_values),ncol=length(y_values))
-adv_3d=plot_ly(advertising,x=~TV,y=~radio,z=~sales)
-adv_3d |> 
-  add_markers(marker = list(color = "black", size = 3)) |>
+z_values=matrix(predict(sales_lm_int,xy_grid),
+         nrow=2,ncol=2)
+advertising |> 
+  plot_ly(x=~TV,y=~radio,z=~sales)|> 
+  add_markers(color = I("black"), size = 3) |>
   add_surface(x = ~x_values, 
               y = ~y_values, 
-              z = ~t(yhat),
-              colorscale = "Viridis",
+              z = ~t(z_values),
+              colorscale = "Portland",
               opacity = 0.7) |>
   layout(scene = list(
     xaxis = list(title = "TV"),
@@ -277,9 +261,7 @@ summary(fit_lm)
 
 Instead, noticing the curvature, let's try fitting a quadratic model
 
-$$
-mpg = \beta_0 + \beta_1 (hp) + \beta_2 (hp)^2 + \varepsilon
-$$
+$$mpg = \beta_0 + \beta_1 (hp) + \beta_2 (hp)^2 + \varepsilon$$
 
 This requires engineering a new variable $(hp)^2$ which `lm` will do automatically:
 

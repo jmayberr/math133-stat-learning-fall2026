@@ -542,7 +542,7 @@ unemployed       unemployed  0.4813118</code></pre>
 <p>First, let’s talk about the output. The summary describes the relative influence of each variable in the boosted model. This is the same thing as variable importance in random forests and we can see that the top five here are similar.</p>
 <p>Second, let’s talk about the inputs.</p>
 <ul>
-<li>distribution = “gaussian” specifies regression; use “binomial” for classification</li>
+<li>distribution = “gaussian” specifies regression; use “bernoulli” for binary classification or “multinomial” for more than two categories.</li>
 <li>interaction.depth = 1 says all the trees can have a max of one split (stumps)</li>
 <li>shrinkage = 0.01 specifies the learning rate</li>
 <li>n.trees = 500 specifies the total number of trees to fit</li>
@@ -639,8 +639,17 @@ unemployed       unemployed  0.4813118</code></pre>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="practice-problems" class="level2">
-<h2 class="anchored" data-anchor-id="practice-problems">Practice Problems</h2>
+<section id="practice" class="level2">
+<h2 class="anchored" data-anchor-id="practice">Practice</h2>
+<p>Recall the <code>palmerpenguins</code> package from several Module practice problems. Load this package into R and work with the <code>penguins</code> dataset to answer the questions below.</p>
+<p>As in Module 6.3, drop all rows containing NA from the dataset and perform a 70-30 training split using <code>set.seed(55)</code> for consistency.</p>
+<ol type="1">
+<li><p>Fit a model to this data using the default settings in <code>gbm</code> (don’t forget to use <code>distribution="multinomial"</code>). Look at the model summary and identify the most important variables.</p></li>
+<li><p>Calculate the accuracy and balanced accuracy of your model on the test set. <strong>Note</strong>: Predict is a bit funky for multinomial distributions and gbm. It will return a 3D array of class probabilities. To instead get class predictions, apply tyhe following two commands to your gbm model output:</p>
+<p><code>class_probs=predict(species_gbm,test_set,type="response")[,,1]</code></p>
+<p><code>pred_class = colnames(class_probs)[max.col(class_probs)]</code></p></li>
+<li><p>(Bonus)</p></li>
+</ol>
 
 
 </section>
