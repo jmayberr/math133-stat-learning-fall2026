@@ -1,0 +1,48 @@
+---
+title: "Class Notes 09-09"
+format: html
+---
+
+```{r}
+# Quadratic Model 
+# lm(mpg~poly(hp,2),data=mtcars)
+fit_lm_quad=lm(mpg~hp+I(hp^2),data=mtcars)
+summary(fit_lm_quad)
+```
+
+Residual Plot
+
+```{r}
+library(tidyverse)
+mtcars2=mtcars |>
+  mutate(yhat=predict(fit_lm_quad),
+         res=mpg-yhat)
+head(mtcars2[,c("mpg","yhat","res")])
+```
+
+```{r}
+mtcars2 |>
+  ggplot(aes(x=yhat,y=res))+
+  geom_point()
+```
+
+Log-log plot
+
+```{r}
+mtcars |>
+  ggplot(aes(x=hp,y=mpg))+
+  geom_point()+
+  scale_x_log10()+
+  scale_y_log10()
+```
+
+```{r}
+fit_lm_log=lm(log(mpg)~log(hp),data=mtcars)
+```
+
+```{r}
+mtcars |>
+  ggplot(aes(x=hp,y=mpg))+
+  geom_point()+
+  geom_line(aes(y=exp(predict(fit_lm_log))))
+```

@@ -46,8 +46,7 @@ beerwings |>
   theme_classic()
 ```
 
-The standard way of incorporating *qualitative* or *categorical* variables like Gender into statistical models is via a process called *dummy coding*[^1]. If the variable is binary[^2], we choose one value to serve as the baseline for the model (R does this by alphabetical order so it will choose "F" in this example). The baseline value is *recoded* with a 0, and the other value with 1. In other words, we would define a new variable
-$$GenderM = \begin{cases}1 & \text{if  Gender == "Male"} \\ 0 & \text{if  Gender == "Female"} \end{cases}$$
+The standard way of incorporating *qualitative* or *categorical* variables like Gender into statistical models is via a process called *dummy coding*[^1]. If the variable is binary[^2], we choose one value to serve as the baseline for the model (R does this by alphabetical order so it will choose "F" in this example). The baseline value is *recoded* with a 0, and the other value with 1. In other words, we would define a new variable $$GenderM = \begin{cases}1 & \text{if  Gender == "Male"} \\ 0 & \text{if  Gender == "Female"} \end{cases}$$
 
 [^1]: Sometimes viewed as a special case of one-hot encoding where one creates a separate column of 0/1s for each possible value of a categorical variable.
 
@@ -81,8 +80,7 @@ lm(Beer ~ Gender,beerwings)
 
 Notice that it adds "M" at the end of Gender to tell us which value is treated as a "1" in the encoding. You can directly use such calls in the future.
 
-For qualitative predictors with $k \geq 2$ categories, the idea is similar. We choose one category to serve as baseline and then we create $k-1$ binary variables for the other categories of the form
-$$X_j = \begin{cases}1 & \text{if  Category ==} j \\ 0 & \text{if  Category !=} j\end{cases}$$
+For qualitative predictors with $k \geq 2$ categories, the idea is similar. We choose one category to serve as baseline and then we create $k-1$ binary variables for the other categories of the form $$X_j = \begin{cases}1 & \text{if  Category ==} j \\ 0 & \text{if  Category !=} j\end{cases}$$
 
 Note that `!=` is R language for "not equal to". The $X_j$ are called *indicator* or (group) *dummy* variables. Again, `lm` is built to handle this kind of stuff. Let's illustrate using the Math 37 survey dataset from the Module 1 Assessment
 
@@ -142,8 +140,7 @@ $$Beer = \beta_0 + \beta_1 \times Gender + \beta_2 \times Hotwings + \varepsilon
 
 The $\beta_1$ serves as the "shift" in intercept between Gender = 0 (F) and Gender = 1 (M) because if Gender = 0 we get
 
-$$Beer = \beta_0  + \beta_2 \times Hotwings + \varepsilon$$
-and if Gender = 1, we get
+$$Beer = \beta_0  + \beta_2 \times Hotwings + \varepsilon$$ and if Gender = 1, we get
 
 $$Beer = (\beta_0 + \beta_1)  + \beta_2 \times Hotwings + \varepsilon$$
 
@@ -158,10 +155,7 @@ Note that the coefficient of GenderM was not significant (although interestingly
 
 $$Beer = \beta_0 + \beta_1 (Gender) + \beta_2 (Hotwings) + \beta_3 (Gender \times Hotwings)+  \varepsilon$$
 
-To see why this works, note that if Gender = 0, the model becomes
-$$Beer = \beta_0 + \beta_2 (Hotwings)+  \varepsilon$$
-while if Gender = 1, we get
-$$Beer = \beta_0 + \beta_1 + (\beta_2+\beta_3)  (Hotwings)+  \varepsilon$$
+To see why this works, note that if Gender = 0, the model becomes $$Beer = \beta_0 + \beta_2 (Hotwings)+  \varepsilon$$ while if Gender = 1, we get $$Beer = \beta_0 + \beta_1 + (\beta_2+\beta_3)  (Hotwings)+  \varepsilon$$
 
 So $\beta_3$ is the difference in the slopes and $\beta_1$ is still the difference in the intercepts.
 
@@ -174,11 +168,9 @@ summary(fit_lm_int)
 
 In this case, the coefficient of *GenderM:Hotwings* tells us the estimate of $\beta_3$. In this case it is negative, but insignificant so we conclude that gender does not impact beer consumption after accounting for wings consumption (i.e. if you have two people consume the same number of wings, our model would predict the same beer consumption regardless of gender).
 
-We can also include interactions between numeric predictors like in the advertising dataset. Remember that 3D plot we showed in Module 2.1 and my comment about wanting to peal down the surface? Well we can do that if we consider the model
-$$sales = \beta_0 + \beta_1 (TV) + \beta_2 (radio) + \beta_3 (TV \times radio) + \varepsilon$$
+We can also include interactions between numeric predictors like in the advertising dataset. Remember that 3D plot we showed in Module 2.1 and my comment about wanting to peal down the surface? Well we can do that if we consider the model $$sales = \beta_0 + \beta_1 (TV) + \beta_2 (radio) + \beta_3 (TV \times radio) + \varepsilon$$
 
-which creates an estimation function of the form
-$$\hat y = a + b_1 x_1 + b_2 x_2 + b_3 x_1x_2$$
+which creates an estimation function of the form $$\hat y = a + b_1 x_1 + b_2 x_2 + b_3 x_1x_2$$
 
 It turns out the interaction between TV and radio is significant:
 
@@ -263,25 +255,35 @@ Instead, noticing the curvature, let's try fitting a quadratic model
 
 $$mpg = \beta_0 + \beta_1 (hp) + \beta_2 (hp)^2 + \varepsilon$$
 
-This requires engineering a new variable $(hp)^2$ which `lm` will do automatically:
+This requires engineering a new variable $(hp)^2$ which `lm` will do automatically^[If you don't like the whole "I" thing, you can also use the `poly(x,k)` function which generates a polynomial of degree $k$ in $x$. In this example,we would use `mpg ~ poly(hp,2)`. ] :
 
 ```{r}
 fit_lm_quad=lm(mpg~hp+I(hp^2),mtcars)
 summary(fit_lm_quad)
 ```
 
-We see an improvement in $R^2$ and the model visually matches the data better too (although the increase in mpg for large hp is unrealistic):
+We see an improvement in $R^2$ and the model visually matches the data better too as can be seen in the graph below. Note that the formula supplied here is the same as the one used in the fitting of `lm`.
 
 ```{r}
 mtcars |> 
   ggplot(aes(x=hp,y=mpg))+
   geom_point()+
   geom_smooth(method=lm,
-              formula=y~poly(x,2),
+              formula=y~x+I(x^2),
               color = "#0072B2")
 ```
 
-To get a more realistic model which incorporates curvature without the increase, we need to use a data transformation. This and a few other topics related to regression diagnostics will be discussed in 2.3.
+A second method of fitting non-linear plots is to use `geom_line` along with the fitted values from our model:
+
+```{r}
+mtcars |> 
+  ggplot(aes(x=hp,y=mpg))+
+  geom_point()+
+  geom_line(aes(y=predict(fit_lm_quad)),
+            col="#0072B2")
+```
+
+Either way, there is an issue. We shouldn't see an increase in mpg for large hp. To fit a more realistic model which incorporates curvature without this increase, we need to use a data transformation. This and a few other topics related to regression diagnostics will be discussed in 2.3.
 
 ## Practice
 
