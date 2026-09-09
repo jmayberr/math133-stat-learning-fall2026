@@ -68,7 +68,7 @@ The `solve` command calculates the inverse. These are the same estimates we get 
 lm(sales_formula,advertising)
 ```
 
-If $p$ happens to be large, it is better to solve the system \$(X\^TX) \beta = X\^TY \$ directly using Gaussian elimination or other numeric techniques for solving systems of equations. This can also be done with `solve`:
+If $p$ happens to be large, it is better to solve the system $(X^TX) \beta = X^TY $ directly using Gaussian elimination or other numeric techniques for solving systems of equations. This can also be done with `solve`:
 
 ```{r}
 solve(t(X) %*% X,t(X) %*% y)

@@ -1,0 +1,17 @@
+{
+  "hash": "a46ea75eb75e9cd4ef84fd9d2eded64d",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Class Notes 09-09\"\nformat: html\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\n# Quadratic Model \n# lm(mpg~poly(hp,2),data=mtcars)\nfit_lm_quad=lm(mpg~hp+I(hp^2),data=mtcars)\nsummary(fit_lm_quad)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n\nCall:\nlm(formula = mpg ~ hp + I(hp^2), data = mtcars)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-4.5512 -1.6027 -0.6977  1.5509  8.7213 \n\nCoefficients:\n              Estimate Std. Error t value Pr(>|t|)    \n(Intercept)  4.041e+01  2.741e+00  14.744 5.23e-15 ***\nhp          -2.133e-01  3.488e-02  -6.115 1.16e-06 ***\nI(hp^2)      4.208e-04  9.844e-05   4.275 0.000189 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 3.077 on 29 degrees of freedom\nMultiple R-squared:  0.7561,\tAdjusted R-squared:  0.7393 \nF-statistic: 44.95 on 2 and 29 DF,  p-value: 1.301e-09\n```\n\n\n:::\n:::\n\n\nResidual Plot\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\nmtcars2=mtcars |>\n  mutate(yhat=predict(fit_lm_quad),\n         res=mpg-yhat)\nhead(mtcars2[,c(\"mpg\",\"yhat\",\"res\")])\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n                   mpg     yhat        res\nMazda RX4         21.0 22.03708 -1.0370777\nMazda RX4 Wag     21.0 22.03708 -1.0370777\nDatsun 710        22.8 24.21108 -1.4110834\nHornet 4 Drive    21.4 22.03708 -0.6370777\nHornet Sportabout 18.7 15.96765  2.7323496\nValiant           18.1 22.65124 -4.5512422\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmtcars2 |>\n  ggplot(aes(x=yhat,y=res))+\n  geom_point()\n```\n\n::: {.cell-output-display}\n![](classNotes09_09_files/figure-html/unnamed-chunk-3-1.png){width=672}\n:::\n:::\n\n\nLog-log plot\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmtcars |>\n  ggplot(aes(x=hp,y=mpg))+\n  geom_point()+\n  scale_x_log10()+\n  scale_y_log10()\n```\n\n::: {.cell-output-display}\n![](classNotes09_09_files/figure-html/unnamed-chunk-4-1.png){width=672}\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfit_lm_log=lm(log(mpg)~log(hp),data=mtcars)\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmtcars |>\n  ggplot(aes(x=hp,y=mpg))+\n  geom_point()+\n  geom_line(aes(y=exp(predict(fit_lm_log))))\n```\n\n::: {.cell-output-display}\n![](classNotes09_09_files/figure-html/unnamed-chunk-6-1.png){width=672}\n:::\n:::\n\n",
+    "supporting": [
+      "classNotes09_09_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
