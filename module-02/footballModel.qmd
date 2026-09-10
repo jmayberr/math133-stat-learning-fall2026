@@ -1,0 +1,113 @@
+---
+title: "Fantasy Football Analysis"
+format: 
+  html:
+    embed-resources: true
+    self-contained: true
+---
+
+The data we will use for our model contains 5629 weekly observations of fantasy football points in a ppr league throughout the 2025 season. It also contains rolling averages of several statistics over the previous 12 games (such as carries, touches, etc.), the previous season's defensive fantasy points per game, and the player's age
+
+```{r}
+library(tidyverse)
+fantasy2025 = read.csv("Datasets/fantasy2025.csv")
+row.names(fantasy2025)=paste0(fantasy2025$player_display_name,fantasy2025$week)
+glimpse(fantasy2025)
+```
+
+Our goal will be to fit and analyze a model for predicting the variable `fantasy_points_ppr` from other variables in the dataset. First note that there is a slight issue with collinearity 
+
+```{r,message=FALSE}
+formula1=fantasy_points_ppr~position+
+          carries_pg+rushing_yards_pg+
+          targets_pg+receptions_pg+receiving_yards_pg+
+          rushing_tds_pg +receiving_tds_pg+
+          age+def_fantasy_points_pg
+fit1=lm(formula1,data=fantasy2025)
+library(car)
+vif(fit1)
+```
+
+This is because some of the predictors are heavily correlated
+
+```{r}
+library(GGally)
+ggcorr(fantasy2025[,c("carries_pg","rushing_yards_pg",
+          "targets_pg","receptions_pg","receiving_yards_pg")])
+```
+
+We can fix this by using yards per carry or target instead of per game. 
+
+```{r}
+formula2=fantasy_points_ppr~ position+
+  carries_pg +
+  targets_pg +
+  yards_per_carry +
+  yards_per_target +
+  rushing_tds_pg +
+  receiving_tds_pg +
+  def_fantasy_points_pg+
+  age
+fit2=lm(formula2,data=fantasy2025)
+library(car)
+vif(fit2)
+```
+
+The $R^2$ value for our model isn't bad
+
+```{r}
+summary(fit2)
+```
+
+This is some evidence of heteroscedasticity and a few outliers:
+
+```{r}
+plot(fit2,which=1)
+```
+
+Jahmyr Gibbs had a monster week 12 against the giants; nothing to be done about predicting that:  
+
+```{r}
+fantasy2025 |>
+  dplyr::filter(player_display_name=="Jahmyr Gibbs"&week==12) |>
+  select(player_display_name,week,opponent_team,fantasy_points_ppr)
+```
+
+Eyeball test also doesn't suggest any high leverage points but we can check the hatvalues. If we use the cutoff $2p/n$, there aren't any people to worry about: 
+
+```{r}
+p=9
+2*(p+1)/nrow(fantasy2025)
+head(sort(hatvalues(fit2),decreasing = TRUE))
+```
+
+Of course, we should check out of sample accuracy. It looks like the test set accuracy is as good as the train one so yay:
+
+```{r}
+set.seed(315)
+n=nrow(fantasy2025)
+s=sample(n,0.8*n)
+train=fantasy2025[s,]
+test=fantasy2025[-s,]
+fit_train=lm(formula2,data=train)
+yhat=predict(fit_train,test)
+SSE=sum((test$fantasy_points_ppr-yhat)^2,na.rm=TRUE)
+SST=sum((test$fantasy_points_ppr-mean(test$fantasy_points_ppr))^2,na.rm=TRUE)
+cat("Test R^2 is",1-SSE/SST)
+```
+
+Also coming back to the point of heteroscedasticity, I learned a new trick^[The augment function is kind of cool too. It adds the predictions (pred), residuals (resid) and other outputs from a model to a test set.] for checking if it impacts predictive accuracy -  plot the absolute residuals vs predicted values for the test data:
+
+```{r}
+augment(lm_final, new_data = test) |>
+  ggplot(aes(x = .pred, y = abs(.resid))) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "loess", se = FALSE) +
+  labs(
+    x = "Predicted Fantasy Points",
+    y = "Absolute Residual"
+  ) +
+  theme_minimal()
+```
+
+Notice that the error does increase for small $\hat y$ but starts to level off. This means the error doesn't keep increasing and I wouldn't be too worried about trying to do anything further to smooth out the variance.  
