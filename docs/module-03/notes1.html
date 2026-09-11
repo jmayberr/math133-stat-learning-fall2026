@@ -365,14 +365,21 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The womenShots.csv dataset contains positional and situational data on a collection of shots taken in several NCAA women’s water polo games from the 2018-2019 seasons.</p>
-<p>In this scenario, the variable we would like to predict is the binary variable Goal. Ultimately, we would like to build a model for predicting Goal based on all the other variables but we are going to start with just the variables xj and yj which contain the “jittered” positions of the shots. The coordinates are relative to the center of the goal with the positive y-axis pointing into the pool and the positive x-axis pointed right. Our model will be of the form <span class="math display">\[
+<p>In this scenario, the variable we would like to predict is the binary variable Goal. Ultimately, we would like to build a model for predicting Goal based on all the other variables but we are going to start with just the variables xj and yj which contain the “jittered” positions of the shots. The coordinates are relative to the center of the goal with the positive y-axis pointing into the pool and the positive x-axis pointed right; see image below</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="WP_shot_diagram.png" class="img-fluid figure-img" style="width:75.0%"></p>
+<figcaption>Orientation of coordinate system</figcaption>
+</figure>
+</div>
+<p>Our model will be of the form <span class="math display">\[
 Y = f(X) + \varepsilon
 \]</span> but now <span class="math inline">\(f\)</span> will be a bit different: it will have to take continuous coordinates as inputs, but output just one of two things: Goal or No Goal. In other words, our final predictive model should look like <span class="math display">\[
 \hat{Y} = \begin{cases} \text{Goal} &amp; \text{ if X is } G  \\
 \text{Not Goal} &amp; \text{ if X is in } \bar{G} \end{cases}
 \]</span></p>
 <p>where <span class="math inline">\(G\)</span> is some region of <span class="math inline">\((x,y)\)</span> space and <span class="math inline">\(\bar{G}\)</span> is its complement. Such problems are fundamentally different from the regression models in Modules 1-2 and are called <strong>classification</strong> problems (you can think of Goal and Not Goal as two classes in which we want to split the observations). When the response is binary (like above) the goal is to split the predictor space into two decision regions (<span class="math inline">\(G\)</span> and <span class="math inline">\(\bar{G}\)</span>) where we will respectively predict goals and misses.</p>
-<p>Before building a formal model, let’s first visualize the data to get a sences of whether classification is even feasible. Plotting shots based on position and coloring the points by whethere or not there was a goal, we can see there will be no perfect way to split the space into decision regions, but there are some clustering of orange and black so maybe we have some hope of beating the “always guess miss model”.</p>
+<p>Before building a formal model, let’s first visualize the data to get a sense of whether classification is even feasible. Plotting shots based on position and coloring the points by goal/not goal, we can see there will be no perfect way to split the space into decision regions, but there are some clustering of orange and black so maybe we have some hope of beating the “always guess miss model”.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>shots<span class="ot">=</span><span class="fu">read.csv</span>(url)</span>
@@ -397,7 +404,7 @@ Y = f(X) + \varepsilon
 <li>What do we mean by “beat”?</li>
 <li>What is the “always guess miss model”?</li>
 </ul>
-<p>To answer the first question, we need to define a metric for assessing how well our model fits the data (akin to RMSE or <span class="math inline">\(R^2\)</span> for regression problem). The most obvious choice is <em>accuracy</em>, the proportion of correct guesses made by our model: <span class="math display">\[
+<p>To answer the first question, we need to define a metric for assessing how well our model fits the data (akin to RMSE or <span class="math inline">\(R^2\)</span> for regression problems). The most obvious choice is <em>accuracy</em>, the proportion of correct predictions: <span class="math display">\[
 accuracy = \frac{1}{n} \sum_{i=1}^n (\hat{y}_i ==y_i)
 \]</span> The model with the highest accuracy wins. Sometimes (to keep things consistent with regression where we looked to minimize the MSE) instead of maximizing the accuracy, people talk in terms of minimizing the error rate: <span class="math display">\[
 ER = 1 - accuracy
