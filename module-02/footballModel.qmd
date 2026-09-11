@@ -10,12 +10,14 @@ The data we will use for our model contains 5629 weekly observations of fantasy 
 
 ```{r}
 library(tidyverse)
-fantasy2025 = read.csv("Datasets/fantasy2025.csv")
+library(broom)
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/fantasy2025.csv"
+fantasy2025 = read.csv(df_url)
 row.names(fantasy2025)=paste0(fantasy2025$player_display_name,fantasy2025$week)
 glimpse(fantasy2025)
 ```
 
-Our goal will be to fit and analyze a model for predicting the variable `fantasy_points_ppr` from other variables in the dataset. First note that there is a slight issue with collinearity 
+Our goal will be to fit and analyze a model for predicting the variable `fantasy_points_ppr` from other variables in the dataset. First note that there is a slight issue with collinearity^[The output here is kind of confusing compared to what we preivously saw because there are some categorical predictors like position with more than two values. Don't worry about it too much; just use the last column and interpret it like you woudl VIF.] 
 
 ```{r,message=FALSE}
 formula1=fantasy_points_ppr~position+
@@ -96,11 +98,13 @@ SST=sum((test$fantasy_points_ppr-mean(test$fantasy_points_ppr))^2,na.rm=TRUE)
 cat("Test R^2 is",1-SSE/SST)
 ```
 
-Also coming back to the point of heteroscedasticity, I learned a new trick^[The augment function is kind of cool too. It adds the predictions (pred), residuals (resid) and other outputs from a model to a test set.] for checking if it impacts predictive accuracy -  plot the absolute residuals vs predicted values for the test data:
+Also coming back to the point of heteroscedasticity, I learned a new trick for checking if it impacts predictive accuracy -  plot the absolute residuals vs predicted values for the test data:
 
-```{r}
-augment(lm_final, new_data = test) |>
-  ggplot(aes(x = .pred, y = abs(.resid))) +
+```{r,warning=FALSE,message=FALSE}
+test |>
+  mutate(pred=predict(fit2,test),
+         resid=fantasy_points_ppr-pred) |>
+  ggplot(aes(x = pred, y = abs(resid))) +
   geom_point(alpha = 0.4) +
   geom_smooth(method = "loess", se = FALSE) +
   labs(
