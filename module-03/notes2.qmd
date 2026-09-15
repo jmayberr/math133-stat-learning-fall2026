@@ -261,11 +261,13 @@ sum(train$Goal_1==1)/nrow(train)
 sum(test$Goal_1==1)/nrow(test)
 ```
 
-We will see an easier way of doing stratified sampling when we discuss `tidymodels` in later modules. For now, my advice would be to definitely use it when there is more than an 80-20 imbalance and consider using it if it is more than 60-40 and the dataset is small. The water polo dataset is large and the imbalance is about 70-30 so it probably isn't necessary. For example, in our previous test_set where we didn't stratified, we ended up with a reasonable fraction of goals anyways:    
+My advice would be to definitely use stratified sampling when there is more than an 80-20 imbalance and consider using it if it is more than 60-40 and the dataset is small. The water polo dataset is large and the imbalance is about 63-37 so it probably isn't necessary. For example, in our previous test_set where we didn't stratified, we ended up with a reasonable fraction of goals anyways:    
 
 ```{r}
 sum(test_set$Goal=="Goal")/nrow(test_set)
 ```
+
+However, in the practice problems below it will make more of a difference because the class imbalance is larger. 
 
 ## What else we need to say
 
@@ -287,7 +289,7 @@ we see that there are two types of errors: predicting goal for not goal and pred
 
 The [framingham dataset]("https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/framingham.csv")  contains information from a study in Framingham, MA on cardiovascular heart disease. You can view more information about the data [here](https://www.kaggle.com/datasets/dileep070/heart-disease-prediction-using-logistic-regression) Download this data and remove all subjects with missing data using the drop_na() command. 
 
-1. Create a 70-30 training-testing split for the data using stratified sampling. 
+1. Create a 70-30 training-testing split for the data. *Bonus*: Use stratified sampling.  
 2. Fit a logistic regression model to the training set using the variable TenYearCHD as the response and all the other variables as predictors. 
-3. Which variables were significant predictors of CHD in your model from 2? 
+3. Which variables were significant predictors of CHD in your model from 2? Looking at the signs of the coefficients, discuss how the odds of getting CHD depends on each of the significant predictors (eg. The odds of getting CDH are expected to increase as variable $x$ increases.)
 4. What was the accuracy of your model on the test set? How does it compare with the null model? 

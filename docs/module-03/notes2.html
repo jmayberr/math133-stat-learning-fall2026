@@ -617,7 +617,7 @@ P(Goal|(x,y)) &gt; 0.5
 <span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>er_logistic<span class="ot">=</span><span class="fu">sum</span>(test_set<span class="sc">$</span>prediction<span class="sc">!=</span>test_set<span class="sc">$</span>Goal)<span class="sc">/</span><span class="fu">length</span>(test_set<span class="sc">$</span>Goal)</span>
 <span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>er_logistic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3561077</code></pre>
+<pre><code>[1] 0.3850932</code></pre>
 </div>
 </div>
 <p>For those of you who did the last practice problems, this should be close to the best knn model error rates you got.</p>
@@ -652,13 +652,14 @@ P(Goal|(x,y)) &gt; 0.5
 <pre><code>[1] 0.36853</code></pre>
 </div>
 </div>
-<p>We will see an easier way of doing stratified sampling when we discuss <code>tidymodels</code> in later modules. For now, my advice would be to definitely use it when there is more than an 80-20 imbalance and consider using it if it is more than 60-40 and the dataset is small. The water polo dataset is large and the imbalance is about 70-30 so it probably isn’t necessary. For example, in our previous test_set where we didn’t stratified, we ended up with a reasonable fraction of goals anyways:</p>
+<p>My advice would be to definitely use stratified sampling when there is more than an 80-20 imbalance and consider using it if it is more than 60-40 and the dataset is small. The water polo dataset is large and the imbalance is about 63-37 so it probably isn’t necessary. For example, in our previous test_set where we didn’t stratified, we ended up with a reasonable fraction of goals anyways:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(test_set<span class="sc">$</span>Goal<span class="sc">==</span><span class="st">"Goal"</span>)<span class="sc">/</span><span class="fu">nrow</span>(test_set)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3561077</code></pre>
+<pre><code>[1] 0.3830228</code></pre>
 </div>
 </div>
+<p>However, in the practice problems below it will make more of a difference because the class imbalance is larger.</p>
 </section>
 <section id="what-else-we-need-to-say" class="level2">
 <h2 class="anchored" data-anchor-id="what-else-we-need-to-say">What else we need to say</h2>
@@ -674,8 +675,8 @@ P(Goal|(x,y)) &gt; 0.5
 <div class="cell-output cell-output-stdout">
 <pre><code>          
            Goal Not Goal
-  Goal       26       26
-  Not Goal  146      285</code></pre>
+  Goal       42       43
+  Not Goal  143      255</code></pre>
 </div>
 </div>
 <p>we see that there are two types of errors: predicting goal for not goal and predicting not goal for goal.The second type of error is happening much more frequently. Is this desirable? Next notes we’ll talk about these two way confusion matrices in more detail and some other metrics one can use to talk about to assess the value of a classification scheme. We’ll also discuss incorporating qualitative predictors into our models and how we compare our logistic model with the “null”. Until then, love the ones you’re with.</p>
@@ -684,9 +685,10 @@ P(Goal|(x,y)) &gt; 0.5
 <h2 class="anchored" data-anchor-id="practice">Practice</h2>
 <p>The <a href="&quot;https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/framingham.csv&quot;">framingham dataset</a> contains information from a study in Framingham, MA on cardiovascular heart disease. You can view more information about the data <a href="https://www.kaggle.com/datasets/dileep070/heart-disease-prediction-using-logistic-regression">here</a> Download this data and remove all subjects with missing data using the drop_na() command.</p>
 <ol type="1">
-<li>Create a 70-30 training-testing split for the data using stratified sampling.</li>
+<li>Create a 70-30 training-testing split for the data. <em>Bonus</em>: Use stratified sampling.<br>
+</li>
 <li>Fit a logistic regression model to the training set using the variable TenYearCHD as the response and all the other variables as predictors.</li>
-<li>Which variables were significant predictors of CHD in your model from 2?</li>
+<li>Which variables were significant predictors of CHD in your model from 2? Looking at the signs of the coefficients, discuss how the odds of getting CHD depends on each of the significant predictors (eg. The odds of getting CDH are expected to increase as variable <span class="math inline">\(x\)</span> increases.)</li>
 <li>What was the accuracy of your model on the test set? How does it compare with the null model?</li>
 </ol>
 

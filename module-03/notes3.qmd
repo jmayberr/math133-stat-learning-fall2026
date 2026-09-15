@@ -16,7 +16,7 @@ framingham = read_csv("https://raw.githubusercontent.com/jmayberr/math133-stat-l
 chd_glm = glm(TenYearCHD ~ ., data = framingham, family = "binomial")
 summary(chd_glm)
 ```
-We'll start off with a few additional words abotu interpreting coefficients and then proceed to enrich our understanding of "accuracy" by examining false positive vs false negatives, working towards a better metric of balanced accuracy and a more nuanced picture of how well our models fit classification data. 
+We'll start off with a few additional words about interpreting coefficients and then proceed to enrich our understanding of "accuracy" by examining false positive vs false negatives, working towards a better metric of balanced accuracy and a more nuanced picture of how well our models fit classification data. 
 
 ## Interpreting Coefficients
 
@@ -34,7 +34,7 @@ sprintf("The odds of getting CHD are %.0f%% higher for males compared to females
         (exp(coef(chd_glm)["male1"]) - 1) * 100)
 ```
 
-We can also ask about the impact of reducing cigarette consumption. Suppose for example we want to know what happens if we reduce cigaratte consumption by 20 per day. This leads to the following change in odds of developing CHD: 
+We can also ask about the impact of reducing cigarette consumption. Suppose for example we want to know what happens if we reduce cigarette consumption by 20 per day. This leads to the following change in odds of developing CHD: 
 
 ```{r}
 exp(-20 * coef(chd_glm)["cigsPerDay"])
@@ -111,14 +111,14 @@ $$balanced\ accuracy = \frac{0.938 + 0.960}{2} = 0.949$$
 **Precision (Positive Predictive Value)** — what is the probability that you actually have the disease given that you tested positive?
 $$precision = \frac{282}{282 + 388} = 0.421$$
 
-Notice something alarming: even though accuracy is 95.9%, if you test positive there is only a **42% chance** you actually have COVID! This happens because the disease is rare; most positive tests are false positives from the large pool of healthy people. This is why accuracy alone is misleading for imbalanced problems.
+Notice something alarming: even though accuracy is 95.9%, if you test positive there is only a 42% chance you actually have COVID! This happens because the disease is rare; most positive tests are false positives from the large pool of healthy people. This is why accuracy alone is misleading for imbalanced problems.
 
 ### Precision vs Recall Tradeoff
 
 Here's an intuitive way to think about the tension between precision and recall. Suppose I show you 10 cards and then shuffle them into a deck of 100. I go through each card and ask if it was one of the ones you saw:
 
-- If you always say "Yes", your **recall will be 100%** — you'll never miss a card you saw. But your **precision will be terrible** since you're also saying yes to 90 cards you never saw.
-- If you only say "Yes" when you're completely certain, your **precision will be high** but you'll **miss many cards** you actually saw.
+- If you always say "Yes", your recall will be 100%. You'll never miss a card you saw! But your precision will be terrible since you're also saying yes to 90 cards you never saw.
+- If you only say "Yes" when you're completely certain, your precision will be high but you'll miss many cards you actually saw.
 
 This tradeoff appears constantly in classification problems (eg. spam filters, medical tests, fraud detection) and is one of the reasons we need multiple metrics rather than just accuracy.
 
@@ -134,14 +134,26 @@ With this framework in place, let's now evaluate our logistic regression model o
 
 ## Computing Validation Metrics
 
-For a fitted model, the predictions $\hat y$ take the place of the test results in the example above while the values of the outcome $y$ are the truth to which we compare. It is more common to display the confusion matrix for test data so we'll start by refitting our model using a 70-30 split
+For a fitted model, the predictions $\hat y$ take the place of the test results in the example above while the values of the outcome $y$ are the truth to which we compare. It is more common to display the confusion matrix for test data so we'll start by refitting our model using a 70-30 split. Notice that the class imbalance is rather large since only 
+
+```{r}
+sum(framingham$TenYearCHD==1)/nrow(framingham)
+```
+
+of all patients had CHD so it is better to use stratified sampling in this scenaior
 
 ```{r}
 set.seed(2178)
-n=nrow(framingham)
-s=sample(n,round(.7*n,0))
+
+n0=sum(framingham$TenYearCHD==0)
+n1=sum(framingham$TenYearCHD==1)
+s0=sample(which(framingham$TenYearCHD==0),0.7*n0)
+s1=sample(which(framingham$TenYearCHD==1),0.7*n1)
+s=c(s0,s1)
+
 train_set=framingham[s,]
 test_set=framingham[-s,]
+
 train_glm=glm(TenYearCHD ~ ., data = train_set, family = "binomial")
 ```
 
@@ -188,7 +200,7 @@ Can we improve the balanced accuracy by defining a different cutoff for predicti
 ```{r}
 calculate_metrics <- function(predicted, actual, positive) {
   # Inputs: predicted values, actual values, positive value (eg. "1" or "Yes")
-  # outputs: COnfusion matrix, recall, precision, specificity, accuracy, bal accuracy
+  # outputs: Confusion matrix, recall, precision, specificity, accuracy, bal accuracy
   # Dependencies: requires tidyverse or at least forcats
   
   actual <- fct_relevel(factor(actual), positive)
