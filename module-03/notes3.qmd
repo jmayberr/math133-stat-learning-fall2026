@@ -5,7 +5,7 @@ title: "Module 2.3: Evaluating Classification Models"
 
 ## Introduction
 
-In these notes we'll be give a more detailed look at the framingham model from the practice problem at the end of the last notes. Please take some time to investigate it on your own first before ruining the surprise. 
+In these notes we'll take a more detailed look at the framingham model from the practice problem at the end of the last notes. Please take some time to investigate it on your own first before ruining the surprise. 
 
 ```{r,warning=F,message=F,output=F}
 library(tidyverse)
