@@ -287,6 +287,7 @@ we see that there are two types of errors: predicting goal for not goal and pred
 
 The [framingham dataset]("https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/framingham.csv")  contains information from a study in Framingham, MA on cardiovascular heart disease. You can view more information about the data [here](https://www.kaggle.com/datasets/dileep070/heart-disease-prediction-using-logistic-regression) Download this data and remove all subjects with missing data using the drop_na() command. 
 
-1. Fit a logistic regression model to the variable TenYearCHD based on all the other predictors in the dataset
-2. If you hold all other variables fixed, what is the percent change in odds for a Male vs Female getting heart disease?
-3. Suppose that a smoker decides to smoke one less pack per day ( about 20 less cigs per day), holding all other variables constant. What will be the percent changes in their odds of getting heart disease?
+1. Create a 70-30 training-testing split for the data using stratified sampling. 
+2. Fit a logistic regression model to the training set using the variable TenYearCHD as the response and all the other variables as predictors. 
+3. Which variables were significant predictors of CHD in your model from 2? 
+4. What was the accuracy of your model on the test set? How does it compare with the null model? 
