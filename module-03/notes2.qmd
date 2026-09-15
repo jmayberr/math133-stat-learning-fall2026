@@ -29,7 +29,7 @@ $$
 
 ## Logistic Regression
 
-Logistic regression, which despite the name is a classification method, takes a more inferential and quantitative approach to the problem. Instead of trying to directly classify points as 0s or 1s for new X, it tries to build a model for the probability of being in class 1 (or 0) and then classifies new points as 1 (or 0) if this probability is $> 0.5$. In other words, we set $p(X) = P(Y=1 | X) $ (the probability of getting a 1 for a given predictor vector $X$). Then we would like to fit a model to $p(X)$ instead of $Y$ itself. We could try for 
+Logistic regression, which despite the name is a classification method, takes a more inferential and quantitative approach to the problem. Instead of trying to directly classify points as 0s or 1s for new X, it tries to build a model for the probability of being in class 1 (or 0) and then classifies new points as 1 (or 0) if this probability is $> 0.5$. In other words, we set $p(X) = P(Y=1 | X)$ (the probability of getting a 1 for a given predictor vector $X$). Then we would like to fit a model to $p(X)$ instead of $Y$ itself. We could try for 
 $$
 p(X) = X\beta
 $$
@@ -101,7 +101,7 @@ Alright enough fun. Let's fit this shit to our data.
 
 ## Logistic Model on Water Polo Data
 
-To fit a logistic model to shot probabilities on the water polo data, we use the glm function in R with the family = "binomial" option. The response variable needs to be one-hot encoded a 0/1 or F/T first. 
+To fit a logistic model to shot probabilities on the water polo data, we use the glm function in R with the family = "binomial" option. The response variable needs to be recoded as 0/1 or F/T first^[That's just the way `glm` works with binary variables. It will take other qualitative variables as predictors, but not a response. ] 
 
 ```{r}
 url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"
@@ -126,7 +126,8 @@ bx=coef(goal_glm)[1] +coef(goal_glm)[2]*2 + coef(goal_glm)[3]*4
 You can also use the predict function with type = "response", to get the probability directly: 
 
 ```{r}
-predict(goal_glm,newdata=data.frame(xj=2,yj=4),type="response")
+new_df=data.frame(xj=2,yj=4)
+predict(goal_glm,new_df,type="response")
 ```
 
 Now, in terms of interpreting the coefficients, remember that the model is linear in log-odds:
@@ -144,7 +145,9 @@ exp(coef(goal_glm)[3]*(-1))
 As a percent change (subtract the above from 1 and multiply by 100), the odds increase by about 22%. Here are the odds changes as a function of the $\Delta yj$:
 
 ```{r}
-plot(-5:5,(exp(coef(goal_glm)[3]*(-5:5))-1)*100,xlab="Change in yj",ylab="% change in odds")
+plot(-5:5,
+     (exp(coef(goal_glm)[3]*(-5:5))-1)*100,
+     xlab="Change in yj",ylab="% change in odds")
 ```
 
 Note that odds changes are negative if you move further away. 
@@ -209,7 +212,7 @@ We could also visualize this as in the last notes with a color grid
   grid |>
   ggplot(aes(x=xj,y=yj,col=as.factor(prediction)))+
   geom_point(size=3)+
-  scale_color_manual(name="Goal",values=c("black","#e35205"))
+  scale_color_manual(name="Goal",values=c("#0072B2","#e35205"))
 ```
 
 To compute the predictive power, use a training-testing split
@@ -230,7 +233,7 @@ er_logistic=sum(test_set$prediction!=test_set$Goal)/length(test_set$Goal)
 er_logistic
 ```
 
-For those of you who did the last group work, this should be close to the best knn model error rates you got. 
+For those of you who did the last practice problems, this should be close to the best knn model error rates you got. 
 
 ## Stratified Sampling
 
@@ -250,12 +253,18 @@ train = shots[s, ]
 test  = shots[-s, ]
 ```
 
-Now all the training and testing sets have rouhgly the same fraction of goals as the original data:
+Now all the training and testing sets have roughly the same fraction of goals as the original data:
 
 ```{r}
 sum(shots$Goal_1==1)/n
 sum(train$Goal_1==1)/nrow(train)
 sum(test$Goal_1==1)/nrow(test)
+```
+
+We will see an easier way of doing stratified sampling when we discuss `tidymodels` in later modules. For now, my advice would be to definitely use it when there is more than an 80-20 imbalance and consider using it if it is more than 60-40 and the dataset is small. The water polo dataset is large and the imbalance is about 70-30 so it probably isn't necessary. For example, in our previous test_set where we didn't stratified, we ended up with a reasonable fraction of goals anyways:    
+
+```{r}
+sum(test_set$Goal=="Goal")/nrow(test_set)
 ```
 
 ## What else we need to say

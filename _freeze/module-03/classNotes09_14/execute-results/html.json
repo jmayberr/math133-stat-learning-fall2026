@@ -1,0 +1,17 @@
+{
+  "hash": "03aba57c16bda9025239ed8995b10d80",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Notes for 09-14\"\nformat: html\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\ndf_url=\"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/fantasy2025.csv\"\nfantasy2025=read.csv(df_url)\nnames(fantasy2025)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n [1] \"player_id\"             \"player_display_name\"   \"position\"             \n [4] \"week\"                  \"team\"                  \"opponent_team\"        \n [7] \"fantasy_points_ppr\"    \"season\"                \"carries\"              \n[10] \"rushing_yards\"         \"rushing_tds\"           \"targets\"              \n[13] \"receptions\"            \"receiving_yards\"       \"receiving_tds\"        \n[16] \"carries_pg\"            \"targets_pg\"            \"rushing_yards_pg\"     \n[19] \"receiving_yards_pg\"    \"receptions_pg\"         \"rushing_tds_pg\"       \n[22] \"receiving_tds_pg\"      \"yards_per_carry\"       \"yards_per_target\"     \n[25] \"receptions_per_target\" \"tds_per_carry\"         \"tds_per_target\"       \n[28] \"def_fantasy_points_pg\" \"age\"                  \n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfantasy2025$RB=ifelse(fantasy2025$position=='RB',\"Y\",\"N\")\ntable(fantasy2025$RB)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n\n   N    Y \n3979 1650 \n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfantasy2025 = fantasy2025 |>\n  dplyr::select(player_display_name,RB,carries,targets)\nhead(fantasy2025)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n  player_display_name RB carries targets\n1        Adam Thielen  N       0       1\n2           Zach Ertz  N       0       5\n3        Keenan Allen  N       0      10\n4        Travis Kelce  N       0       4\n5     DeAndre Hopkins  N       0       2\n6       Brandin Cooks  N       0       4\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nfantasy2025 |>\n  ggplot(aes(x=carries,y=targets,color=RB))+\n  geom_jitter()\n```\n\n::: {.cell-output-display}\n![](classNotes09_14_files/figure-html/unnamed-chunk-4-1.png){width=672}\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nset.seed(11)\nn=nrow(fantasy2025)\ns=sample(n,0.7*n)\ntrain=fantasy2025[s,]\ntest=fantasy2025[-s,]\n\nlibrary(class)\nfit_knn=knn(train[,c(\"carries\",\"targets\")], # training predictors\n            test[,c(\"carries\",\"targets\")],  # test predictors\n            cl=train$RB,                    # training outcomes\n            k=11)                           # number of neighbors\nhead(fit_knn)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] N N N N N Y\nLevels: N Y\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\naccuracy=sum(fit_knn==test$RB)/nrow(test)\ncat(\"Accuracy = \",accuracy)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nAccuracy =  0.9177028\n```\n\n\n:::\n:::\n\n\nNull model\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsum(test$RB==\"N\")/nrow(test)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 0.7092954\n```\n\n\n:::\n:::\n\n",
+    "supporting": [
+      "classNotes09_14_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
