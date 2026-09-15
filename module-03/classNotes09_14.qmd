@@ -1,0 +1,54 @@
+---
+title: "Notes for 09-14"
+format: html
+---
+
+```{r}
+library(tidyverse)
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/fantasy2025.csv"
+fantasy2025=read.csv(df_url)
+names(fantasy2025)
+```
+
+```{r}
+fantasy2025$RB=ifelse(fantasy2025$position=='RB',"Y","N")
+table(fantasy2025$RB)
+```
+
+```{r}
+fantasy2025 = fantasy2025 |>
+  dplyr::select(player_display_name,RB,carries,targets)
+head(fantasy2025)
+```
+
+```{r}
+fantasy2025 |>
+  ggplot(aes(x=carries,y=targets,color=RB))+
+  geom_jitter()
+```
+
+```{r}
+set.seed(11)
+n=nrow(fantasy2025)
+s=sample(n,0.7*n)
+train=fantasy2025[s,]
+test=fantasy2025[-s,]
+
+library(class)
+fit_knn=knn(train[,c("carries","targets")], # training predictors
+            test[,c("carries","targets")],  # test predictors
+            cl=train$RB,                    # training outcomes
+            k=11)                           # number of neighbors
+head(fit_knn)
+```
+
+```{r}
+accuracy=sum(fit_knn==test$RB)/nrow(test)
+cat("Accuracy = ",accuracy)
+```
+
+Null model
+
+```{r}
+sum(test$RB=="N")/nrow(test)
+```

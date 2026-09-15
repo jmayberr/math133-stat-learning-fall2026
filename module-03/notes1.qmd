@@ -153,7 +153,21 @@ The head function shows the first six predictions of fake_knn. To compute the er
 sum(fake_knn!=test$class)/length(test$class)
 ```
 
-Pretty close to the true expected error rate of 0.1^[Note: you may get a different error rate if your seed is different.]! Here is a more detailed plot of what we would predict if we use our original dataframe as the training set, but include a finer grid of points for the test set (this is called a plot of the decision region):
+Pretty close to the true expected error rate of 0.1^[Note: you may get a different error rate if your seed is different.]! Also note that since B is the most dominant class:
+
+```{r}
+table(test$class)
+```
+
+the null error rate would be 
+
+```{r}
+sum(test$class=="A")/nrow(test)
+```
+
+We definitely beat that!
+
+Here is a more detailed plot of what we would predict if we use our original dataframe as the training set, but include a finer grid of points for the test set (this is called a plot of the decision region):
 
 ```{r}
     x = seq(0,1,by=0.01)
