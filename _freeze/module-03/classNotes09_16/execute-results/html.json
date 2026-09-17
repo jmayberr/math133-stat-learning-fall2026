@@ -1,0 +1,17 @@
+{
+  "hash": "c02e43f213d97ca50976a9e89a1aeed5",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Class Notes for 09-16\"\nformat: html\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\nurl=\"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv\"\nshots=read.csv(url)\n```\n:::\n\n\nLogistic model with one variable\n\n\n::: {.cell}\n\n```{.r .cell-code}\nshots$Goal_1=ifelse(shots$Goal==\"Goal\",1,0)\nfit_glm=glm(Goal_1~yj,data=shots)\nsummary(fit_glm)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n\nCall:\nglm(formula = Goal_1 ~ yj, data = shots)\n\nCoefficients:\n             Estimate Std. Error t value Pr(>|t|)    \n(Intercept)  0.574471   0.036335  15.810  < 2e-16 ***\nyj          -0.048021   0.008023  -5.985 2.66e-09 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\n(Dispersion parameter for gaussian family taken to be 0.2280418)\n\n    Null deviance: 374.18  on 1606  degrees of freedom\nResidual deviance: 366.01  on 1605  degrees of freedom\nAIC: 2189\n\nNumber of Fisher Scoring iterations: 2\n```\n\n\n:::\n:::\n\n\nModel Predictions\n\n\n::: {.cell}\n\n```{.r .cell-code}\nnew_df=data.frame(yj=1:10)\npreds=predict(fit_glm,new_df,type=\"response\")\nplot(preds)\n```\n\n::: {.cell-output-display}\n![](classNotes09_16_files/figure-html/unnamed-chunk-3-1.png){width=672}\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nyhat=ifelse(preds>0.5,\"Goal\",\"Not Goal\")\nyhat\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n         1          2          3          4          5          6          7 \n    \"Goal\" \"Not Goal\" \"Not Goal\" \"Not Goal\" \"Not Goal\" \"Not Goal\" \"Not Goal\" \n         8          9         10 \n\"Not Goal\" \"Not Goal\" \"Not Goal\" \n```\n\n\n:::\n:::\n\n\nCalculating overall accuracy\n\n\n::: {.cell}\n\n```{.r .cell-code}\npreds=predict(fit_glm,type=\"response\")\nyhat=ifelse(preds>0.5,\"Goal\",\"Not Goal\")\n\nsum(yhat==shots$Goal)/nrow(shots) #Accuracy\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 0.6260112\n```\n\n\n:::\n:::\n\n",
+    "supporting": [
+      "classNotes09_16_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -1,11 +1,10 @@
 ---
-title: "Module 2.3: Evaluating Classification Models"
+title: "Module 3.3: Evaluating Classification Models"
 ---
-
 
 ## Introduction
 
-In these notes we'll take a more detailed look at the framingham model from the practice problem at the end of the last notes. Please take some time to investigate it on your own first before ruining the surprise. 
+In these notes we'll take a more detailed look at the framingham model from the practice problem at the end of the last notes. Please take some time to investigate it on your own first before ruining the surprise.
 
 ```{r,warning=F,message=F,output=F}
 library(tidyverse)
@@ -16,17 +15,19 @@ framingham = read_csv("https://raw.githubusercontent.com/jmayberr/math133-stat-l
 chd_glm = glm(TenYearCHD ~ ., data = framingham, family = "binomial")
 summary(chd_glm)
 ```
-We'll start off with a few additional words about interpreting coefficients and then proceed to enrich our understanding of "accuracy" by examining false positive vs false negatives, working towards a better metric of balanced accuracy and a more nuanced picture of how well our models fit classification data. 
+
+We'll start off with a few additional words about interpreting coefficients and then proceed to enrich our understanding of "accuracy" by examining false positive vs false negatives, working towards a better metric of balanced accuracy and a more nuanced picture of how well our models fit classification data.
 
 ## Interpreting Coefficients
 
 The coefficients in a logistic regression model are on the log-odds scale, which makes them difficult to interpret directly. Exponentiating them gives us **odds ratios**, which are easier to describe
 
-For example, we can ask: how much more likely are males to develop CHD compared to females? For this, we use the coefficient of "male1" from our model above and exponentiate the result 
+For example, we can ask: how much more likely are males to develop CHD compared to females? For this, we use the coefficient of "male1" from our model above and exponentiate the result
 
 ```{r}
 exp(coef(chd_glm)["male1"])
 ```
+
 This tells us that Males are about 1.74 as likely to get CHD as females if we hold all other variables constant. It is common to express this as a percentage by subtracting 1 from the above result and multiplying by 100:
 
 ```{r}
@@ -34,7 +35,7 @@ sprintf("The odds of getting CHD are %.0f%% higher for males compared to females
         (exp(coef(chd_glm)["male1"]) - 1) * 100)
 ```
 
-We can also ask about the impact of reducing cigarette consumption. Suppose for example we want to know what happens if we reduce cigarette consumption by 20 per day. This leads to the following change in odds of developing CHD: 
+We can also ask about the impact of reducing cigarette consumption. Suppose for example we want to know what happens if we reduce cigarette consumption by 20 per day. This leads to the following change in odds of developing CHD:
 
 ```{r}
 exp(-20 * coef(chd_glm)["cigsPerDay"])
@@ -58,10 +59,11 @@ head(tidy_model)
 Then we plot the predictors vs their corresponding coefficient estimates with confidence intervals:
 
 ```{r}
-tidy_model[-1,] |>
+tidy_model[-1,] |>  #Note: -1 gets rid of the intercept
   ggplot( aes(x = estimate, y = term)) +
   geom_vline(xintercept = 1, linetype = "dashed", color = "#E69F00") +
-  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
+  geom_errorbar(aes(xmin = conf.low, xmax = conf.high), 
+                 width = 0.2) +
   geom_point(size = 3, color = "#009E73") +
   scale_x_log10() +
   labs(x = "Odds Ratio (log scale)",
@@ -82,34 +84,33 @@ So far we have been using accuracy as our metric for classification performance,
 
 Suppose these is a town of 10,000 people where about 3% have had COVID-19. A particular antibody test has:
 
-- A **93.8% chance** of correctly detecting antibodies in someone who has had COVID (this is called *recall* or *sensitivity* or *true positive* rate^[Its annoying that there are so many names for these terms but that just tells you the concepts are important! They have appeared across many different applications leading to the independent development of different terminologies.])
+- A **93.8% chance** of correctly detecting antibodies in someone who has had COVID (this is called *recall* or *sensitivity* or *true positive* rate[^1])
 - A **95.6% chance** of correctly showing no antibodies in someone who hasn't had COVID (this is called *specificity* or *true negative* rate)
 
-We can organize the results of testing everyone in town into a **confusion matrix** where the rows tell the truth and the columns tell us the predictions^[Although be careful of always assuming this orientation. You'll see examples where truth and predictions are switched!]
+[^1]: Its annoying that there are so many names for these terms but that just tells you the concepts are important! They have appeared across many different applications leading to the independent development of different terminologies.
 
-|  | Test Positive | Test Negative |
-|--|--|--|
-| **Actually COVID** | 282 | 18 |
-| **Actually No COVID** | 388 | 9312 |
+We can organize the results of testing everyone in town into a **confusion matrix** where the rows tell the truth and the columns tell us the predictions[^2]
+
+[^2]: Although be careful of always assuming this orientation. You'll see examples where truth and predictions are switched!
+
+|                       | Test Positive | Test Negative |
+|-----------------------|---------------|---------------|
+| **Actually COVID**    | 282           | 18            |
+| **Actually No COVID** | 388           | 9312          |
 
 From this table we can compute several metrics:
 
-**Accuracy** — what fraction of all predictions were correct?
-$$accuracy = \frac{282 + 9312}{10000} = 0.959$$
+**Accuracy** — what fraction of all predictions were correct? $$accuracy = \frac{282 + 9312}{10000} = 0.959$$
 
 Looks pretty good! But let's dig deeper.
 
-**Recall** — what is the probability of testing positive given that you actually have the disease?
-$$recall = \frac{282}{282 + 18} = 0.938$$
+**Recall** — what is the probability of testing positive given that you actually have the disease? $$recall = \frac{282}{282 + 18} = 0.938$$
 
-**Specificity** — what is the probability of testing negative given that you actually don't have the disease?
-$$specificity = \frac{9312}{9312 + 388} = 0.960$$
+**Specificity** — what is the probability of testing negative given that you actually don't have the disease? $$specificity = \frac{9312}{9312 + 388} = 0.960$$
 
-**Balanced Accuracy** — the average of sensitivity and specificity:
-$$balanced\ accuracy = \frac{0.938 + 0.960}{2} = 0.949$$
+**Balanced Accuracy** — the average of sensitivity and specificity: $$balanced\ accuracy = \frac{0.938 + 0.960}{2} = 0.949$$
 
-**Precision (Positive Predictive Value)** — what is the probability that you actually have the disease given that you tested positive?
-$$precision = \frac{282}{282 + 388} = 0.421$$
+**Precision (Positive Predictive Value)** — what is the probability that you actually have the disease given that you tested positive? $$precision = \frac{282}{282 + 388} = 0.421$$
 
 Notice something alarming: even though accuracy is 95.9%, if you test positive there is only a 42% chance you actually have COVID! This happens because the disease is rare; most positive tests are false positives from the large pool of healthy people. This is why accuracy alone is misleading for imbalanced problems.
 
@@ -134,13 +135,13 @@ With this framework in place, let's now evaluate our logistic regression model o
 
 ## Computing Validation Metrics
 
-For a fitted model, the predictions $\hat y$ take the place of the test results in the example above while the values of the outcome $y$ are the truth to which we compare. It is more common to display the confusion matrix for test data so we'll start by refitting our model using a 70-30 split. Notice that the class imbalance is rather large since only 
+For a fitted model, the predictions $\hat y$ take the place of the test results in the example above while the values of the outcome $y$ are the truth to which we compare. It is more common to display the confusion matrix for test data so we'll start by refitting our model using a 70-30 split. Notice that the class imbalance is rather large since only
 
 ```{r}
 sum(framingham$TenYearCHD==1)/nrow(framingham)
 ```
 
-of all patients had CHD so it is better to use stratified sampling in this scenaior
+of all patients had CHD so it is better to use stratified sampling in this scenario
 
 ```{r}
 set.seed(2178)
@@ -165,7 +166,7 @@ probs=predict(train_glm,test_set,type="response")
 yhat=ifelse(probs>0.5,1,0)
 ```
 
-To create a confusion matrix, we simply count true positives (places where actual and predicted are both positive), true negatives (both negative), false positives (predicted true but actual false) and false negatives (predicted false but actual true) in the test set, storing the result in a matrix: 
+To create a confusion matrix, we simply count true positives (places where actual and predicted are both positive), true negatives (both negative), false positives (predicted true but actual false) and false negatives (predicted false but actual true) in the test set, storing the result in a matrix:
 
 ```{r}
   TP = sum(yhat == 1 & y == 1)
@@ -178,6 +179,7 @@ To create a confusion matrix, we simply count true positives (places where actua
                                              "Predicted" = c(1, 0)))
   print(confusion_matrix)
 ```
+
 From here, we compute any metrics we want such
 
 ```{r}
@@ -193,7 +195,7 @@ cat("\nSpecificity:",spec)
 cat("\nBalanced Acc:",bal_acc)
 ```
 
-Here you notice the issue with accuracy. The model with a 0.5 cutoff does very well at ruling out CHD when it is absent (high specificity), but it is shitty at recall. The balanced accuracy reflects this fact.  
+Here you notice the issue with accuracy. The model with a 0.5 cutoff does very well at ruling out CHD when it is absent (high specificity), but it is shitty at recall. The balanced accuracy reflects this fact.
 
 Can we improve the balanced accuracy by defining a different cutoff for prediction? We'll investigate that in the next section, but first, here is a helper function that computes all of the above metrics in one package deal:
 
@@ -276,7 +278,9 @@ calculate_metrics(yhat, y, "1")
 
 The specificity is smaller than what we got using the 0.5 cutoff, but this is offset by a rise in recall to create an overall gain in balanced accuracy.
 
-## Bonus: ROC curves^[Yet another metric we won't cover in these notes are _Brier Scores_, defined as the MSE between the predicted probabilities and the actual binary values. I put the name here so you know what it is if you see it in future performance analysis ventures. ]
+## Bonus: ROC curves[^3]
+
+[^3]: Yet another metric we won't cover in these notes are *Brier Scores*, defined as the MSE between the predicted probabilities and the actual binary values. I put the name here so you know what it is if you see it in future performance analysis ventures.
 
 Receiver Operator Characteristic (ROC) curves are a tool that machine learning has borrowed from signal processing as an alternative metric for measuring model success. In an ROC curve, we plot the recall (true positive rate) vs $1-$ sensitivity (false positive rate). This curve is compared with the line $y=x$ for reference. Here is what this looks like for the framingham model:
 
@@ -301,7 +305,7 @@ plot(results$FPR, results$TPR,
 abline(a=0,b=1,col="#D55e00")
 ```
 
-The optimal cutoff will be the one which gets us the most gain in TPR before we start losing FPR. One way to measure this is as the point with the greatest vertical distance from the line $y=x$, frequently measured by a statistic called _Youden's J_. For our example, this would be 
+The optimal cutoff will be the one which gets us the most gain in TPR before we start losing FPR. One way to measure this is as the point with the greatest vertical distance from the line $y=x$, frequently measured by a statistic called *Youden's J*. For our example, this would be
 
 ```{r}
 results$J = results$TPR - results$FPR
@@ -312,7 +316,7 @@ best
 
 Interestingly, this gave the same value as optimizing balanced accuracy.
 
-The _area under the ROC curve_ (or AUC) is another commonly used metric for assessing the fit of a classification scheme which doesn't choose a cutoff at all. Instead, it just measures a model by the overall area under its ROC. We could compute this by choosing a finer grid of points and using numeric integration, but instead we'll introduce the pROC package for this purpose
+The *area under the ROC curve* (or AUC) is another commonly used metric for assessing the fit of a classification scheme which doesn't choose a cutoff at all. Instead, it just measures a model by the overall area under its ROC. We could compute this by choosing a finer grid of points and using numeric integration, but instead we'll introduce the pROC package for this purpose
 
 ```{r}
 library(pROC)
@@ -320,15 +324,15 @@ roc_result=roc(response=y,predictor=probs)
 auc(roc_result)
 ```
 
-The AUC can be interpreted as follows. Suppose that we give each of our data points a score based on the model's assigned probability that this point corresponds to a positive results. AUC is then the probability that a random positive case is awarded a higher score than a random negative case. In other words, if I select one CHD and one none CHD, AUC gives the probability that the model scores the actual CHD case higher than the false one. The closer AUC is to 1, the better the model fits the data. 
+The AUC can be interpreted as follows. Suppose that we give each of our data points a score based on the model's assigned probability that this point corresponds to a positive results. AUC is then the probability that a random positive case is awarded a higher score than a random negative case. In other words, if I select one CHD and one none CHD, AUC gives the probability that the model scores the actual CHD case higher than the false one. The closer AUC is to 1, the better the model fits the data.
 
 ## What's next
 
-One issue with analyzing our model and choosing optimal thresholds based on a single training-testing set pair is that the results may dependent on the starting seed or at least we should check if they do. In our example above, I tried several different starting seeds and the results were fairly consistent which gives us greater confidence in our recommendations. In the next module, we will systematize this process of repeated sampling or _resampling_ in the context of cross-validation. We'll then see some applications to variable selection as well. 
+One issue with analyzing our model and choosing optimal thresholds based on a single training-testing set pair is that the results may dependent on the starting seed or at least we should check if they do. In our example above, I tried several different starting seeds and the results were fairly consistent which gives us greater confidence in our recommendations. In the next module, we will systematize this process of repeated sampling or *resampling* in the context of cross-validation. We'll then see some applications to variable selection as well.
 
 ## Practice
 
-The `palmerpenguins` package contains a famous dataset called `penguins` on the size measurements for adult penguins foraging near Palmer Station, Antartica. After you have installed this package, load it into R and create a new dataset which drops all NAs by running the following code. 
+The `palmerpenguins` package contains a famous dataset called `penguins` on the size measurements for adult penguins foraging near Palmer Station, Antartica. After you have installed this package, load it into R and create a new dataset which drops all NAs by running the following code.
 
 ```{r}
 library(palmerpenguins)
@@ -336,6 +340,6 @@ penguins2=penguins |>
   drop_na()
 ```
 
-1. Split the data into training-testing sets according to a 70-30 split and fit a logistic model to the training data to predict sex (female/male) based on bill length, bill depth flipper length, and body mass. Which predictors were significant? 
-2. Calculate a confusion matrix, accuracy, recall, precision, specificity, and balanced accuracy for your model on the test set (using the standard predict positive if probability > 0.5 threshold). Comment on the results.
-3. (Bonus) Can you find a threshold which beats the predictions from 2 in terms of either balanced accuracy or Youden's J distance? 
+1.  Split the data into training-testing sets according to a 70-30 split and fit a logistic model to the training data to predict sex (female/male) based on bill length, bill depth flipper length, and body mass. Which predictors were significant?
+2.  Calculate a confusion matrix, accuracy, recall, precision, specificity, and balanced accuracy for your model on the test set (using the standard predict positive if probability \> 0.5 threshold). Comment on the results.
+3.  (Bonus) Can you find a threshold which beats the predictions from 2 in terms of either balanced accuracy or Youden's J distance?

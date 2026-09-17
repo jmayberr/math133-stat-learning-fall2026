@@ -117,9 +117,10 @@ cv_plan =vfold_cv(train_set[,4:19],v=5)
 # Step 3: Parameter tuning/ Model evaluation
 
 # Set mtry_grid
-mtry_grid=grid_regular(
-  finalize(mtry(),train_set[,5:19]), # This line gives mtry the range of 1 to max number of features
-  levels = 5)  #Sets how many values in the range to try, can do 15 but its slower.  
+mtry_grid = grid_regular(
+  mtry(range = c(1, 15)),
+  levels = 5
+)
 
 rf_models=tune_grid(rf_specs,
                     popularity~.,
