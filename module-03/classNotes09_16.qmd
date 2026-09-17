@@ -1,0 +1,40 @@
+---
+title: "Class Notes for 09-16"
+format: html
+---
+
+```{r}
+library(tidyverse)
+url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"
+shots=read.csv(url)
+```
+
+Logistic model with one variable
+
+```{r}
+shots$Goal_1=ifelse(shots$Goal=="Goal",1,0)
+fit_glm=glm(Goal_1~yj,data=shots)
+summary(fit_glm)
+```
+
+Model Predictions
+
+```{r}
+new_df=data.frame(yj=1:10)
+preds=predict(fit_glm,new_df,type="response")
+plot(preds)
+```
+
+```{r}
+yhat=ifelse(preds>0.5,"Goal","Not Goal")
+yhat
+```
+
+Calculating overall accuracy
+
+```{r}
+preds=predict(fit_glm,type="response")
+yhat=ifelse(preds>0.5,"Goal","Not Goal")
+
+sum(yhat==shots$Goal)/nrow(shots) #Accuracy
+```
