@@ -366,10 +366,45 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>framingham <span class="ot">=</span> <span class="fu">read_csv</span>(<span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/framingham.csv"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="st">"male"</span>,<span class="st">"currentSmoker"</span>,<span class="st">"BPMeds"</span>,<span class="st">"prevalentStroke"</span>,<span class="st">"prevalentHyp"</span>), as.factor)) <span class="sc">|&gt;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>chd_glm <span class="ot">=</span> <span class="fu">glm</span>(TenYearCHD <span class="sc">~</span> ., <span class="at">data =</span> framingham, <span class="at">family =</span> <span class="st">"binomial"</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(chd_glm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>chd_glm <span class="ot">=</span> <span class="fu">glm</span>(TenYearCHD <span class="sc">~</span> ., <span class="at">data =</span> framingham, <span class="at">family =</span> <span class="st">"binomial"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(chd_glm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = TenYearCHD ~ ., family = "binomial", data = framingham)
+
+Coefficients:
+                  Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)      -8.322206   0.715476 -11.632  &lt; 2e-16 ***
+male1             0.555098   0.109046   5.091 3.57e-07 ***
+age               0.063453   0.006680   9.499  &lt; 2e-16 ***
+education        -0.047497   0.049390  -0.962  0.33621    
+currentSmoker1    0.070875   0.156749   0.452  0.65115    
+cigsPerDay        0.017929   0.006238   2.874  0.00405 ** 
+BPMeds1           0.162255   0.234309   0.692  0.48863    
+prevalentStroke1  0.693502   0.489532   1.417  0.15658    
+prevalentHyp1     0.234638   0.138037   1.700  0.08917 .  
+diabetes          0.039461   0.315483   0.125  0.90046    
+totChol           0.002324   0.001127   2.062  0.03920 *  
+sysBP             0.015398   0.003808   4.043 5.27e-05 ***
+diaBP            -0.004132   0.006438  -0.642  0.52096    
+BMI               0.006603   0.012758   0.518  0.60476    
+heartRate        -0.003250   0.004211  -0.772  0.44030    
+glucose           0.007124   0.002234   3.189  0.00143 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 3120.5  on 3655  degrees of freedom
+Residual deviance: 2754.2  on 3640  degrees of freedom
+AIC: 2786.2
+
+Number of Fisher Scoring iterations: 5</code></pre>
+</div>
 </div>
 <p>We’ll start off with a few additional words about interpreting coefficients and then proceed to enrich our understanding of “accuracy” by examining false positive vs false negatives, working towards a better metric of balanced accuracy and a more nuanced picture of how well our models fit classification data.</p>
 </section>
@@ -378,7 +413,7 @@ window.Quarto = {
 <p>The coefficients in a logistic regression model are on the log-odds scale, which makes them difficult to interpret directly. Exponentiating them gives us <strong>odds ratios</strong>, which are easier to describe</p>
 <p>For example, we can ask: how much more likely are males to develop CHD compared to females? For this, we use the coefficient of “male1” from our model above and exponentiate the result</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(chd_glm)[<span class="st">"male1"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(chd_glm)[<span class="st">"male1"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   male1 
 1.742111 </code></pre>
@@ -386,15 +421,15 @@ window.Quarto = {
 </div>
 <p>This tells us that Males are about 1.74 as likely to get CHD as females if we hold all other variables constant. It is common to express this as a percentage by subtracting 1 from the above result and multiplying by 100:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">"The odds of getting CHD are %.0f%% higher for males compared to females"</span>,</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>        (<span class="fu">exp</span>(<span class="fu">coef</span>(chd_glm)[<span class="st">"male1"</span>]) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">100</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">"The odds of getting CHD are %.0f%% higher for males compared to females"</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>        (<span class="fu">exp</span>(<span class="fu">coef</span>(chd_glm)[<span class="st">"male1"</span>]) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="dv">100</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "The odds of getting CHD are 74% higher for males compared to females"</code></pre>
 </div>
 </div>
 <p>We can also ask about the impact of reducing cigarette consumption. Suppose for example we want to know what happens if we reduce cigarette consumption by 20 per day. This leads to the following change in odds of developing CHD:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="sc">-</span><span class="dv">20</span> <span class="sc">*</span> <span class="fu">coef</span>(chd_glm)[<span class="st">"cigsPerDay"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="sc">-</span><span class="dv">20</span> <span class="sc">*</span> <span class="fu">coef</span>(chd_glm)[<span class="st">"cigsPerDay"</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>cigsPerDay 
  0.6986635 </code></pre>
@@ -402,17 +437,17 @@ window.Quarto = {
 </div>
 <p>Notice this time the answer is less than 1 so to express as a percentage, subtract the number from 1 and multiply by 100:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">"The odds of getting CHD decrease by %.0f%% if cigs per day decreases by 20"</span>,</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">20</span> <span class="sc">*</span> <span class="fu">coef</span>(chd_glm)[<span class="st">"cigsPerDay"</span>])) <span class="sc">*</span> <span class="dv">100</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sprintf</span>(<span class="st">"The odds of getting CHD decrease by %.0f%% if cigs per day decreases by 20"</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">20</span> <span class="sc">*</span> <span class="fu">coef</span>(chd_glm)[<span class="st">"cigsPerDay"</span>])) <span class="sc">*</span> <span class="dv">100</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "The odds of getting CHD decrease by 30% if cigs per day decreases by 20"</code></pre>
 </div>
 </div>
 <p>A useful way to visualize all the odds ratios and their uncertainty simultaneously is a <strong>forest plot</strong>. To make this plot, we first need to convert the output of our model into a “tidy” format where each row is a predictor variable and each column is a different attribute of the model fit:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom) </span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">=</span> <span class="fu">tidy</span>(chd_glm, <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">exponentiate =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tidy_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(broom) </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>tidy_model <span class="ot">=</span> <span class="fu">tidy</span>(chd_glm, <span class="at">conf.int =</span> <span class="cn">TRUE</span>, <span class="at">exponentiate =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(tidy_model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 7
   term           estimate std.error statistic  p.value  conf.low conf.high
@@ -427,23 +462,23 @@ window.Quarto = {
 </div>
 <p>Then we plot the predictors vs their corresponding coefficient estimates with confidence intervals:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>tidy_model[<span class="sc">-</span><span class="dv">1</span>,] <span class="sc">|&gt;</span>  <span class="co">#Note: -1 gets rid of the intercept</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>( <span class="fu">aes</span>(<span class="at">x =</span> estimate, <span class="at">y =</span> term)) <span class="sc">+</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"#E69F00"</span>) <span class="sc">+</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> conf.low, <span class="at">xmax =</span> conf.high), </span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">color =</span> <span class="st">"#009E73"</span>) <span class="sc">+</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Odds Ratio (log scale)"</span>,</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Variables"</span>,</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Forest Plot of Odds Ratios with 95% Confidence Intervals"</span>,</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Vertical line at OR = 1 indicates no effect"</span>) <span class="sc">+</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>tidy_model[<span class="sc">-</span><span class="dv">1</span>,] <span class="sc">|&gt;</span>  <span class="co">#Note: -1 gets rid of the intercept</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>( <span class="fu">aes</span>(<span class="at">x =</span> estimate, <span class="at">y =</span> term)) <span class="sc">+</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"#E69F00"</span>) <span class="sc">+</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">xmin =</span> conf.low, <span class="at">xmax =</span> conf.high), </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>, <span class="at">color =</span> <span class="st">"#009E73"</span>) <span class="sc">+</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Odds Ratio (log scale)"</span>,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Variables"</span>,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Forest Plot of Odds Ratios with 95% Confidence Intervals"</span>,</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Vertical line at OR = 1 indicates no effect"</span>) <span class="sc">+</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes3_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes3_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -515,43 +550,43 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="computing-validation-metrics">Computing Validation Metrics</h2>
 <p>For a fitted model, the predictions <span class="math inline">\(\hat y\)</span> take the place of the test results in the example above while the values of the outcome <span class="math inline">\(y\)</span> are the truth to which we compare. It is more common to display the confusion matrix for test data so we’ll start by refitting our model using a 70-30 split. Notice that the class imbalance is rather large since only</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(framingham<span class="sc">$</span>TenYearCHD<span class="sc">==</span><span class="dv">1</span>)<span class="sc">/</span><span class="fu">nrow</span>(framingham)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(framingham<span class="sc">$</span>TenYearCHD<span class="sc">==</span><span class="dv">1</span>)<span class="sc">/</span><span class="fu">nrow</span>(framingham)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.1523523</code></pre>
 </div>
 </div>
 <p>of all patients had CHD so it is better to use stratified sampling in this scenario</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2178</span>)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>n0<span class="ot">=</span><span class="fu">sum</span>(framingham<span class="sc">$</span>TenYearCHD<span class="sc">==</span><span class="dv">0</span>)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>n1<span class="ot">=</span><span class="fu">sum</span>(framingham<span class="sc">$</span>TenYearCHD<span class="sc">==</span><span class="dv">1</span>)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>s0<span class="ot">=</span><span class="fu">sample</span>(<span class="fu">which</span>(framingham<span class="sc">$</span>TenYearCHD<span class="sc">==</span><span class="dv">0</span>),<span class="fl">0.7</span><span class="sc">*</span>n0)</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>s1<span class="ot">=</span><span class="fu">sample</span>(<span class="fu">which</span>(framingham<span class="sc">$</span>TenYearCHD<span class="sc">==</span><span class="dv">1</span>),<span class="fl">0.7</span><span class="sc">*</span>n1)</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">c</span>(s0,s1)</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>train_set<span class="ot">=</span>framingham[s,]</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>test_set<span class="ot">=</span>framingham[<span class="sc">-</span>s,]</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>train_glm<span class="ot">=</span><span class="fu">glm</span>(TenYearCHD <span class="sc">~</span> ., <span class="at">data =</span> train_set, <span class="at">family =</span> <span class="st">"binomial"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2178</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>n0<span class="ot">=</span><span class="fu">sum</span>(framingham<span class="sc">$</span>TenYearCHD<span class="sc">==</span><span class="dv">0</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>n1<span class="ot">=</span><span class="fu">sum</span>(framingham<span class="sc">$</span>TenYearCHD<span class="sc">==</span><span class="dv">1</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>s0<span class="ot">=</span><span class="fu">sample</span>(<span class="fu">which</span>(framingham<span class="sc">$</span>TenYearCHD<span class="sc">==</span><span class="dv">0</span>),<span class="fl">0.7</span><span class="sc">*</span>n0)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>s1<span class="ot">=</span><span class="fu">sample</span>(<span class="fu">which</span>(framingham<span class="sc">$</span>TenYearCHD<span class="sc">==</span><span class="dv">1</span>),<span class="fl">0.7</span><span class="sc">*</span>n1)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">c</span>(s0,s1)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>train_set<span class="ot">=</span>framingham[s,]</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>test_set<span class="ot">=</span>framingham[<span class="sc">-</span>s,]</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>train_glm<span class="ot">=</span><span class="fu">glm</span>(TenYearCHD <span class="sc">~</span> ., <span class="at">data =</span> train_set, <span class="at">family =</span> <span class="st">"binomial"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Then we calculate the predictions for the test set</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>test_set<span class="sc">$</span>TenYearCHD</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>probs<span class="ot">=</span><span class="fu">predict</span>(train_glm,test_set,<span class="at">type=</span><span class="st">"response"</span>)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">ifelse</span>(probs<span class="sc">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>test_set<span class="sc">$</span>TenYearCHD</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>probs<span class="ot">=</span><span class="fu">predict</span>(train_glm,test_set,<span class="at">type=</span><span class="st">"response"</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">ifelse</span>(probs<span class="sc">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>To create a confusion matrix, we simply count true positives (places where actual and predicted are both positive), true negatives (both negative), false positives (predicted true but actual false) and false negatives (predicted false but actual true) in the test set, storing the result in a matrix:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>  TP <span class="ot">=</span> <span class="fu">sum</span>(yhat <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> y <span class="sc">==</span> <span class="dv">1</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  TN <span class="ot">=</span> <span class="fu">sum</span>(yhat <span class="sc">==</span>  <span class="dv">0</span> <span class="sc">&amp;</span> y <span class="sc">==</span> <span class="dv">0</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  FP <span class="ot">=</span> <span class="fu">sum</span>(yhat <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> y <span class="sc">==</span> <span class="dv">0</span>)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  FN <span class="ot">=</span> <span class="fu">sum</span>(yhat <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> y <span class="sc">==</span> <span class="dv">1</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  confusion_matrix <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">c</span>(TP, FP, FN, TN), </span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>                             <span class="at">nrow =</span> <span class="dv">2</span>,</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>                             <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"Actual"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>),</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>                                             <span class="st">"Predicted"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>)))</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(confusion_matrix)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>  TP <span class="ot">=</span> <span class="fu">sum</span>(yhat <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> y <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  TN <span class="ot">=</span> <span class="fu">sum</span>(yhat <span class="sc">==</span>  <span class="dv">0</span> <span class="sc">&amp;</span> y <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  FP <span class="ot">=</span> <span class="fu">sum</span>(yhat <span class="sc">==</span> <span class="dv">1</span> <span class="sc">&amp;</span> y <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  FN <span class="ot">=</span> <span class="fu">sum</span>(yhat <span class="sc">==</span> <span class="dv">0</span> <span class="sc">&amp;</span> y <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  confusion_matrix <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">c</span>(TP, FP, FN, TN), </span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>                             <span class="at">nrow =</span> <span class="dv">2</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                             <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"Actual"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>                                             <span class="st">"Predicted"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>)))</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(confusion_matrix)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      Predicted
 Actual  1   0
@@ -561,31 +596,31 @@ Actual  1   0
 </div>
 <p>From here, we compute any metrics we want such</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>acc<span class="ot">=</span>(TP<span class="sc">+</span>TN)<span class="sc">/</span>(TP<span class="sc">+</span>TN<span class="sc">+</span>FN<span class="sc">+</span>FP)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>recall<span class="ot">=</span>TP <span class="sc">/</span> (TP <span class="sc">+</span> FN)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>precision<span class="ot">=</span> TP<span class="sc">/</span>(TP<span class="sc">+</span>FP)</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>spec<span class="ot">=</span>TN<span class="sc">/</span>(TN<span class="sc">+</span>FP)</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>bal_acc<span class="ot">=</span>(recall<span class="sc">+</span>spec)<span class="sc">/</span><span class="dv">2</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Accuracy:"</span>,acc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>acc<span class="ot">=</span>(TP<span class="sc">+</span>TN)<span class="sc">/</span>(TP<span class="sc">+</span>TN<span class="sc">+</span>FN<span class="sc">+</span>FP)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>recall<span class="ot">=</span>TP <span class="sc">/</span> (TP <span class="sc">+</span> FN)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>precision<span class="ot">=</span> TP<span class="sc">/</span>(TP<span class="sc">+</span>FP)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>spec<span class="ot">=</span>TN<span class="sc">/</span>(TN<span class="sc">+</span>FP)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>bal_acc<span class="ot">=</span>(recall<span class="sc">+</span>spec)<span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Accuracy:"</span>,acc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Accuracy: 0.852459</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Recall:"</span>, recall)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Recall:"</span>, recall)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Recall: 0.1011905</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Precision:"</span>, precision)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Precision:"</span>, precision)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Precision: 0.6071429</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Specificity:"</span>,spec)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Specificity:"</span>,spec)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Specificity: 0.988172</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Balanced Acc:"</span>,bal_acc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Balanced Acc:"</span>,bal_acc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Balanced Acc: 0.5446813</code></pre>
@@ -594,41 +629,41 @@ Balanced Acc: 0.5446813</code></pre>
 <p>Here you notice the issue with accuracy. The model with a 0.5 cutoff does very well at ruling out CHD when it is absent (high specificity), but it is shitty at recall. The balanced accuracy reflects this fact.</p>
 <p>Can we improve the balanced accuracy by defining a different cutoff for prediction? We’ll investigate that in the next section, but first, here is a helper function that computes all of the above metrics in one package deal:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>calculate_metrics <span class="ot">&lt;-</span> <span class="cf">function</span>(predicted, actual, positive) {</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Inputs: predicted values, actual values, positive value (eg. "1" or "Yes")</span></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># outputs: Confusion matrix, recall, precision, specificity, accuracy, bal accuracy</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Dependencies: requires tidyverse or at least forcats</span></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  actual <span class="ot">&lt;-</span> <span class="fu">fct_relevel</span>(<span class="fu">factor</span>(actual), positive)</span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  predicted <span class="ot">&lt;-</span> <span class="fu">fct_relevel</span>(<span class="fu">factor</span>(predicted), positive)</span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  TP <span class="ot">&lt;-</span> <span class="fu">sum</span>(predicted <span class="sc">==</span> positive <span class="sc">&amp;</span> actual <span class="sc">==</span> positive)</span>
-<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  FP <span class="ot">&lt;-</span> <span class="fu">sum</span>(predicted <span class="sc">==</span> positive <span class="sc">&amp;</span> actual <span class="sc">!=</span> positive)</span>
-<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  TN <span class="ot">&lt;-</span> <span class="fu">sum</span>(predicted <span class="sc">!=</span> positive <span class="sc">&amp;</span> actual <span class="sc">!=</span> positive)</span>
-<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  FN <span class="ot">&lt;-</span> <span class="fu">sum</span>(predicted <span class="sc">!=</span> positive <span class="sc">&amp;</span> actual <span class="sc">==</span> positive)</span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>  precision <span class="ot">&lt;-</span> <span class="fu">ifelse</span>((TP <span class="sc">+</span> FP) <span class="sc">&gt;</span> <span class="dv">0</span>, TP <span class="sc">/</span> (TP <span class="sc">+</span> FP), <span class="cn">NA</span>)</span>
-<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  recall <span class="ot">&lt;-</span> <span class="fu">ifelse</span>((TP <span class="sc">+</span> FN) <span class="sc">&gt;</span> <span class="dv">0</span>, TP <span class="sc">/</span> (TP <span class="sc">+</span> FN), <span class="cn">NA</span>)</span>
-<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>  specificity <span class="ot">&lt;-</span> <span class="fu">ifelse</span>((TN <span class="sc">+</span> FP) <span class="sc">&gt;</span> <span class="dv">0</span>, TN <span class="sc">/</span> (TN <span class="sc">+</span> FP), <span class="cn">NA</span>)</span>
-<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>  accuracy <span class="ot">&lt;-</span> (TP <span class="sc">+</span> TN) <span class="sc">/</span> (TP <span class="sc">+</span> FP <span class="sc">+</span> TN <span class="sc">+</span> FN)</span>
-<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>  balanced_accuracy <span class="ot">&lt;-</span> (recall <span class="sc">+</span> specificity) <span class="sc">/</span> <span class="dv">2</span></span>
-<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>  confusion_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(TP, FP, FN, TN), <span class="at">nrow =</span> <span class="dv">2</span>,</span>
-<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>                             <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"Actual"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"Positive"</span>, <span class="st">"Negative"</span>),</span>
-<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>                                             <span class="st">"Predicted "</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"Positive"</span>, <span class="st">"Negative"</span>)))</span>
-<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(</span>
-<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">Confusion_Matrix =</span> confusion_matrix,</span>
-<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">Recall =</span> recall,</span>
-<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">Precision =</span> precision,</span>
-<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">Specificity =</span> specificity,</span>
-<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">Accuracy =</span> accuracy,</span>
-<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">Balanced_Accuracy =</span> balanced_accuracy</span>
-<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a>  ))</span>
-<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>calculate_metrics <span class="ot">&lt;-</span> <span class="cf">function</span>(predicted, actual, positive) {</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Inputs: predicted values, actual values, positive value (eg. "1" or "Yes")</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># outputs: Confusion matrix, recall, precision, specificity, accuracy, bal accuracy</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Dependencies: requires tidyverse or at least forcats</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  actual <span class="ot">&lt;-</span> <span class="fu">fct_relevel</span>(<span class="fu">factor</span>(actual), positive)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  predicted <span class="ot">&lt;-</span> <span class="fu">fct_relevel</span>(<span class="fu">factor</span>(predicted), positive)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>  TP <span class="ot">&lt;-</span> <span class="fu">sum</span>(predicted <span class="sc">==</span> positive <span class="sc">&amp;</span> actual <span class="sc">==</span> positive)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  FP <span class="ot">&lt;-</span> <span class="fu">sum</span>(predicted <span class="sc">==</span> positive <span class="sc">&amp;</span> actual <span class="sc">!=</span> positive)</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>  TN <span class="ot">&lt;-</span> <span class="fu">sum</span>(predicted <span class="sc">!=</span> positive <span class="sc">&amp;</span> actual <span class="sc">!=</span> positive)</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  FN <span class="ot">&lt;-</span> <span class="fu">sum</span>(predicted <span class="sc">!=</span> positive <span class="sc">&amp;</span> actual <span class="sc">==</span> positive)</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>  precision <span class="ot">&lt;-</span> <span class="fu">ifelse</span>((TP <span class="sc">+</span> FP) <span class="sc">&gt;</span> <span class="dv">0</span>, TP <span class="sc">/</span> (TP <span class="sc">+</span> FP), <span class="cn">NA</span>)</span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>  recall <span class="ot">&lt;-</span> <span class="fu">ifelse</span>((TP <span class="sc">+</span> FN) <span class="sc">&gt;</span> <span class="dv">0</span>, TP <span class="sc">/</span> (TP <span class="sc">+</span> FN), <span class="cn">NA</span>)</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>  specificity <span class="ot">&lt;-</span> <span class="fu">ifelse</span>((TN <span class="sc">+</span> FP) <span class="sc">&gt;</span> <span class="dv">0</span>, TN <span class="sc">/</span> (TN <span class="sc">+</span> FP), <span class="cn">NA</span>)</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>  accuracy <span class="ot">&lt;-</span> (TP <span class="sc">+</span> TN) <span class="sc">/</span> (TP <span class="sc">+</span> FP <span class="sc">+</span> TN <span class="sc">+</span> FN)</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>  balanced_accuracy <span class="ot">&lt;-</span> (recall <span class="sc">+</span> specificity) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>  confusion_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(TP, FP, FN, TN), <span class="at">nrow =</span> <span class="dv">2</span>,</span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>                             <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"Actual"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"Positive"</span>, <span class="st">"Negative"</span>),</span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>                                             <span class="st">"Predicted "</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"Positive"</span>, <span class="st">"Negative"</span>)))</span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(</span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">Confusion_Matrix =</span> confusion_matrix,</span>
+<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">Recall =</span> recall,</span>
+<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">Precision =</span> precision,</span>
+<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">Specificity =</span> specificity,</span>
+<span id="cb31-28"><a href="#cb31-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">Accuracy =</span> accuracy,</span>
+<span id="cb31-29"><a href="#cb31-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">Balanced_Accuracy =</span> balanced_accuracy</span>
+<span id="cb31-30"><a href="#cb31-30" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb31-31"><a href="#cb31-31" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Here’s an example of how to apply the test set in our framingham model using the default cutoff of 0.5:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">calculate_metrics</span>(yhat, y, <span class="st">"1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">calculate_metrics</span>(yhat, y, <span class="st">"1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$Confusion_Matrix
           Predicted 
@@ -657,45 +692,45 @@ $Balanced_Accuracy
 <h2 class="anchored" data-anchor-id="choosing-an-optimal-cutoff">Choosing an Optimal Cutoff</h2>
 <p>Let’s try a range of cutoffs for predicting CHD starting at 0 and ending at 0.9 and check the balanced accuracy of each:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>test_set<span class="sc">$</span>TenYearCHD</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>probs<span class="ot">=</span><span class="fu">predict</span>(train_glm,test_set,<span class="at">type=</span><span class="st">"response"</span>)</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>cutoffs <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.9</span>, <span class="at">by =</span> <span class="fl">0.05</span>)</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>results <span class="ot">=</span> <span class="fu">map_dfr</span>(cutoffs, <span class="cf">function</span>(cutoff) {</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  yhat<span class="ot">=</span><span class="fu">ifelse</span>(probs<span class="sc">&gt;</span>cutoff,<span class="dv">1</span>,<span class="dv">0</span>)</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">=</span> <span class="fu">calculate_metrics</span>(yhat, y, <span class="st">"1"</span>)</span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">cutoffs =</span> cutoff,</span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">bal_acc=</span>m<span class="sc">$</span>Balanced_Accuracy</span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(results<span class="sc">$</span>cutoffs, results<span class="sc">$</span>bal_acc,</span>
-<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Cutoff for Positive Classification"</span>,</span>
-<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Balanced Accuracy"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>test_set<span class="sc">$</span>TenYearCHD</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>probs<span class="ot">=</span><span class="fu">predict</span>(train_glm,test_set,<span class="at">type=</span><span class="st">"response"</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>cutoffs <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.9</span>, <span class="at">by =</span> <span class="fl">0.05</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>results <span class="ot">=</span> <span class="fu">map_dfr</span>(cutoffs, <span class="cf">function</span>(cutoff) {</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  yhat<span class="ot">=</span><span class="fu">ifelse</span>(probs<span class="sc">&gt;</span>cutoff,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">=</span> <span class="fu">calculate_metrics</span>(yhat, y, <span class="st">"1"</span>)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">cutoffs =</span> cutoff,</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">bal_acc=</span>m<span class="sc">$</span>Balanced_Accuracy</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(results<span class="sc">$</span>cutoffs, results<span class="sc">$</span>bal_acc,</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Cutoff for Positive Classification"</span>,</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"Balanced Accuracy"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes3_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes3_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>The optimal cutoff and its corresponding balanced accuracy are:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Best cutoff is"</span>, cutoffs[<span class="fu">which.max</span>(results<span class="sc">$</span>bal_acc)]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Best cutoff is"</span>, cutoffs[<span class="fu">which.max</span>(results<span class="sc">$</span>bal_acc)]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Best cutoff is 0.15"</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sprintf</span>(<span class="st">"Balanced Accuracy is %.3f"</span>, <span class="fu">max</span>(results<span class="sc">$</span>bal_acc)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">sprintf</span>(<span class="st">"Balanced Accuracy is %.3f"</span>, <span class="fu">max</span>(results<span class="sc">$</span>bal_acc)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Balanced Accuracy is 0.675"</code></pre>
 </div>
 </div>
 <p>Finally, let’s look at the full set of metrics for the optimal cutoff:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">ifelse</span>(probs<span class="sc">&gt;</span>cutoffs[<span class="fu">which.max</span>(results<span class="sc">$</span>bal_acc)], <span class="dv">1</span>, <span class="dv">0</span>)</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">calculate_metrics</span>(yhat, y, <span class="st">"1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">ifelse</span>(probs<span class="sc">&gt;</span>cutoffs[<span class="fu">which.max</span>(results<span class="sc">$</span>bal_acc)], <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">calculate_metrics</span>(yhat, y, <span class="st">"1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$Confusion_Matrix
           Predicted 
@@ -725,38 +760,38 @@ $Balanced_Accuracy
 <h2 class="anchored" data-anchor-id="bonus-roc-curves3">Bonus: ROC curves<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></h2>
 <p>Receiver Operator Characteristic (ROC) curves are a tool that machine learning has borrowed from signal processing as an alternative metric for measuring model success. In an ROC curve, we plot the recall (true positive rate) vs <span class="math inline">\(1-\)</span> sensitivity (false positive rate). This curve is compared with the line <span class="math inline">\(y=x\)</span> for reference. Here is what this looks like for the framingham model:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>test_set<span class="sc">$</span>TenYearCHD</span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>probs<span class="ot">=</span><span class="fu">predict</span>(train_glm,test_set,<span class="at">type=</span><span class="st">"response"</span>)</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>cutoffs <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.9</span>, <span class="at">by =</span> <span class="fl">0.05</span>)</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(cutoffs, <span class="cf">function</span>(cutoff) {</span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  yhat <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(probs <span class="sc">&gt;</span> cutoff, <span class="dv">1</span>, <span class="dv">0</span>)</span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">calculate_metrics</span>(yhat, y, <span class="st">"1"</span>)</span>
-<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(</span>
-<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">cutoff =</span> cutoff,</span>
-<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPR =</span> m<span class="sc">$</span>Recall,</span>
-<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">FPR =</span> <span class="dv">1</span> <span class="sc">-</span> m<span class="sc">$</span>Specificity</span>
-<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(results<span class="sc">$</span>FPR, results<span class="sc">$</span>TPR,</span>
-<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"False Positive Rate"</span>,</span>
-<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"True Positive Rate"</span>)</span>
-<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a=</span><span class="dv">0</span>,<span class="at">b=</span><span class="dv">1</span>,<span class="at">col=</span><span class="st">"#D55e00"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>test_set<span class="sc">$</span>TenYearCHD</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>probs<span class="ot">=</span><span class="fu">predict</span>(train_glm,test_set,<span class="at">type=</span><span class="st">"response"</span>)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>cutoffs <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.9</span>, <span class="at">by =</span> <span class="fl">0.05</span>)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(cutoffs, <span class="cf">function</span>(cutoff) {</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  yhat <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(probs <span class="sc">&gt;</span> cutoff, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">calculate_metrics</span>(yhat, y, <span class="st">"1"</span>)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">cutoff =</span> cutoff,</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">TPR =</span> m<span class="sc">$</span>Recall,</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">FPR =</span> <span class="dv">1</span> <span class="sc">-</span> m<span class="sc">$</span>Specificity</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(results<span class="sc">$</span>FPR, results<span class="sc">$</span>TPR,</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"False Positive Rate"</span>,</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">"True Positive Rate"</span>)</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a=</span><span class="dv">0</span>,<span class="at">b=</span><span class="dv">1</span>,<span class="at">col=</span><span class="st">"#D55e00"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes3_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes3_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>The optimal cutoff will be the one which gets us the most gain in TPR before we start losing FPR. One way to measure this is as the point with the greatest vertical distance from the line <span class="math inline">\(y=x\)</span>, frequently measured by a statistic called <em>Youden’s J</em>. For our example, this would be</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>results<span class="sc">$</span>J <span class="ot">=</span> results<span class="sc">$</span>TPR <span class="sc">-</span> results<span class="sc">$</span>FPR</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>best <span class="ot">=</span> results[<span class="fu">which.max</span>(results<span class="sc">$</span>J), ]</span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>best</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>results<span class="sc">$</span>J <span class="ot">=</span> results<span class="sc">$</span>TPR <span class="sc">-</span> results<span class="sc">$</span>FPR</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>best <span class="ot">=</span> results[<span class="fu">which.max</span>(results<span class="sc">$</span>J), ]</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>best</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 4
   cutoff   TPR   FPR     J
@@ -767,9 +802,9 @@ $Balanced_Accuracy
 <p>Interestingly, this gave the same value as optimizing balanced accuracy.</p>
 <p>The <em>area under the ROC curve</em> (or AUC) is another commonly used metric for assessing the fit of a classification scheme which doesn’t choose a cutoff at all. Instead, it just measures a model by the overall area under its ROC. We could compute this by choosing a finer grid of points and using numeric integration, but instead we’ll introduce the pROC package for this purpose</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pROC)</span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>roc_result<span class="ot">=</span><span class="fu">roc</span>(<span class="at">response=</span>y,<span class="at">predictor=</span>probs)</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">auc</span>(roc_result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pROC)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>roc_result<span class="ot">=</span><span class="fu">roc</span>(<span class="at">response=</span>y,<span class="at">predictor=</span>probs)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">auc</span>(roc_result)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Area under the curve: 0.736</code></pre>
 </div>
@@ -784,9 +819,9 @@ $Balanced_Accuracy
 <h2 class="anchored" data-anchor-id="practice">Practice</h2>
 <p>The <code>palmerpenguins</code> package contains a famous dataset called <code>penguins</code> on the size measurements for adult penguins foraging near Palmer Station, Antartica. After you have installed this package, load it into R and create a new dataset which drops all NAs by running the following code.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(palmerpenguins)</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>penguins2<span class="ot">=</span>penguins <span class="sc">|&gt;</span></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(palmerpenguins)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>penguins2<span class="ot">=</span>penguins <span class="sc">|&gt;</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ol type="1">
 <li>Split the data into training-testing sets according to a 70-30 split and fit a logistic model to the training data to predict sex (female/male) based on bill length, bill depth flipper length, and body mass. Which predictors were significant?</li>

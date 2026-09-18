@@ -11,7 +11,9 @@ library(tidyverse)
 framingham = read_csv("https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/framingham.csv") |>
   mutate(across(c("male","currentSmoker","BPMeds","prevalentStroke","prevalentHyp"), as.factor)) |>
   drop_na()
+```
 
+```{r}
 chd_glm = glm(TenYearCHD ~ ., data = framingham, family = "binomial")
 summary(chd_glm)
 ```
