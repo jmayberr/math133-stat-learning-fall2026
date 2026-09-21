@@ -1,0 +1,77 @@
+---
+title: "Class Notes 09-18"
+format: html
+---
+
+```{r}
+library(tidyverse)
+framingham = read_csv("https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/framingham.csv") |>
+  drop_na()
+```
+
+```{r}
+fit_glm=glm(TenYearCHD~.,data=framingham,family="binomial")
+```
+
+Skeleton of a forest plot:
+
+```{r}
+library(broom)
+tidy_glm=tidy(fit_glm,conf.int = TRUE,exponentiate = TRUE)
+tidy_glm[-1,] |>
+  ggplot(aes(x=estimate,y=term))+
+  geom_errorbar(aes(xmin=conf.low,xmax=conf.high))+
+  geom_point()+
+  scale_x_log10()
+```
+
+Confusion Matrices
+
+```{r}
+probs=predict(fit_glm,type="response")
+yhat=ifelse(probs>0.5,1,0)
+y=framingham$TenYearCHD
+table(y,yhat)
+```
+
+```{r}
+cat("Recall=",51/(51+506))
+cat("\nSpecificity=",3080/(3080+19))
+cat("\nPrecision=",51/(51+19))
+```
+
+```{r}
+calculate_metrics <- function(predicted, actual, positive) {
+  # Inputs: predicted values, actual values, positive value (eg. "1" or "Yes")
+  # outputs: Confusion matrix, recall, precision, specificity, accuracy, bal accuracy
+  # Dependencies: requires tidyverse or at least forcats
+  
+  actual <- fct_relevel(factor(actual), positive)
+  predicted <- fct_relevel(factor(predicted), positive)
+  
+  TP <- sum(predicted == positive & actual == positive)
+  FP <- sum(predicted == positive & actual != positive)
+  TN <- sum(predicted != positive & actual != positive)
+  FN <- sum(predicted != positive & actual == positive)
+  
+  precision <- ifelse((TP + FP) > 0, TP / (TP + FP), NA)
+  recall <- ifelse((TP + FN) > 0, TP / (TP + FN), NA)
+  specificity <- ifelse((TN + FP) > 0, TN / (TN + FP), NA)
+  accuracy <- (TP + TN) / (TP + FP + TN + FN)
+  balanced_accuracy <- (recall + specificity) / 2
+  
+  confusion_matrix <- matrix(c(TP, FP, FN, TN), nrow = 2,
+                             dimnames = list("Actual" = c("Positive", "Negative"),
+                                             "Predicted " = c("Positive", "Negative")))
+  return(list(
+    Confusion_Matrix = confusion_matrix,
+    Recall = recall,
+    Precision = precision,
+    Specificity = specificity,
+    Accuracy = accuracy,
+    Balanced_Accuracy = balanced_accuracy
+  ))
+}
+
+calculate_metrics(yhat,y,"1")
+```

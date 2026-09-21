@@ -372,38 +372,18 @@ window.Quarto = {
 <li>Unlike regression models, there is no natural way to estimate the probability of belonging to a class, only a hard prediction</li>
 </ul>
 <p>Let’s expand on these. To see why 2 is an issue, think back to Module 2. When we fit a multiple regression model, we were able to say which predictors were significant. There is no way to do that with KNN, so while it might be a good predictive model in <em>some</em> scenarios, it doesn’t give us much in the realm of inference. Sure, if we only have two predictors, we can look at a plot of the decision regions, but such plots can be too holey and unpredictable for my taste. For issue 3, KNN relies on being able to calculate the “distance” between points which isn’t so well defined for categories. If two data points have the same value of a category but are 5 units a part in a numeric variable, how should this compare with two data points that have different categories but are only 1 unit apart<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>? Weird.</p>
-<p>For the rest of these notes, we are going to assume that our response variable <span class="math inline">\(Y\)</span> is binary and denote its values as 0 and 1. We will assume that we are using an arbitrary number of <span class="math inline">\(p\)</span> predictors, which could be quantitative or qualitative and let <span class="math inline">\(X\)</span> be the model matrix of predictors with the constant term appended on. In other words, <span class="math display">\[
-X = \begin{bmatrix} 1 &amp; X_1 &amp; X_2 &amp; \cdots &amp; X_p \end{bmatrix}
-\]</span></p>
+<p>For the rest of these notes, we are going to assume that our response variable <span class="math inline">\(Y\)</span> is binary and denote its values as 0 and 1. We will assume that we are using an arbitrary number of <span class="math inline">\(p\)</span> predictors, which could be quantitative or qualitative and let <span class="math inline">\(X\)</span> be the model matrix of predictors with the constant term appended on. In other words, <span class="math display">\[X = \begin{bmatrix} 1 &amp; X_1 &amp; X_2 &amp; \cdots &amp; X_p \end{bmatrix}\]</span></p>
 </section>
 <section id="logistic-regression" class="level2">
 <h2 class="anchored" data-anchor-id="logistic-regression">Logistic Regression</h2>
-<p>Logistic regression, which despite the name is a classification method, takes a more inferential and quantitative approach to the problem. Instead of trying to directly classify points as 0s or 1s for new X, it tries to build a model for the probability of being in class 1 (or 0) and then classifies new points as 1 (or 0) if this probability is <span class="math inline">\(&gt; 0.5\)</span>. In other words, we set <span class="math inline">\(p(X) = P(Y=1 | X)\)</span> (the probability of getting a 1 for a given predictor vector <span class="math inline">\(X\)</span>). Then we would like to fit a model to <span class="math inline">\(p(X)\)</span> instead of <span class="math inline">\(Y\)</span> itself. We could try for <span class="math display">\[
-p(X) = X\beta
-\]</span> (i.e.&nbsp;a multiple regression model), but that would lead to values of <span class="math inline">\(p\)</span> outside [0,1]. <span class="math inline">\(p\)</span> is supposed to be a probability so that is bad.</p>
-<p>Instead, a generalized linear model (GLM) is one which tries to fit a function of <span class="math inline">\(p\)</span> as a linear model: <span class="math display">\[
-g(p(X)) = X \beta
-\]</span></p>
-<p>for some function <span class="math inline">\(g\)</span> (called the link function). Different choices of <span class="math inline">\(g\)</span> lead to different GLMs but the most widely used is the logistic model where <span class="math inline">\(g\)</span> is taken as the log-odds function <span class="math display">\[
-g(x) = \log(x/(1-x))
-\]</span> Why is this choice so popular? Here’s a thought experiment to explain.</p>
+<p>Logistic regression, which despite the name is a classification method, takes a more inferential and quantitative approach to the problem. Instead of trying to directly classify points as 0s or 1s for new X, it tries to build a model for the probability of being in class 1 (or 0) and then classifies new points as 1 (or 0) if this probability is <span class="math inline">\(&gt; 0.5\)</span>. In other words, we set <span class="math inline">\(p(X) = P(Y=1 | X)\)</span> (the probability of getting a 1 for a given predictor vector <span class="math inline">\(X\)</span>). Then we would like to fit a model to <span class="math inline">\(p(X)\)</span> instead of <span class="math inline">\(Y\)</span> itself. We could try for <span class="math display">\[p(X) = X\beta\]</span> (i.e.&nbsp;a multiple regression model), but that would lead to values of <span class="math inline">\(p\)</span> outside [0,1]. <span class="math inline">\(p\)</span> is supposed to be a probability so that is bad.</p>
+<p>Instead, a generalized linear model (GLM) is one which tries to fit a function of <span class="math inline">\(p\)</span> as a linear model: <span class="math display">\[g(p(X)) = X \beta \]</span></p>
+<p>for some function <span class="math inline">\(g\)</span> (called the link function). Different choices of <span class="math inline">\(g\)</span> lead to different GLMs but the most widely used is the logistic model where <span class="math inline">\(g\)</span> is taken as the log-odds function <span class="math display">\[g(x) = \log(x/(1-x))\]</span> Why is this choice so popular? Here’s a thought experiment to explain.</p>
 <p>Suppose that we are building a model for water polo shots again and we would like to say something along the following lines: “the chances of making a shot doubles when you move 2 meters closer to the goal”. First of all, using “doubled” implies a multiplicative change, not an additive one, and hence, we need to use log in our model. Second, we use the word “chance” very loosely in these type of statements, but it can really mean one of two things: probability or odds. Let’s say it means the probability <span class="math inline">\(p\)</span> of making a shot and the chances of making a shot from 4.5 meters out is 0.5. That would mean the chances of making a shot for 2.5 meter out is 1 and the chances of making a shot from 0.5 meters is 2. WTF? You can’t have a probability 2 of making a shot.</p>
-<p>However, suppose that we take a different approach and instead interpret the statement as one about odds: <span class="math display">\[
-odds = \frac{p}{1-p}
-\]</span> Note that a probability of 0.5 would correspond to an odds of 1, a probability of 2/3 would correspond to an odds of 2, 3/4 would correspond to an odds of 3, and so on. Now if we double odds going from 4.5 to 2.5 to 0.5 meters, we go from an odds of 1 to an odds of 2 to an odds of 4 which make more sense! So really, if we want to make statements about “doubling chances” as we change predictors, we should work in terms of odds. Hence the “log-odds” model.</p>
-<p>Now if you invert the model <span class="math display">\[
-\log\left(\frac{p(X)}{1-p(X)}\right) = X\beta
-\]</span> to solve for <span class="math inline">\(p(X)\)</span> we get <span class="math display">\[
-p(X) = \frac{e^{X\beta}}{1 + e^{X\beta}} = \frac{1}{1 + e^{-X\beta}}
-\]</span> The function <span class="math display">\[
-h(x) = 1/(1+e^{-x})
-\]</span> is called the <em>logistic function</em>. Hence the model name.</p>
-<p>Plotting <span class="math inline">\(h\)</span> also helps see why the model <span class="math display">\[
-p(X) = h(X\beta)= \frac{1}{1 + e^{-X\beta}}
-\]</span> is a reasonable choice for modeling probabilities as a function of <span class="math inline">\(X\)</span>. Suppose for example we have just single predictor <span class="math inline">\(X_1\)</span>. Then the plot of</p>
-<p><span class="math display">\[
-p(X_1) = 1/(1+e^{-(\beta_0 + \beta_1 X_1)})
-\]</span> would look like this:</p>
+<p>However, suppose that we take a different approach and instead interpret the statement as one about odds: <span class="math display">\[odds = \frac{p}{1-p}\]</span> Note that a probability of 0.5 would correspond to an odds of 1, a probability of 2/3 would correspond to an odds of 2, 3/4 would correspond to an odds of 3, and so on. Now if we double odds going from 4.5 to 2.5 to 0.5 meters, we go from an odds of 1 to an odds of 2 to an odds of 4 which make more sense! So really, if we want to make statements about “doubling chances” as we change predictors, we should work in terms of odds. Hence the “log-odds” model.</p>
+<p>Now if you invert the model <span class="math display">\[\log\left(\frac{p(X)}{1-p(X)}\right) = X\beta\]</span> to solve for <span class="math inline">\(p(X)\)</span> we get <span class="math display">\[p(X) = \frac{e^{X\beta}}{1 + e^{X\beta}} = \frac{1}{1 + e^{-X\beta}}\]</span> The function <span class="math display">\[h(x) = 1/(1+e^{-x})\]</span> is called the <em>logistic function</em>. Hence the model name.</p>
+<p>Plotting <span class="math inline">\(h\)</span> also helps see why the model <span class="math display">\[p(X) = h(X\beta)= \frac{1}{1 + e^{-X\beta}}\]</span> is a reasonable choice for modeling probabilities as a function of <span class="math inline">\(X\)</span>. Suppose for example we have just single predictor <span class="math inline">\(X_1\)</span>. Then the plot of</p>
+<p><span class="math display">\[p(X_1) = 1/(1+e^{-(\beta_0 + \beta_1 X_1)})\]</span> would look like this:</p>
 <iframe src="https://jmayberry.shinyapps.io/logistic-explorer" width="100%" height="400px">
 </iframe>
 <p>You can play around with different values of <span class="math inline">\(\beta_0, \beta_1\)</span> to get some ideas about what is going on. Try to answer the following based on this application:</p>
@@ -449,9 +429,7 @@ AIC: 2087
 Number of Fisher Scoring iterations: 4</code></pre>
 </div>
 </div>
-<p>Don’t freak out! Let’s talk about this output. The three values in the “Estimate” column are the coefficients <span class="math inline">\(\hat{\beta}_0,  \hat{\beta}_1, \hat{\beta}_2\)</span> in the model <span class="math display">\[
-p(X) = h(\beta_0 +\beta_1 X_1 + \beta_2 X_2)
-\]</span> with <span class="math inline">\(X_1=xj\)</span> and <span class="math inline">\(X_2=yj\)</span>. If we want to predict the probability of making a shot from position (2,4), we would plug in <span class="math inline">\(X_1= 2\)</span> and <span class="math inline">\(X_2=4\)</span> into the right hand side of this equation:</p>
+<p>Don’t freak out! Let’s talk about this output. The three values in the “Estimate” column are the coefficients <span class="math inline">\(\hat{\beta}_0,  \hat{\beta}_1, \hat{\beta}_2\)</span> in the model <span class="math display">\[p(X) = h(\beta_0 +\beta_1 X_1 + \beta_2 X_2)\]</span> with <span class="math inline">\(X_1=xj\)</span> and <span class="math inline">\(X_2=yj\)</span>. If we want to predict the probability of making a shot from position (2,4), we would plug in <span class="math inline">\(X_1= 2\)</span> and <span class="math inline">\(X_2=4\)</span> into the right hand side of this equation:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>bx<span class="ot">=</span><span class="fu">coef</span>(goal_glm)[<span class="dv">1</span>] <span class="sc">+</span><span class="fu">coef</span>(goal_glm)[<span class="dv">2</span>]<span class="sc">*</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">coef</span>(goal_glm)[<span class="dv">3</span>]<span class="sc">*</span><span class="dv">4</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>bx))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -469,9 +447,7 @@ p(X) = h(\beta_0 +\beta_1 X_1 + \beta_2 X_2)
 0.3832721 </code></pre>
 </div>
 </div>
-<p>Now, in terms of interpreting the coefficients, remember that the model is linear in log-odds: <span class="math display">\[
-\log(p(X)/(1-p(X))) = \beta_0 + \beta_1X_1 + \beta_2 X_2
-\]</span></p>
+<p>Now, in terms of interpreting the coefficients, remember that the model is linear in log-odds: <span class="math display">\[\log(p(X)/(1-p(X))) = \beta_0 + \beta_1X_1 + \beta_2 X_2\]</span></p>
 <p>In a simple linear equation, a change of <span class="math inline">\(\Delta x\)</span> to <span class="math inline">\(x\)</span> means that the outcome variable changes by <span class="math inline">\(m\Delta x\)</span> where <span class="math inline">\(m\)</span> is the slope. Now a change <span class="math inline">\(\Delta x\)</span> in one of the predictors <span class="math inline">\(X_i\)</span>, while holding the others constant, means that the log-odds of “success” goes up by <span class="math inline">\(\hat{\beta}_i \Delta x\)</span> so the odds increase by a multiplicative factor <span class="math inline">\(e^{\hat{\beta}_i \Delta x}\)</span>. For example, if we keep our horizontal position constant, but move one meter closer to the goal (change in <span class="math inline">\(yj\)</span> of <span class="math inline">\(-1\)</span>), then the odds get multiplied by</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(goal_glm)[<span class="dv">3</span>]<span class="sc">*</span>(<span class="sc">-</span><span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -550,9 +526,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <section id="logistic-regression-decision-boundaries-and-prediction" class="level2">
 <h2 class="anchored" data-anchor-id="logistic-regression-decision-boundaries-and-prediction">Logistic Regression, Decision Boundaries, and Prediction</h2>
 <p>After we have computed a logistic regression model, we can also use it to visualize the decision regions <span class="math inline">\(G\)</span> and <span class="math inline">\(\bar{G}\)</span>. <span class="math inline">\(G\)</span> will be the region of <span class="math inline">\((x,y)\)</span> values where</p>
-<p><span class="math display">\[
-P(Goal|(x,y)) &gt; 0.5
-\]</span> The “triangular” boundary for this region<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> is shown with the shot data in the plot below:</p>
+<p><span class="math display">\[P(Goal|(x,y)) &gt; 0.5\]</span> The “triangular” boundary for this region<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> is shown with the shot data in the plot below:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>x_range <span class="ot">=</span> </span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seq</span>(<span class="fu">min</span>(shots<span class="sc">$</span>xj), <span class="fu">max</span>(shots<span class="sc">$</span>xj), </span>
@@ -617,7 +591,7 @@ P(Goal|(x,y)) &gt; 0.5
 <span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>er_logistic<span class="ot">=</span><span class="fu">sum</span>(test_set<span class="sc">$</span>prediction<span class="sc">!=</span>test_set<span class="sc">$</span>Goal)<span class="sc">/</span><span class="fu">length</span>(test_set<span class="sc">$</span>Goal)</span>
 <span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>er_logistic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3850932</code></pre>
+<pre><code>[1] 0.3312629</code></pre>
 </div>
 </div>
 <p>For those of you who did the last practice problems, this should be close to the best knn model error rates you got.</p>
@@ -656,7 +630,7 @@ P(Goal|(x,y)) &gt; 0.5
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(test_set<span class="sc">$</span>Goal<span class="sc">==</span><span class="st">"Goal"</span>)<span class="sc">/</span><span class="fu">nrow</span>(test_set)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3830228</code></pre>
+<pre><code>[1] 0.3291925</code></pre>
 </div>
 </div>
 <p>However, in the practice problems below it will make more of a difference because the class imbalance is larger.</p>
@@ -675,8 +649,8 @@ P(Goal|(x,y)) &gt; 0.5
 <div class="cell-output cell-output-stdout">
 <pre><code>          
            Goal Not Goal
-  Goal       42       43
-  Not Goal  143      255</code></pre>
+  Goal       36       37
+  Not Goal  123      287</code></pre>
 </div>
 </div>
 <p>we see that there are two types of errors: predicting goal for not goal and predicting not goal for goal.The second type of error is happening much more frequently. Is this desirable? Next notes we’ll talk about these two way confusion matrices in more detail and some other metrics one can use to talk about to assess the value of a classification scheme. We’ll also discuss incorporating qualitative predictors into our models and how we compare our logistic model with the “null”. Until then, love the ones you’re with.</p>
@@ -700,7 +674,7 @@ P(Goal|(x,y)) &gt; 0.5
 
 <ol>
 <li id="fn1"><p>Ok, there is a method of computing distances in the presence of mixed quantitative/qualitative predictors called Gower Distance - I’ll leave it to you to go down that rabbit hole if you want to take the red pill.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>That’s just the way <code>glm</code> works with binary variables. It will take other qualitative variables as predictors, but not a response. <a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>That’s just the way <code>glm</code> works with binary variables. It will take other qualitative variables as predictors, but not a response.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>Usually the boundary is linear but using absolute value turned it into a triangle<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
