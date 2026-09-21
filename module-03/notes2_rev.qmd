@@ -87,7 +87,7 @@ new_df=data.frame(yj=4)
 predict(goal_glm,new_df,type="response")
 ```
 
-We'll talk more about interpreting coefficients in the next section, but a few things are worth noting here. First, the p-value in the `yj` row can be interpreted in the same way as the p-values from our earlier `lm` outputs; the variable `yj` has a significant relationship with goal scoring probabilities! What type of relationship? Well recalling from earlier how $\beta_1$ impacts the graph of the logistic equation and noting that our estimate here is negative, we can say that the probability of making a shot tends to decrease as we increase `yj`. If the coefficient was positive, we would say the opposite.
+We'll talk more about interpreting coefficients in the next section, but a few things are worth noting here. First, the p-value in the `yj` row can be interpreted in the same way as the p-values from our earlier `lm` outputs; the variable `yj` has a significant relationship with goal scoring probabilities! What type of relationship? Well, recalling from earlier how $\beta_1$ impacts the graph of the logistic equation and noting that our estimate here is negative, we can say that the probability of making a shot tends to decrease as we increase `yj`. If the coefficient was positive, we would say the opposite.
 
 ## Logistic Regression, Decision Boundaries, and Prediction
 
@@ -124,7 +124,7 @@ goal_glm2=glm(Goal_1~xj+yj,data=shots,family="binomial")
 summary(goal_glm2)
 ```
 
-Now if we denote our two predictors as $X,Y$ (to correspond with our usually labelling of axes in two-dimensions and coincidentally, the two predictors in our water polo example) the decision boundary is the equation
+Now if we denote our two predictors as $X,Y$ (to correspond with our usual labeling of axes in two-dimensions and coincidentally, the two predictors in our water polo example) the decision boundary is the equation
 
 $$\beta_0 + \beta_1 X + \beta_2 Y = 0$$ or equivalently $$Y = -\beta_0/\beta_2 + (-\beta_1/\beta_2) X.$$
 
@@ -144,7 +144,7 @@ shots |>
 
 ```
 
-Note however that `xj` wasn't significant since it isn't actually horizontal distance but rather relative position. If we use absolute value instead, we get a better model and a more reasonable decision boundary:
+Note however that `xj` wasn't significant. This is probably because it represents relative position and not horizontal distance. If we use absolute value instead, we get a better model and a more reasonable decision boundary:
 
 ```{r}
 goal_glm3=glm(Goal_1~abs(xj)+yj,data=shots,family="binomial")
@@ -167,7 +167,7 @@ shots |>
 
 ## Testing Set Validation and Stratified Sampling
 
-To compute the predictive power of this or any other glm model, we can do our usual test set validation:
+To compute the predictive power of this or any other `glm` model, we can do our usual test set validation:
 
 ```{r}
 n=nrow(shots)
