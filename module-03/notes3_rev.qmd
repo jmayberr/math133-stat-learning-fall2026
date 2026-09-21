@@ -22,9 +22,13 @@ We'll start off with a few additional words about interpreting coefficients and 
 
 ## Interpreting Coefficients
 
-Recall that if we have a single predictor $X$, the basic model behind logistic regression is of the form $$p(X) = h(\beta_0 + \beta_1 X)$$ where $h$ is the logistic function. Similarly, with multiple predictors we have $$p(X) = h(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p).$$ So while we can use the sign of the $\beta_i$ to determine if the probability of success goes up or down as we increase $X_i$, we cannot say anything more explicit from this formulation. First, we have to take a slightly different view of the logistic model and talk about odds.
+Recall that if we have a single predictor $X$, the basic model behind logistic regression is of the form $$p(X) = h(\beta_0 + \beta_1 X)$$ where $h$ is the logistic function. Similarly, with multiple predictors we have $$p(X) = h(\beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p).$$ While we can use the sign of the $\beta_i$ to determine if the probability of success goes up or down as we increase $X_i$, it is difficult to say anything more explicit about the coefficients from this formulation. First, we have to take a slightly different view of the logistic model and talk about odds.
 
-If you take a walk through the garden of algebra[^1], you can rewrite the logistic equation as $$g(p(X)) =  \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p$$ where $g$ is given by the "link function[^2]" $$g(x) = \log(x/(1-x))$$ In other words, $$\log \left(\frac{p(X)}{1 - p(X)}\right) =  \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p$$ The lefthand side is called the "log-odds" function. When we look at a coefficient $\beta_i$, it is telling us the change in the log-odds of success when we increae predictor $X_i$ by 1. For example, in the framingham model, the log-odds of getting CHD are about 0.55 higher for males than females.
+If you take a walk through the garden of algebra[^1], you can rewrite the logistic equation as $$g(p(X)) =  \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p$$ where $g$ is given by the "link function"[^2] 
+$$g(x) = \log(x/(1-x))$$ 
+In other words, 
+$$\log \left(\frac{p(X)}{1 - p(X)}\right) =  \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \cdots + \beta_p X_p$$ 
+The lefthand side is called the "log-odds" function. When we look at a coefficient $\beta_i$, it is telling us the change in the log-odds of success when we increase predictor $X_i$ by 1. For example, in the framingham model, the log-odds of getting CHD are about 0.55 higher for males than females.
 
 [^1]: Credit Parker "Birdman" Spurlin for this phrase.
 
@@ -298,12 +302,12 @@ Receiver Operator Characteristic (ROC) curves are a tool that machine learning h
 y=test_set$TenYearCHD
 probs=predict(train_glm,test_set,type="response")
 cutoffs = seq(0, 0.9, by = 0.05)
-results <- map_dfr(cutoffs, function(cutoff) {
+results = map_dfr(cutoffs, function(cutoff) {
 
-  yhat <- ifelse(probs > cutoff, 1, 0)
-  m <- calculate_metrics(yhat, y, "1")
+  yhat = ifelse(probs > cutoff, 1, 0)
+  m = calculate_metrics(yhat, y, "1")
 
-  tibble(
+  data.frame(
     cutoff = cutoff,
     TPR = m$Recall,
     FPR = 1 - m$Specificity
@@ -324,7 +328,10 @@ best = results[which.max(results$J), ]
 best
 ```
 
-Interestingly, this gave the same value as optimizing balanced accuracy.
+Interestingly, this gave the same value as optimizing balanced accuracy^[This is no coincidence since 
+$$
+Balanced \,  Accuracy= \frac{TPR+(1-FPR)}{2} + 1/2 + (TPR-FPR)/2.
+$$]
 
 The *area under the ROC curve* (or AUC) is another commonly used metric for assessing the fit of a classification scheme which doesn't choose a cutoff at all. Instead, it just measures a model by the overall area under its ROC. We could compute this by choosing a finer grid of points and using numeric integration, but instead we'll introduce the pROC package for this purpose
 
