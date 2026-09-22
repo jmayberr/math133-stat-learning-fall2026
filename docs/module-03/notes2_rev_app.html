@@ -657,7 +657,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>er_logistic<span class="ot">=</span><span class="fu">sum</span>(test_set<span class="sc">$</span>prediction<span class="sc">!=</span>test_set<span class="sc">$</span>Goal)<span class="sc">/</span><span class="fu">length</span>(test_set<span class="sc">$</span>Goal)</span>
 <span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>er_logistic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3581781</code></pre>
+<pre><code>[1] 0.3354037</code></pre>
 </div>
 </div>
 <p>For those of you who did the last practice problems, this should be close to the best knn model error rates you got (although it still doesn’t beat the null model).</p>
@@ -694,7 +694,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(test_set<span class="sc">$</span>Goal<span class="sc">==</span><span class="st">"Goal"</span>)<span class="sc">/</span><span class="fu">nrow</span>(test_set)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3561077</code></pre>
+<pre><code>[1] 0.3643892</code></pre>
 </div>
 </div>
 <p>However, in the practice problems below it will make more of a difference because the class imbalance is larger.</p>
@@ -714,8 +714,8 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>          
            Goal Not Goal
-  Goal       26       27
-  Not Goal  146      284</code></pre>
+  Goal       27       13
+  Not Goal  149      294</code></pre>
 </div>
 </div>
 <p>we see that there are two types of errors: predicting goal for not goal and predicting not goal for goal.The second type of error is happening much more frequently. Is this desirable? Next notes we’ll talk about these two way confusion matrices in more detail and some other metrics one can use to talk about to assess the value of a classification scheme. Until then, love the ones you’re with.</p>
