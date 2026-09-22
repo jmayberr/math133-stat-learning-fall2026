@@ -580,20 +580,14 @@ Selection Algorithm: exhaustive
 <li>Use cross-validated versions of the metrics (like in the last notes)</li>
 <li>Use a complexity based metric which balances least squares with number of predictors</li>
 </ol>
-<p>Regsubsets uses three different types of complexity metrics: Mallow’s Cp, Bayesian Information Criteria, and Adjusted R^2. All three are based on modified version of least squares metrics with a penalty for having more predictors. The former two look at an error term proportional to: <span class="math display">\[
-SSE + C(p)
-\]</span> where <span class="math inline">\(C(p)\)</span> is a “cost” function that increases with the number of parameters <span class="math inline">\(p\)</span> in the model and hence, penalizes complex models (those with higher <span class="math inline">\(p\)</span>) more heavily.</p>
+<p>Regsubsets uses three different types of complexity metrics: Mallow’s Cp, Bayesian Information Criteria, and Adjusted <span class="math inline">\(R^2\)</span>. All three are based on modified version of least squares metrics with a penalty for having more predictors. The former two look at an error term proportional to: <span class="math display">\[SSE + C(p)\]</span> where <span class="math inline">\(C(p)\)</span> is a “cost” function that increases with the number of parameters <span class="math inline">\(p\)</span> in the model and hence, penalizes complex models (those with higher <span class="math inline">\(p\)</span>) more heavily.</p>
 <p>Most complexity metrics differ only in the proportionality constants and their choice of <span class="math inline">\(C(p)\)</span>. For example,</p>
 <ul>
 <li>Mallows Cp (which is equivalent to the more commonly used Akaike Information Criteria or AIC) uses a penalty proportional to <span class="math inline">\(2 p\)</span></li>
-<li>Bayesian Information Criteria (BIC) uses a penalty proportional to $ (n) p$ (and hence penalizes excess parameters more steeply than Mallow’s)</li>
+<li>Bayesian Information Criteria (BIC) uses a penalty proportional to <span class="math inline">\((\log n) p\)</span> (and hence penalizes excess parameters more steeply than Mallow’s)</li>
 </ul>
-<p>The third, adjusted <span class="math inline">\(R^2\)</span>, is slightly different in that it calculates a degree adjusted form of <span class="math display">\[
-R^2 = 1-SSE/SST.
-\]</span> by doing <span class="math display">\[
-Adjusted \; R^2 = 1 - \frac{SSE}{SST} \frac{n-1}{n-p-1}
-\]</span></p>
-<p>A larger <span class="math inline">\(p\)</span> will increase the fraction multiplying the second term and hence decrease adjusted <span class="math inline">\(R^2\)</span>. Here are plots of all three for our trump model with the actual R^2 for comparison:</p>
+<p>The third, adjusted <span class="math inline">\(R^2\)</span>, is slightly different in that it calculates a degree adjusted form of <span class="math display">\[R^2 = 1-SSE/SST\]</span> by doing <span class="math display">\[Adjusted \; R^2 = 1 - \frac{SSE}{SST} \frac{n-1}{n-p-1}\]</span></p>
+<p>A larger <span class="math inline">\(p\)</span> will increase the fraction multiplying the second term and hence decrease adjusted <span class="math inline">\(R^2\)</span>. Here are plots of all three for our trump model with the actual <span class="math inline">\(R^2\)</span> for comparison:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>sum_fit_full<span class="ot">=</span><span class="fu">summary</span>(trump_regfit)</span>
@@ -769,8 +763,8 @@ Selection Algorithm: 'sequential replacement'
 8  ( 1 ) "*"         "*"      </code></pre>
 </div>
 </div>
-<p>Take some time to further look at the differences in the model outputs to get some intuition about what’s going on. I think that when possible, it’s best to use the exhaustive option and then seqrep and as an alternative if the processing time is too long.</p>
-<p>On drawback of <code>regsubsets()</code> is that it can not be used directly with predict. There are a couple of ways around this. The following helper function<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> which can be loaded for these purposes:</p>
+<p>Take some time to further look at the differences in the model outputs to get some intuition about what’s going on. I think that when possible, it’s best to use the “exhaustive” option and then “seqrep” as an alternative if the processing time is too long.</p>
+<p>One drawback of <code>regsubsets()</code> is that it can’t be directly used with predict. There are a couple of ways around this. For example, you can apply the following helper function<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>predict_regsubsets <span class="ot">=</span> <span class="cf">function</span>(fit_reg, newdata, id) {</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Input: fit_reg = regsubsets object, newdata = data for calculations predictions, i = # of terms</span></span>
@@ -796,8 +790,8 @@ Selection Algorithm: 'sequential replacement'
 </section>
 <section id="connection-to-last-class-using-cross-validation-to-decide-between-models." class="level2">
 <h2 class="anchored" data-anchor-id="connection-to-last-class-using-cross-validation-to-decide-between-models.">Connection to last class: Using Cross-Validation to decide between models.</h2>
-<p>Notice that all three complexity metrics give different answers, and none of them used cross-validation directly so at this point you’re saying “why did we go through all that trouble for nothing”? Well the real payoff will come in Module 4.3 but we can start to shwo some utility here.</p>
-<p>First, we’ll modify our looCV routine from Module 4.1:</p>
+<p>Notice that all three complexity metrics give different answers, and none of them used cross-validation directly so at this point you’re saying “why did we go through all that trouble for nothing”? Well the real payoff will come in Module 4.3 but we can start to show some utility here.</p>
+<p>First, we’ll modify our looCV routine from Module 4.1 so we can apply it to <code>regsubset</code> objects:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>looCV_regsubsets <span class="ot">=</span> <span class="cf">function</span>(fla, df, p){</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Input: fla = model formula, df = data frame, p = # of predictors</span></span>
@@ -820,7 +814,7 @@ Selection Algorithm: 'sequential replacement'
 <span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(rmse)</span>
 <span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Applying this to our model yields the following results:</p>
+<p>Applying our new function to the election model yields the following results:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>rmse<span class="ot">=</span><span class="fu">looCV_regsubsets</span>(trump.vote<span class="sc">~</span>.,election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>],<span class="dv">8</span>)</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,rmse,<span class="at">col=</span><span class="st">"black"</span>,<span class="at">xlab=</span><span class="st">"Number of Terms"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -843,7 +837,7 @@ Selection Algorithm: 'sequential replacement'
 <li>Using an exhaustive or seqrep search with Mallow’s or Adjusted R^2 or AIC says the six predictor model with median income, metro, high school, white poverty, income inequality, and non-white was best</li>
 <li>LOOCV says the full model with all eight predictors is best.</li>
 </ul>
-<p>In this type of situation, I tend to lean towards choosing the simplest possible optimal model (in this case the three variable one), but I can’t ever be certain this is the right choice and I usually try and think about WHY I might be getting different answers. Here, the <span class="math inline">\(R^2\)</span> value for the full model is pretty decent (about 65%) which means that we have a solid set of predictors to begin with, but I think the reason we get such different answers for optimal subsets is colinearity.</p>
+<p>In this type of situation, I tend to lean towards choosing the simplest possible optimal model (in this case the three variable one), but I can’t ever be certain this is the right choice and I usually try and think about WHY I might be getting different answers. Here, the <span class="math inline">\(R^2\)</span> value for the full model is pretty decent (about 65%) which means that we have a solid set of predictors to begin with, but I think the reason we get such different answers for optimal subsets is collinearity.</p>
 <p>There are some pretty high correlations between the predictors as we saw in the last section. Of particular relevance is the fact that non-citizen is very heavily correlated with both metro and non-white. Therefore, the former could be serving as a surrogate summary measure for the latter two in the simpler model (or conversely, the latter two could be breaking up the effects of the former). Also notice that median income is heavily correlated with high school and white-poverty, both of which show up in the more complicated model and hence, dropping those latter two doesn’t mean much if we penalize models more heavily for extra parameters (like in BIC or forward selection).</p>
 <p>The real lesson here is that model selection is as much art as science. Different methods reflect different assumptions and priorities. BIC prioritizes parsimony, adjusted <span class="math inline">\(R^2\)</span> is more permissive, and cross-validation prioritizes predictive performance. Understanding WHY they disagree is more valuable than blindly following any one of them.</p>
 <p>In other words, don’t choose - decide!</p>
@@ -858,7 +852,9 @@ Selection Algorithm: 'sequential replacement'
 <li>How many variables are optimal using Cp? Which variables are in this model?</li>
 <li><em>Bonus</em>: How many variables are optimal using LOOCV? Which variables are in this model?</li>
 </ul>
-<p><em>Note</em>: The LOOCV routine above may throw back an error for answering the last question. If so, try running this command first to convert all the character columns to factors: `credit[ , 7:10] = lapply(credit[ , 7:10], factor)’. Also beware that it may take a while to run.</p>
+<p><em>Note</em>: If you use the LOOCV routine from these notes to answer the bonus, you may get an error depending on how you imported the credit data variables (whether R decided to store the categorical variables as characters or factors). If this happens, try running the following command first:</p>
+<p><code>credit[ , 7:10] = lapply(credit[ , 7:10], factor)</code></p>
+<p>to convert all the character columns to factors. Also beware that it may take a while to run.</p>
 
 
 </section>
@@ -869,7 +865,7 @@ Selection Algorithm: 'sequential replacement'
 <ol>
 <li id="fn1"><p>This can be argued by defining a model by a binary vector <span class="math inline">\((x_1,...,x_8)\)</span> where <span class="math inline">\(x_i = 1\)</span> if the <span class="math inline">\(i\)</span>th variable is included in the model and 0 otherwise. There are two possibilities for each <span class="math inline">\(x_i\)</span> hence <span class="math inline">\(2^8\)</span> total such vectors.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>Needle meaning best model here, sorry Sleeping Beauty…or Cinderella…or whichever Disney princess would most hate needles.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>In the 20-50 range depending on your computing power<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Usually anything up to the 20-50 range is fine depending on your computing power<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>Six-seven! Eyeroll.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>Inspired by a similar one in the previously referenced ISLR textbook.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
