@@ -1,0 +1,63 @@
+---
+title: "Class Notes for 09-23"
+format: html
+---
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016=read.csv(df_url)
+```
+
+Load LOOCV and KFOLD routines
+
+```{r}
+looCV_lm=function(fla,df){
+  # LOO cross-validation for linear models
+  # Inputs: fla = formula, df = dataframe
+  # Output: LOO RMSE
+  yhat=numeric(nrow(df))
+  for (j in 1:nrow(df)){
+    train=df[-j,]
+    fit=lm(fla,train)
+    yhat[j]=predict(fit,newdata=df[j,])
+  }
+  y=df[[all.vars(fla)[1]]]
+  rmse=sqrt(mean((y-yhat)^2))
+  return(rmse)
+}
+
+kfoldCV_lm = function(fla, df, k) {
+  # K-fold cross-validation for linear models
+  # Inputs: fla = formula, df = dataframe, k = number of folds
+  # Output: K-fold RMSE
+  
+  n = nrow(df)
+  if (k > n) stop("k cannot be greater than the number of observations")
+  
+  s = sample(n)  
+  fold_assignments = cut(1:n, breaks = k, labels = FALSE)  
+  SSE = numeric(k)  
+  
+  for (j in 1:k) {
+    fold = s[fold_assignments == j]  
+    train = df[-fold, ]  
+    test = df[fold, ]  
+    
+    fit = lm(fla,train) 
+    yhat = predict(fit,test)  
+    
+    SSE[j] = sum((test[[all.vars(fla)[1]]] - yhat)^2)  
+  }
+  rmse=sqrt(sum(SSE) / n)
+  return(rmse)
+}
+
+```
+
+Apply functions
+
+```{r}
+formula=trump.vote~median.income+high.school
+looCV_lm(formula,election2016)
+kfoldCV_lm(formula,election2016,5)
+```

@@ -78,11 +78,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-ece42c8223ec2bf36298a08f122c9a68.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<meta name="shinylive:serviceworker_dir" content="..">
-<script src="../site_libs/quarto-contrib/shinylive-0.10.12/shinylive/load-shinylive-sw.js" type="module"></script>
-<script src="../site_libs/quarto-contrib/shinylive-0.10.12/shinylive/run-python-blocks.js" type="module"></script>
-<link href="../site_libs/quarto-contrib/shinylive-0.10.12/shinylive/shinylive.css" rel="stylesheet">
-<link href="../site_libs/quarto-contrib/shinylive-quarto-css/shinylive-quarto.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -228,11 +223,11 @@ window.Quarto = {
  <span class="dropdown-text">Module 3.1: Introduction to Classification</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../module-03/notes2_rev_app.html">
+    <a class="dropdown-item" href="../module-03/notes2.html">
  <span class="dropdown-text">Module 3.2: Logistic Regression</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../module-03/notes3_rev.html">
+    <a class="dropdown-item" href="../module-03/notes3.html">
  <span class="dropdown-text">Module 3.3: Evaluating Classifiers</span></a>
   </li>  
         <li>
@@ -377,178 +372,41 @@ window.Quarto = {
 <li>Unlike regression models, there is no natural way to estimate the probability of belonging to a class, only a hard prediction</li>
 </ul>
 <p>Let’s expand on these. To see why 2 is an issue, think back to Module 2. When we fit a multiple regression model, we were able to say which predictors were significant. There is no way to do that with KNN, so while it might be a good predictive model in <em>some</em> scenarios, it doesn’t give us much in the realm of inference. Sure, if we only have two predictors, we can look at a plot of the decision regions, but such plots can be too holey and unpredictable for my taste. For issue 3, KNN relies on being able to calculate the “distance” between points which isn’t so well defined for categories. If two data points have the same value of a category but are 5 units a part in a numeric variable, how should this compare with two data points that have different categories but are only 1 unit apart<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>? Weird.</p>
-<p>For the rest of these notes, we are going to assume that our response variable <span class="math inline">\(Y\)</span> is binary and denote its values as 0 and 1. We will develop the idea of logistic regression using a single predictor <span class="math inline">\(X\)</span> for simplicity, but will look at some examples using <span class="math inline">\(p&gt; 1\)</span> predictors later in the notes.</p>
+<p>For the rest of these notes, we are going to assume that our response variable <span class="math inline">\(Y\)</span> is binary and denote its values as 0 and 1. We will assume that we are using an arbitrary number of <span class="math inline">\(p\)</span> predictors, which could be quantitative or qualitative and let <span class="math inline">\(X\)</span> be the model matrix of predictors with the constant term appended on. In other words, <span class="math display">\[X = \begin{bmatrix} 1 &amp; X_1 &amp; X_2 &amp; \cdots &amp; X_p \end{bmatrix}\]</span></p>
 </section>
 <section id="logistic-regression" class="level2">
 <h2 class="anchored" data-anchor-id="logistic-regression">Logistic Regression</h2>
-<p>Logistic regression, which despite the name is a classification method, takes a more inferential and quantitative approach to the problem. Instead of trying to directly classify points as 0s or 1s for new X, it tries to build a model for the probability of being in class 1 (or 0) and then classifies new points as 1 (or 0) if this probability is <span class="math inline">\(&gt; 0.5\)</span>. In other words, we set <span class="math inline">\(p(X) = P(Y=1 | X)\)</span> (the probability of getting a 1 for a given predictor value <span class="math inline">\(X\)</span>) and call this the “success probability”.</p>
-<p>Our goal will be to fit a model to <span class="math inline">\(p(X)\)</span> instead of <span class="math inline">\(Y\)</span> itself. We could try for <span class="math display">\[p(X) = \beta_0 + \beta_1 X\]</span> (i.e.&nbsp;an SLM with <span class="math inline">\(p\)</span> as the outcome), but that would lead to values of <span class="math inline">\(p\)</span> outside [0,1]. <span class="math inline">\(p\)</span> is supposed to be a probability so that is bad.</p>
-<p>Instead, a generalized linear model (GLM) is one which adds another function <span class="math inline">\(h\)</span> into the equation and seeks to fit the model: <span class="math display">\[p(X) = h(\beta_0 + \beta_1 X) \]</span></p>
-<p>where <span class="math inline">\(h\)</span> is called the <em>inverse link function</em><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. <span class="math inline">\(h\)</span> should have the property that it has a range in <span class="math inline">\([0,1]\)</span> so that it can convert our potentially nonsensical probabilistic values <span class="math inline">\(\beta_0 + \beta_1 X\)</span> into probabilities. One common choice is the logistic function <span class="math display">\[h(x) = 1/(1+e^{-x})\]</span> whose plot is shown in the slider-app below (using the default <span class="math inline">\(\beta_0 = 0, \beta_1 = 1\)</span>). Notice that it approaches <span class="math inline">\(0\)</span> as <span class="math inline">\(x\)</span> gets smaller and approaches 1 as <span class="math inline">\(x\)</span> gets bigger, crossing <span class="math inline">\(1/2\)</span> when <span class="math inline">\(x=0\)</span>.</p>
-<p>We can also look at the plot of the probabilities <span class="math display">\[p(X) = h(\beta_0 + \beta_1 X)= \frac{1}{1 + e^{-(\beta_0 + \beta_1 X)}}\]</span> vs <span class="math inline">\(X\)</span> changes as we change <span class="math inline">\(\beta_0, \beta_1\)</span></p>
-<pre class="shinylive-r" data-engine="r"><code>#| '!! shinylive warning !!': |
-#|   shinylive does not work in self-contained HTML documents.
-#|   Please set `embed-resources: false` in your metadata.
-#| standalone: true
-#| viewerHeight: 400
-
-library(shiny)
-library(ggplot2)
-
-ui &lt;- fluidPage(
-  sliderInput("beta0", "β₀ (beta0):", min = -5, max = 5, value = 0, step = 0.1),
-  sliderInput("beta1", "β₁ (beta1):", min = -5, max = 5, value = 1, step = 0.1),
-  plotOutput("logisticPlot", width = "400px", height = "200px")
-)
-
-server &lt;- function(input, output) {
-  output$logisticPlot &lt;- renderPlot({
-    logistic_func &lt;- function(x, beta0, beta1) {
-      1 / (1 + exp(-(beta0 + beta1 * x)))
-    }
-    x_vals &lt;- seq(-10, 10, by = 0.1)
-    y_vals &lt;- logistic_func(x_vals, input$beta0, input$beta1)
-    ggplot() +
-      geom_line(data = data.frame(x = x_vals, y = y_vals), 
-                aes(x = x, y = y))
-  })
-}
-
-shinyApp(ui = ui, server = server)</code></pre>
-<p>I encourage you to play around with a few different values of these paramaters to get some ideas about what is going on. In particular, try to answer the following:</p>
+<p>Logistic regression, which despite the name is a classification method, takes a more inferential and quantitative approach to the problem. Instead of trying to directly classify points as 0s or 1s for new X, it tries to build a model for the probability of being in class 1 (or 0) and then classifies new points as 1 (or 0) if this probability is <span class="math inline">\(&gt; 0.5\)</span>. In other words, we set <span class="math inline">\(p(X) = P(Y=1 | X)\)</span> (the probability of getting a 1 for a given predictor vector <span class="math inline">\(X\)</span>). Then we would like to fit a model to <span class="math inline">\(p(X)\)</span> instead of <span class="math inline">\(Y\)</span> itself. We could try for <span class="math display">\[p(X) = X\beta\]</span> (i.e.&nbsp;a multiple regression model), but that would lead to values of <span class="math inline">\(p\)</span> outside [0,1]. <span class="math inline">\(p\)</span> is supposed to be a probability so that is bad.</p>
+<p>Instead, a generalized linear model (GLM) is one which tries to fit a function of <span class="math inline">\(p\)</span> as a linear model: <span class="math display">\[g(p(X)) = X \beta \]</span></p>
+<p>for some function <span class="math inline">\(g\)</span> (called the link function). Different choices of <span class="math inline">\(g\)</span> lead to different GLMs but the most widely used is the logistic model where <span class="math inline">\(g\)</span> is taken as the log-odds function <span class="math display">\[g(x) = \log(x/(1-x))\]</span> Why is this choice so popular? Here’s a thought experiment to explain.</p>
+<p>Suppose that we are building a model for water polo shots again and we would like to say something along the following lines: “the chances of making a shot doubles when you move 2 meters closer to the goal”. First of all, using “doubled” implies a multiplicative change, not an additive one, and hence, we need to use log in our model. Second, we use the word “chance” very loosely in these type of statements, but it can really mean one of two things: probability or odds. Let’s say it means the probability <span class="math inline">\(p\)</span> of making a shot and the chances of making a shot from 4.5 meters out is 0.5. That would mean the chances of making a shot for 2.5 meter out is 1 and the chances of making a shot from 0.5 meters is 2. WTF? You can’t have a probability 2 of making a shot.</p>
+<p>However, suppose that we take a different approach and instead interpret the statement as one about odds: <span class="math display">\[odds = \frac{p}{1-p}\]</span> Note that a probability of 0.5 would correspond to an odds of 1, a probability of 2/3 would correspond to an odds of 2, 3/4 would correspond to an odds of 3, and so on. Now if we double odds going from 4.5 to 2.5 to 0.5 meters, we go from an odds of 1 to an odds of 2 to an odds of 4 which make more sense! So really, if we want to make statements about “doubling chances” as we change predictors, we should work in terms of odds. Hence the “log-odds” model.</p>
+<p>Now if you invert the model <span class="math display">\[\log\left(\frac{p(X)}{1-p(X)}\right) = X\beta\]</span> to solve for <span class="math inline">\(p(X)\)</span> we get <span class="math display">\[p(X) = \frac{e^{X\beta}}{1 + e^{X\beta}} = \frac{1}{1 + e^{-X\beta}}\]</span> The function <span class="math display">\[h(x) = 1/(1+e^{-x})\]</span> is called the <em>logistic function</em>. Hence the model name.</p>
+<p>Plotting <span class="math inline">\(h\)</span> also helps see why the model <span class="math display">\[p(X) = h(X\beta)= \frac{1}{1 + e^{-X\beta}}\]</span> is a reasonable choice for modeling probabilities as a function of <span class="math inline">\(X\)</span>. Suppose for example we have just single predictor <span class="math inline">\(X_1\)</span>. Then the plot of</p>
+<p><span class="math display">\[p(X_1) = 1/(1+e^{-(\beta_0 + \beta_1 X_1)})\]</span> would look like this:</p>
+<iframe src="https://jmayberry.shinyapps.io/logistic-explorer" width="100%" height="400px">
+</iframe>
+<p>You can play around with different values of <span class="math inline">\(\beta_0, \beta_1\)</span> to get some ideas about what is going on. Try to answer the following based on this application:</p>
 <ol type="1">
 <li>How does changing <span class="math inline">\(\beta_0\)</span> affect the shape?</li>
 <li>How does changing <span class="math inline">\(\beta_1\)</span> affect the shape?</li>
 <li>If <span class="math inline">\(p(x)\)</span> tends to decrease with <span class="math inline">\(x\)</span>, what could we say about the parameters?</li>
+<li>What happens if <span class="math inline">\(\beta_0 = 0\)</span>? What if <span class="math inline">\(\beta_1 = 0\)</span>?</li>
 </ol>
-<p>The sliders below also allow you to see how the logistic graph matches up with the empirical probability of making a shot as a function of vertical distance form the goal in the shots dataset. See if you can choose <span class="math inline">\(\beta_0, \beta_1\)</span> to capture the basic shape.</p>
-<pre class="shinylive-r" data-engine="r"><code>#| '!! shinylive warning !!': |
-#|   shinylive does not work in self-contained HTML documents.
-#|   Please set `embed-resources: false` in your metadata.
-#| standalone: true
-#| viewerHeight: 400
-
-library(shiny)
-library(ggplot2)
-library(dplyr)
-
-shots &lt;- read.csv("https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv")
-
-ui &lt;- fluidPage(
-  sliderInput("beta0", "β₀ (Intercept):", min = -5, max = 5, value = 0, step = 0.1),
-  sliderInput("beta1", "β₁ (Slope):", min = -5, max = 5, value = 1, step = 0.1),
-  plotOutput("logisticPlot", width = "400px", height = "200px")
-)
-
-server &lt;- function(input, output) {
-  output$logisticPlot &lt;- renderPlot({
-    logistic_func &lt;- function(x, beta0, beta1) {
-      1 / (1 + exp(-(beta0 + beta1 * x)))
-    }
-    x_vals &lt;- seq(0, 8, by = 0.1)
-    y_vals &lt;- logistic_func(x_vals, input$beta0, input$beta1)
-    
-    shots_binned &lt;- shots |&gt;
-      group_by(y) |&gt;
-      summarize(prop_goal = mean(Goal == "Goal"))
-    
-    ggplot() +
-      geom_line(data = data.frame(x = x_vals, y = y_vals), 
-                aes(x = x, y = y),
-                color = "red2", linewidth = 1) +
-      geom_bar(data = shots_binned, 
-               aes(x = y, y = prop_goal),
-               stat = "identity", fill = "steelblue", 
-               color = "white", alpha = 0.6, width = 1) +
-      labs(title = paste("Logistic Regression: β₀ =", input$beta0, 
-                         ", β₁ =", input$beta1),
-           x = "Vertical Distance", y = "Proportion of Goals")
-  })
-}
-
-shinyApp(ui = ui, server = server)</code></pre>
+<p>The sliders below also allow you to see how the logistic graph matches up with the empirical probabality of making a shot as a function of vertical distance form the goal in the shots dataset. See if you can choose <span class="math inline">\(\beta_0, \beta_1\)</span> to capture the basic shape.</p>
+<iframe src="https://jmayberry.shinyapps.io/logistic-shots" width="100%" height="400px">
+</iframe>
 <p>Alright enough fun. Let’s fit this shit to our data.</p>
 </section>
 <section id="logistic-model-on-water-polo-data" class="level2">
 <h2 class="anchored" data-anchor-id="logistic-model-on-water-polo-data">Logistic Model on Water Polo Data</h2>
-<p>To fit a logistic model to shot probabilities on the water polo data using vertical distance (<code>yj</code>) as a predictor, we use the glm function in R with the family = “binomial” option. The response variable needs to be recoded as 0/1 or F/T first<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<p>To fit a logistic model to shot probabilities on the water polo data, we use the glm function in R with the family = “binomial” option. The response variable needs to be recoded as 0/1 or F/T first<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>shots<span class="ot">=</span><span class="fu">read.csv</span>(url)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>shots<span class="sc">$</span>Goal_1<span class="ot">=</span><span class="fu">ifelse</span>(shots<span class="sc">$</span>Goal<span class="sc">==</span><span class="st">"Goal"</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>goal_glm<span class="ot">=</span><span class="fu">glm</span>(Goal_1<span class="sc">~</span>yj,<span class="at">family=</span><span class="st">"binomial"</span>,<span class="at">data=</span>shots)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(goal_glm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Call:
-glm(formula = Goal_1 ~ yj, family = "binomial", data = shots)
-
-Coefficients:
-            Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)  0.33841    0.15608   2.168   0.0301 *  
-yj          -0.20722    0.03527  -5.875 4.24e-09 ***
----
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-
-(Dispersion parameter for binomial family taken to be 1)
-
-    Null deviance: 2116.2  on 1606  degrees of freedom
-Residual deviance: 2081.1  on 1605  degrees of freedom
-AIC: 2085.1
-
-Number of Fisher Scoring iterations: 4</code></pre>
-</div>
-</div>
-<p>Don’t freak out! Let’s talk about this output. The two values in the “Estimate” column are the coefficients <span class="math inline">\(\hat{\beta}_0,  \hat{\beta}_1\)</span> in the model <span class="math display">\[p(X) = h(\beta_0 +\beta_1 X)\]</span> with <span class="math inline">\(X=yj\)</span>. If we want to predict the probability of making a shot from four metters back, for example, we would plug <span class="math inline">\(X= 4\)</span> into the right hand side of this equation:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>bx<span class="ot">=</span><span class="fl">0.33841</span> <span class="sc">+</span>(<span class="sc">-</span><span class="fl">0.20722</span>)<span class="sc">*</span><span class="dv">4</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>bx))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3797829</code></pre>
-</div>
-</div>
-<p>You can also use the predict function with <code>type = "response"</code>, to get the probability directly:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>new_df<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">yj=</span><span class="dv">4</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(goal_glm,new_df,<span class="at">type=</span><span class="st">"response"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>        1 
-0.3797826 </code></pre>
-</div>
-</div>
-<p>We’ll talk more about interpreting coefficients in the next section, but a few things are worth noting here. First, the p-value in the <code>yj</code> row can be interpreted in the same way as the p-values from our earlier <code>lm</code> outputs; the variable <code>yj</code> has a significant relationship with goal scoring probabilities! What type of relationship? Well, recalling from earlier how <span class="math inline">\(\beta_1\)</span> impacts the graph of the logistic equation and noting that our estimate here is negative, we can say that the probability of making a shot tends to decrease as we increase <code>yj</code>. If the coefficient was positive, we would say the opposite.</p>
-</section>
-<section id="logistic-regression-decision-boundaries-and-prediction" class="level2">
-<h2 class="anchored" data-anchor-id="logistic-regression-decision-boundaries-and-prediction">Logistic Regression, Decision Boundaries, and Prediction</h2>
-<p>After we have computed a logistic regression model, we can also use it to visualize the decision regions <span class="math inline">\(G\)</span> and <span class="math inline">\(\bar{G}\)</span>. In our single variable model, <span class="math inline">\(G\)</span> will be the region of <span class="math inline">\(X\)</span> values where</p>
-<p><span class="math display">\[P(Goal|X) &gt; 0.5\]</span></p>
-<p>You can solve for this explicitly using the equation <span class="math display">\[1/(1+e^{-\beta_0 + \beta_1 x}) = 1/2\]</span></p>
-<p>to get <span class="math display">\[x = -\beta_0/\beta_1\]</span></p>
-<p>Here is the threshold for predicting goal alongside the original data. All shots to the left of the red line would be predicted goals and all shots right would not.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>beta0<span class="ot">=</span><span class="fu">coef</span>(goal_glm)[<span class="dv">1</span>]</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>beta1<span class="ot">=</span><span class="fu">coef</span>(goal_glm)[<span class="dv">2</span>]</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>threshold<span class="ot">=</span><span class="sc">-</span>beta0<span class="sc">/</span>beta1</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the decision boundary with the actual data</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>shots <span class="sc">|&gt;</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> yj, <span class="at">y =</span> Goal_1, <span class="at">color =</span> Goal)) <span class="sc">+</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>,<span class="at">shape=</span><span class="dv">2</span>) <span class="sc">+</span>  </span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept=</span>threshold,<span class="at">color=</span><span class="st">"darkred"</span>)<span class="sc">+</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Vertical Distance"</span>,<span class="at">y=</span><span class="st">"Goal"</span>,<span class="at">color =</span> <span class="st">"Goal"</span>) <span class="sc">+</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#e35205"</span>,<span class="st">"black"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="notes2_rev_app_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>The decision boundary looks more interesting for two-variable models. For example, suppose we add in the <span class="math inline">\(x\)</span>-coordinate of points and create a new model</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>goal_glm2<span class="ot">=</span><span class="fu">glm</span>(Goal_1<span class="sc">~</span>xj<span class="sc">+</span>yj,<span class="at">data=</span>shots,<span class="at">family=</span><span class="st">"binomial"</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(goal_glm2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>shots<span class="ot">=</span><span class="fu">read.csv</span>(url)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>shots<span class="sc">$</span>Goal_1<span class="ot">=</span><span class="fu">ifelse</span>(shots<span class="sc">$</span>Goal<span class="sc">==</span><span class="st">"Goal"</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>goal_glm<span class="ot">=</span><span class="fu">glm</span>(Goal_1<span class="sc">~</span>xj<span class="sc">+</span>yj,<span class="at">family=</span><span class="st">"binomial"</span>,<span class="at">data=</span>shots)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(goal_glm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -571,32 +429,76 @@ AIC: 2087
 Number of Fisher Scoring iterations: 4</code></pre>
 </div>
 </div>
-<p>Now if we denote our two predictors as <span class="math inline">\(X,Y\)</span> (to correspond with our usual labeling of axes in two-dimensions and coincidentally, the two predictors in our water polo example) the decision boundary is the equation</p>
-<p><span class="math display">\[\beta_0 + \beta_1 X + \beta_2 Y = 0\]</span> or equivalently <span class="math display">\[Y = -\beta_0/\beta_2 + (-\beta_1/\beta_2) X.\]</span></p>
-<p>In the figure below, this equation is represented by the red line. Shots from below the line would be classified as goals and those above as misses:</p>
+<p>Don’t freak out! Let’s talk about this output. The three values in the “Estimate” column are the coefficients <span class="math inline">\(\hat{\beta}_0,  \hat{\beta}_1, \hat{\beta}_2\)</span> in the model <span class="math display">\[p(X) = h(\beta_0 +\beta_1 X_1 + \beta_2 X_2)\]</span> with <span class="math inline">\(X_1=xj\)</span> and <span class="math inline">\(X_2=yj\)</span>. If we want to predict the probability of making a shot from position (2,4), we would plug in <span class="math inline">\(X_1= 2\)</span> and <span class="math inline">\(X_2=4\)</span> into the right hand side of this equation:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>beta0<span class="ot">=</span><span class="fu">coef</span>(goal_glm2)[<span class="dv">1</span>]</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>beta1<span class="ot">=</span><span class="fu">coef</span>(goal_glm2)[<span class="dv">2</span>]</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>beta2<span class="ot">=</span><span class="fu">coef</span>(goal_glm2)[<span class="dv">3</span>]</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>shots <span class="sc">|&gt;</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> xj, <span class="at">y =</span> yj, <span class="at">color =</span> Goal)) <span class="sc">+</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>,<span class="at">shape=</span><span class="dv">2</span>)  <span class="sc">+</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="sc">-</span>beta1<span class="sc">/</span>beta2,<span class="at">intercept =</span> <span class="sc">-</span>beta0<span class="sc">/</span>beta2,<span class="at">color=</span><span class="st">"darkred"</span>) <span class="sc">+</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Vertical Position"</span>,<span class="at">y=</span><span class="st">"Horizontal Distance"</span>,<span class="at">color =</span> <span class="st">"Goal"</span>) <span class="sc">+</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#e35205"</span>,<span class="st">"black"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>bx<span class="ot">=</span><span class="fu">coef</span>(goal_glm)[<span class="dv">1</span>] <span class="sc">+</span><span class="fu">coef</span>(goal_glm)[<span class="dv">2</span>]<span class="sc">*</span><span class="dv">2</span> <span class="sc">+</span> <span class="fu">coef</span>(goal_glm)[<span class="dv">3</span>]<span class="sc">*</span><span class="dv">4</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">/</span>(<span class="dv">1</span><span class="sc">+</span><span class="fu">exp</span>(<span class="sc">-</span>bx))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(Intercept) 
+  0.3832721 </code></pre>
+</div>
+</div>
+<p>You can also use the predict function with type = “response”, to get the probability directly:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>new_df<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">xj=</span><span class="dv">2</span>,<span class="at">yj=</span><span class="dv">4</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(goal_glm,new_df,<span class="at">type=</span><span class="st">"response"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        1 
+0.3832721 </code></pre>
+</div>
+</div>
+<p>Now, in terms of interpreting the coefficients, remember that the model is linear in log-odds: <span class="math display">\[\log(p(X)/(1-p(X))) = \beta_0 + \beta_1X_1 + \beta_2 X_2\]</span></p>
+<p>In a simple linear equation, a change of <span class="math inline">\(\Delta x\)</span> to <span class="math inline">\(x\)</span> means that the outcome variable changes by <span class="math inline">\(m\Delta x\)</span> where <span class="math inline">\(m\)</span> is the slope. Now a change <span class="math inline">\(\Delta x\)</span> in one of the predictors <span class="math inline">\(X_i\)</span>, while holding the others constant, means that the log-odds of “success” goes up by <span class="math inline">\(\hat{\beta}_i \Delta x\)</span> so the odds increase by a multiplicative factor <span class="math inline">\(e^{\hat{\beta}_i \Delta x}\)</span>. For example, if we keep our horizontal position constant, but move one meter closer to the goal (change in <span class="math inline">\(yj\)</span> of <span class="math inline">\(-1\)</span>), then the odds get multiplied by</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(goal_glm)[<span class="dv">3</span>]<span class="sc">*</span>(<span class="sc">-</span><span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      yj 
+1.229843 </code></pre>
+</div>
+</div>
+<p>As a percent change (subtract the above from 1 and multiply by 100), the odds increase by about 22%. Here are the odds changes as a function of the <span class="math inline">\(\Delta yj\)</span>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="sc">-</span><span class="dv">5</span><span class="sc">:</span><span class="dv">5</span>,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>     (<span class="fu">exp</span>(<span class="fu">coef</span>(goal_glm)[<span class="dv">3</span>]<span class="sc">*</span>(<span class="sc">-</span><span class="dv">5</span><span class="sc">:</span><span class="dv">5</span>))<span class="sc">-</span><span class="dv">1</span>)<span class="sc">*</span><span class="dv">100</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">"Change in yj"</span>,<span class="at">ylab=</span><span class="st">"% change in odds"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes2_rev_app_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes2_old_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Note however that <code>xj</code> wasn’t significant. This is probably because it represents relative position and not horizontal distance. If we use absolute value instead, we get a better model and a more reasonable decision boundary:</p>
+<p>Note that odds changes are negative if you move further away.</p>
+<p>One more comment before we wrap this up. The last column of the summary table again gives the p-values for tests of nonzero coefficients:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>goal_glm3<span class="ot">=</span><span class="fu">glm</span>(Goal_1<span class="sc">~</span><span class="fu">abs</span>(xj)<span class="sc">+</span>yj,<span class="at">data=</span>shots,<span class="at">family=</span><span class="st">"binomial"</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(goal_glm3)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(goal_glm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+glm(formula = Goal_1 ~ xj + yj, family = "binomial", data = shots)
+
+Coefficients:
+             Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)  0.337554   0.156129   2.162   0.0306 *  
+xj           0.007154   0.031643   0.226   0.8211    
+yj          -0.206886   0.035306  -5.860 4.63e-09 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 2116.2  on 1606  degrees of freedom
+Residual deviance: 2081.0  on 1604  degrees of freedom
+AIC: 2087
+
+Number of Fisher Scoring iterations: 4</code></pre>
+</div>
+</div>
+<p>In our example, the intercept and <span class="math inline">\(y\)</span> distance were significant, but the <span class="math inline">\(x\)</span> distance was not. That is probably because <span class="math inline">\(x\)</span> is not distance, but rather horizontal position. Instead, we should fit the model with <span class="math inline">\(|xj|\)</span>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>goal_glm<span class="ot">=</span><span class="fu">glm</span>(Goal_1<span class="sc">~</span><span class="fu">abs</span>(xj)<span class="sc">+</span>yj,<span class="at">family=</span><span class="st">"binomial"</span>,<span class="at">data=</span>shots)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(goal_glm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -619,29 +521,61 @@ AIC: 2052.3
 Number of Fisher Scoring iterations: 4</code></pre>
 </div>
 </div>
+<p>That seems better!</p>
+</section>
+<section id="logistic-regression-decision-boundaries-and-prediction" class="level2">
+<h2 class="anchored" data-anchor-id="logistic-regression-decision-boundaries-and-prediction">Logistic Regression, Decision Boundaries, and Prediction</h2>
+<p>After we have computed a logistic regression model, we can also use it to visualize the decision regions <span class="math inline">\(G\)</span> and <span class="math inline">\(\bar{G}\)</span>. <span class="math inline">\(G\)</span> will be the region of <span class="math inline">\((x,y)\)</span> values where</p>
+<p><span class="math display">\[P(Goal|(x,y)) &gt; 0.5\]</span> The “triangular” boundary for this region<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> is shown with the shot data in the plot below:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>beta0<span class="ot">=</span><span class="fu">coef</span>(goal_glm3)[<span class="dv">1</span>]</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>beta1<span class="ot">=</span><span class="fu">coef</span>(goal_glm3)[<span class="dv">2</span>]</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>beta2<span class="ot">=</span><span class="fu">coef</span>(goal_glm3)[<span class="dv">3</span>]</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>shots <span class="sc">|&gt;</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">abs</span>(xj), <span class="at">y =</span> yj, <span class="at">color =</span> Goal)) <span class="sc">+</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>,<span class="at">shape=</span><span class="dv">2</span>)  <span class="sc">+</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="sc">-</span>beta1<span class="sc">/</span>beta2,<span class="at">intercept =</span> <span class="sc">-</span>beta0<span class="sc">/</span>beta2,<span class="at">color=</span><span class="st">"darkred"</span>) <span class="sc">+</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Vertical Distance"</span>,<span class="at">y=</span><span class="st">"Horizontal Distance"</span>,<span class="at">color =</span> <span class="st">"Goal"</span>) <span class="sc">+</span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#e35205"</span>,<span class="st">"black"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>x_range <span class="ot">=</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seq</span>(<span class="fu">min</span>(shots<span class="sc">$</span>xj), <span class="fu">max</span>(shots<span class="sc">$</span>xj), </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">length.out =</span> <span class="dv">100</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>y_range <span class="ot">=</span> </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fu">max</span>(shots<span class="sc">$</span>yj), </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">length.out =</span> <span class="dv">100</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">=</span> <span class="fu">expand.grid</span>(<span class="at">xj =</span> x_range, <span class="at">yj =</span> y_range)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict probabilities using the logistic regression model</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>prob <span class="ot">=</span> <span class="fu">predict</span>(goal_glm, </span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                    <span class="at">newdata =</span> grid, </span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>                    <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert probability into a classification (1 if prob &gt; 0.5, else 0)</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>prediction <span class="ot">=</span> <span class="fu">ifelse</span>(grid<span class="sc">$</span>prob <span class="sc">&gt;</span> <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the decision boundary with the actual data</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>shots <span class="sc">|&gt;</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> xj, <span class="at">y =</span> yj, <span class="at">color =</span> Goal)) <span class="sc">+</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span>  </span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_contour</span>(<span class="at">data =</span> grid, <span class="fu">aes</span>(<span class="at">z =</span> prob), </span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>               <span class="at">breaks =</span> <span class="fl">0.5</span>, <span class="at">color =</span> <span class="st">"red2"</span>,<span class="at">linewidth=</span><span class="dv">2</span>) <span class="sc">+</span>  <span class="co"># Decision boundary</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">color =</span> <span class="st">"Goal"</span>) <span class="sc">+</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#e35205"</span>,<span class="st">"black"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes2_rev_app_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes2_old_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-</section>
-<section id="testing-set-validation-and-stratified-sampling" class="level2">
-<h2 class="anchored" data-anchor-id="testing-set-validation-and-stratified-sampling">Testing Set Validation and Stratified Sampling</h2>
-<p>To compute the predictive power of this or any other <code>glm</code> model, we can do our usual test set validation:</p>
+<p>We could also visualize this as in the last notes with a color grid</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>  grid <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>xj,<span class="at">y=</span>yj,<span class="at">col=</span><span class="fu">as.factor</span>(prediction)))<span class="sc">+</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size=</span><span class="dv">3</span>)<span class="sc">+</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">name=</span><span class="st">"Goal"</span>,<span class="at">values=</span><span class="fu">c</span>(<span class="st">"#0072B2"</span>,<span class="st">"#e35205"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes2_old_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To compute the predictive power, use a training-testing split</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(shots)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(n,<span class="fl">0.7</span><span class="sc">*</span>n)</span>
@@ -657,20 +591,22 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>er_logistic<span class="ot">=</span><span class="fu">sum</span>(test_set<span class="sc">$</span>prediction<span class="sc">!=</span>test_set<span class="sc">$</span>Goal)<span class="sc">/</span><span class="fu">length</span>(test_set<span class="sc">$</span>Goal)</span>
 <span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>er_logistic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3354037</code></pre>
+<pre><code>[1] 0.3478261</code></pre>
 </div>
 </div>
-<p>For those of you who did the last practice problems, this should be close to the best knn model error rates you got (although it still doesn’t beat the null model).</p>
-<p>When the classes of our outcome are imbalanced (meaning far fewer of one possible class than the other) and the sample size is small, the usual procedure can lead to issues because we might not have enough observations from each class in our test set. For example, if you have a dataset of size 200 and only 20 are from a specific class A, all 20 could potentially end up in the training set and then we’re in trouble! In such situations, reflecting class imbalance in our split can be desirable.</p>
-<p>Many machine learning packages use what’s called <em>stratified sampling</em> to choose training-testing splits. This process selects proportionate samples from all possible classes of the outcome to form the training and testing sets.</p>
+<p>For those of you who did the last practice problems, this should be close to the best knn model error rates you got.</p>
+</section>
+<section id="stratified-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="stratified-sampling">Stratified Sampling</h2>
+<p>When the classes of our outcome are imbalanced (meaning far fewer of one possible class than the other), reflecting this imbalance in our sample can be desirable. Many machine learning packages use what’s called “stratified sampling” to choose training-testing splits. This process selects proportionate samples from all possible classes of the outcome to form the split.</p>
 <p>We can perform stratified sampling on the water polo dataset, for example, by modifying our typical algorithm as follows:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>n0 <span class="ot">=</span> <span class="fu">sum</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">0</span>) <span class="co"># Number of class 0</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>n1 <span class="ot">=</span> <span class="fu">sum</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">1</span>) <span class="co"># Number of class 1</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>s0 <span class="ot">=</span> <span class="fu">sample</span>(<span class="fu">which</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">0</span>), <span class="fl">0.7</span> <span class="sc">*</span> n0) <span class="co"># Training data indices for 0s</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>s1<span class="ot">=</span> <span class="fu">sample</span>(<span class="fu">which</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">1</span>), <span class="fl">0.7</span> <span class="sc">*</span> n1)  <span class="co"># Training data indices for 1s</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>n0 <span class="ot">=</span> <span class="fu">sum</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>n1 <span class="ot">=</span> <span class="fu">sum</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">1</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>s0 <span class="ot">=</span> <span class="fu">sample</span>(<span class="fu">which</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">0</span>), <span class="fl">0.7</span> <span class="sc">*</span> n0)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>s1<span class="ot">=</span> <span class="fu">sample</span>(<span class="fu">which</span>(shots<span class="sc">$</span>Goal_1 <span class="sc">==</span> <span class="dv">1</span>), <span class="fl">0.7</span> <span class="sc">*</span> n1)</span>
 <span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>s <span class="ot">=</span> <span class="fu">c</span>(s0, s1)  <span class="co"># Combine 0s and 1s for training indices </span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>s <span class="ot">=</span> <span class="fu">c</span>(s0, s1)</span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>train <span class="ot">=</span> shots[s, ]</span>
 <span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>test  <span class="ot">=</span> shots[<span class="sc">-</span>s, ]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -694,7 +630,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(test_set<span class="sc">$</span>Goal<span class="sc">==</span><span class="st">"Goal"</span>)<span class="sc">/</span><span class="fu">nrow</span>(test_set)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3643892</code></pre>
+<pre><code>[1] 0.3498965</code></pre>
 </div>
 </div>
 <p>However, in the practice problems below it will make more of a difference because the class imbalance is larger.</p>
@@ -703,22 +639,21 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <h2 class="anchored" data-anchor-id="what-else-we-need-to-say">What else we need to say</h2>
 <p>To summarize these notes,</p>
 <ul>
-<li>The logistic model finds a function <span class="math inline">\(h(\beta_0 + \beta_1 X)\)</span> for the probability that our response <span class="math inline">\(Y=1\)</span> when our predictor is <span class="math inline">\(X\)</span>.</li>
-<li>This function helps reveal important information about the relationships between our predictors and the outcome. For example, a negative coefficient <span class="math inline">\(\beta_1\)</span> means that the probability of a 1 decreases as we increase <span class="math inline">\(X\)</span>.</li>
-<li>We can add additional predictors and similarly interpret their coefficients in terms of their relationship with the success probability.</li>
-<li>We predict successes when the predicted probability is above 0.5.</li>
+<li>The logistic model fits a linear function <span class="math inline">\(\beta X\)</span> to the log-odds of getting a 1.</li>
+<li>The exponentiated coefficients tell us changes in the log-odds of success when the corresponding variable is changed.</li>
+<li>A logistic model can reveal some important information about the relationships between our predictors and the outcome.</li>
 </ul>
-<p>In the next section, we’ll delve a little deeper into the interpretation of the coefficients and the evaluation of classification models in more detail. For example, why should we use 0.5 as a cutoff for class predictions? Since the classes Goal and Not Goal are imbalanced with roughly twice as many of the latter, could we actually do better by using a different cutoff? Furthermore, we haven’t look at the types of misclassifications. If we actually create a two-way table of predictions vs reality for our Goals:</p>
+<p>But there is one kind of strange issue here which is the use of 0.5 as a cutoff for class predictions. Since the classes Goal and Not Goal are imbalanced with roughly twice as many of the latter, could we actually do better by using a different cutoff? Furthermore, we haven’t look at the types of misclassifications. If we actually create a two-way table of predictions vs reality for our Goals:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(test_set<span class="sc">$</span>prediction,test_set<span class="sc">$</span>Goal)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          
            Goal Not Goal
-  Goal       27       13
-  Not Goal  149      294</code></pre>
+  Goal       33       32
+  Not Goal  136      282</code></pre>
 </div>
 </div>
-<p>we see that there are two types of errors: predicting goal for not goal and predicting not goal for goal.The second type of error is happening much more frequently. Is this desirable? Next notes we’ll talk about these two way confusion matrices in more detail and some other metrics one can use to talk about to assess the value of a classification scheme. Until then, love the ones you’re with.</p>
+<p>we see that there are two types of errors: predicting goal for not goal and predicting not goal for goal.The second type of error is happening much more frequently. Is this desirable? Next notes we’ll talk about these two way confusion matrices in more detail and some other metrics one can use to talk about to assess the value of a classification scheme. We’ll also discuss incorporating qualitative predictors into our models and how we compare our logistic model with the “null”. Until then, love the ones you’re with.</p>
 </section>
 <section id="practice" class="level2">
 <h2 class="anchored" data-anchor-id="practice">Practice</h2>
@@ -739,8 +674,8 @@ Number of Fisher Scoring iterations: 4</code></pre>
 
 <ol>
 <li id="fn1"><p>Ok, there is a method of computing distances in the presence of mixed quantitative/qualitative predictors called Gower Distance - I’ll leave it to you to go down that rabbit hole if you want to take the red pill.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Why inverse you ask? You shall see in Section 3.3…<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>That’s just the way <code>glm</code> works with binary variables. It will take other qualitative variables as predictors, but not a response.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>That’s just the way <code>glm</code> works with binary variables. It will take other qualitative variables as predictors, but not a response.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Usually the boundary is linear but using absolute value turned it into a triangle<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
