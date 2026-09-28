@@ -1,0 +1,17 @@
+{
+  "hash": "cb0ed3b1cb95d7c0c5d4b2d786b534a9",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Class Notes 09-28\"\nformat: html\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\ndf_url=\"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv\"\nelection2016=read.csv(df_url)\nnames(election2016[,2:9])\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] \"median.income\" \"unemployed\"    \"metro\"         \"high.school\"  \n[5] \"non.citizen\"   \"white.pov\"     \"income.ineq\"   \"non.white\"    \n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(leaps)\nfit_regsubsets=regsubsets(trump.vote~.,\n                          data=election2016[,2:10],\n                          nvmax=NULL)\nsummary(fit_regsubsets)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nSubset selection object\nCall: regsubsets.formula(trump.vote ~ ., data = election2016[, 2:10], \n    nvmax = NULL)\n8 Variables  (and intercept)\n              Forced in Forced out\nmedian.income     FALSE      FALSE\nunemployed        FALSE      FALSE\nmetro             FALSE      FALSE\nhigh.school       FALSE      FALSE\nnon.citizen       FALSE      FALSE\nwhite.pov         FALSE      FALSE\nincome.ineq       FALSE      FALSE\nnon.white         FALSE      FALSE\n1 subsets of each size up to 8\nSelection Algorithm: exhaustive\n         median.income unemployed metro high.school non.citizen white.pov\n1  ( 1 ) \" \"           \" \"        \" \"   \" \"         \"*\"         \" \"      \n2  ( 1 ) \"*\"           \" \"        \" \"   \" \"         \"*\"         \" \"      \n3  ( 1 ) \"*\"           \" \"        \" \"   \" \"         \"*\"         \" \"      \n4  ( 1 ) \"*\"           \" \"        \"*\"   \" \"         \" \"         \" \"      \n5  ( 1 ) \"*\"           \" \"        \"*\"   \"*\"         \" \"         \" \"      \n6  ( 1 ) \"*\"           \" \"        \"*\"   \"*\"         \" \"         \"*\"      \n7  ( 1 ) \"*\"           \"*\"        \"*\"   \"*\"         \" \"         \"*\"      \n8  ( 1 ) \"*\"           \"*\"        \"*\"   \"*\"         \"*\"         \"*\"      \n         income.ineq non.white\n1  ( 1 ) \" \"         \" \"      \n2  ( 1 ) \" \"         \" \"      \n3  ( 1 ) \"*\"         \" \"      \n4  ( 1 ) \"*\"         \"*\"      \n5  ( 1 ) \"*\"         \"*\"      \n6  ( 1 ) \"*\"         \"*\"      \n7  ( 1 ) \"*\"         \"*\"      \n8  ( 1 ) \"*\"         \"*\"      \n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsum_regsubsets=summary(fit_regsubsets)\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nplot(sum_regsubsets$bic)\n```\n\n::: {.cell-output-display}\n![](classNotes09_28_files/figure-html/unnamed-chunk-4-1.png){width=672}\n:::\n\n```{.r .cell-code}\ncoef(fit_regsubsets,id=which.min(sum_regsubsets$bic))\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n  (Intercept) median.income   non.citizen   income.ineq \n 1.536291e+00 -6.419114e-06 -1.024826e+00 -1.398085e+00 \n```\n\n\n:::\n:::\n\n",
+    "supporting": [
+      "classNotes09_28_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
