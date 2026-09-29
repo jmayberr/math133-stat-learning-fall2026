@@ -361,11 +361,11 @@ window.Quarto = {
 
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
-<p>Module 4.2 discussed variable selection methods that use either parameter adjusted penalties (Cp, BIC, etc) or cross validation to determine optimal models. In general, these are all “subset selection” methods and the only difference between them is the criteria used to select between linear models with different numbers of features. <em>Regularization</em> (also called <em>shrinkage</em>) methods, in contrast, create a penalty for large coefficients in linear models and hence “shrink” the size of estimated coefficients from the get go. We shall discuss the two most common shrinkage methods in these notes: Ridge and LASSO regression. After, we’ll combine them both into a class of models called elastic net and show how to train them using the glmnet package.</p>
+<p>Module 4.2 discussed variable selection methods that use either parameter adjusted penalties (Cp, BIC, etc) or cross validation to determine optimal models. In general, these are all “subset selection” methods and the only difference between them is the criteria used to select between linear models with different numbers of features. <em>Regularization</em> (also called <em>shrinkage</em>) methods, in contrast, create a penalty for large coefficients in linear models and hence “shrink” the size of estimated coefficients from the get go. We shall discuss the two most common shrinkage methods in these notes: Ridge and LASSO regression.</p>
 </section>
 <section id="ridge-vs-lasso-theory" class="level2">
 <h2 class="anchored" data-anchor-id="ridge-vs-lasso-theory">Ridge vs LASSO: Theory</h2>
-<p>To understand shrinkage methods, let’s first recall the ordinary least squares (henceforth OLS) method for estimating coefficients in a simple linear model: we choose a vector of <span class="math inline">\(p+1\)</span> coefficients <span class="math inline">\(\hat{\beta} = (\hat{\beta}_0,\hat{\beta}_1,...,\hat{\beta}_p)^T\)</span> such that the resulting prediction <span class="math inline">\(\hat{y} =X\hat{\beta}\)</span> minimizes the sum of squared errors <span class="math display">\[
+<p>To understand shrinkage methods, let’s first recall the ordinary least squares (henceforth OLS) method for estimating coefficients in a simple linear model: we choose a vector of <span class="math inline">\(p+1\)</span> coefficients <span class="math inline">\(\hat{\beta} = (\hat{\beta}_0,\hat{\beta}_1,...,\hat{\beta}_p)^T\)</span> such that the resulting prediction <span class="math inline">\(\hat{y} = \beta_0 + \beta_1 X_1+ \cdots \beta_p X_p\)</span> minimizes the sum of squared errors <span class="math display">\[
 SSE = \sum (y_i - \hat{y}_i)^2.
 \]</span> or equivalently, <span class="math inline">\(MSE = RSS/n\)</span>.</p>
 <p>The concept of norms can greatly ease the notation involved in representing regression penalty functions. Given a vector <span class="math inline">\(x=(x_1,...,x_n)^T\)</span>, its <span class="math inline">\(\ell_2\)</span>-norm is defined as its (physics) magnitude <span class="math display">\[
@@ -401,35 +401,50 @@ MSE = \frac{1}{n} \| y-\hat{y} \|_2^2
 </div>
 <p>The primary function in glmnet is called…wait for it…glmnet and has four inputs: a matrix of predictors, a vector of responses, a value of “alpha”, and a grid of values to use for lambda cross-validation (the last of which you can usually leave off and let it default to choosing 100 lambdas). What is alpha you might ask? Well, glmnet actually can implement ridge/lasso hybrids (called <em>Elastic Net</em>) which minimizes <span class="math display">\[
 \frac{1}{2} MSE + \lambda\left[ \alpha \|\beta\|_1 + \left(\frac{1-\alpha}{2}\right) \|\beta\|_2^2 \right]
-\]</span> for any value of <span class="math inline">\(\alpha\)</span> between 0 and 1. When <span class="math inline">\(\alpha=0\)</span>, we get Ridge and when <span class="math inline">\(\alpha = 1\)</span>, we get Lasso. Taking <span class="math inline">\(\alpha = 1/2\)</span> would lead to an equal mixture of the two.In practice, you can also tune <span class="math inline">\(\alpha\)</span> <span class="math inline">\(\lambda\)</span> using cross-validation, which we’ll demonstrate in the next section. In these notes we’ll stick to lasso and ridge.</p>
-<p>Let’s start with applying ridge to the election2016 data. The format of glmnet is a little different because you have to input the outcome as a vector and the predictors as a matrix. The best way to do this in the right format is to first define your formula and then pass it to model.matrix (the “-1” removes the intercept because glmnet adds it automatically)</p>
+\]</span> for any value of <span class="math inline">\(\alpha\)</span> between 0 and 1. When <span class="math inline">\(\alpha=0\)</span>, we get Ridge and when <span class="math inline">\(\alpha = 1\)</span>, we get Lasso. Taking <span class="math inline">\(\alpha = 1/2\)</span> would lead to an equal mixture of the two. In practice, you can also tune <span class="math inline">\(\alpha\)</span> using cross-validation, which we’ll demonstrate in Module 4 R Tools section. In these notes we’ll stick to lasso and ridge though.</p>
+<p>Let’s start with applying ridge to the election2016 data. The format of glmnet is a little different because you have to input the outcome as a vector <span class="math inline">\(y\)</span> and the predictors as a matrix <span class="math inline">\(X\)</span>. The best way to do this in the right format is to first define your formula and then pass it to model.matrix (the “-1” removes the intercept because glmnet adds it automatically). For example, to fit the optimal three predictor model from the last section we would define <span class="math inline">\(y\)</span> and <span class="math inline">\(X\)</span> by:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>election2016<span class="sc">$</span>trump.vote</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">=</span> <span class="fu">names</span>(election2016)[<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>formula <span class="ot">=</span> <span class="fu">reformulate</span>(predictors,<span class="at">response=</span><span class="st">"trump.vote"</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>X<span class="ot">=</span><span class="fu">model.matrix</span>(formula,<span class="at">data=</span>election2016)[,<span class="sc">-</span><span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>formula<span class="ot">=</span>trump.vote<span class="sc">~</span>median.income<span class="sc">+</span>non.citizen<span class="sc">+</span>income.ineq</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>X<span class="ot">=</span><span class="fu">model.matrix</span>(formula,<span class="at">data=</span>election2016)[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(X)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  median.income non.citizen income.ineq
+1         42278        0.02       0.472
+2         67629        0.04       0.422
+3         49254        0.10       0.455
+4         44922        0.04       0.458
+5         60487        0.13       0.471
+6         60940        0.06       0.457</code></pre>
 </div>
-<p>Now we’ll run glmnet with <span class="math inline">\(\alpha = 0\)</span> (corresponding to ridge). Note that glmnet automatically standardizes all the predictors prior to the fit so you don’t have to worry about that.</p>
+</div>
+<p>If you want to get at the full model while avoiding the tedium of writing out all the terms, the <code>reformulate</code> function is useful for defining <span class="math inline">\(X\)</span>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ridge.mod<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">=</span> <span class="fu">names</span>(election2016)[<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>formula <span class="ot">=</span> <span class="fu">reformulate</span>(predictors,<span class="at">response=</span><span class="st">"trump.vote"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>X<span class="ot">=</span><span class="fu">model.matrix</span>(formula,<span class="at">data=</span>election2016)[,<span class="sc">-</span><span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now we’ll run glmnet with <span class="math inline">\(\alpha = 0\)</span> (corresponding to ridge). Note that glmnet automatically standardizes all the predictors prior to the fit so you don’t have to worry about pre-processing.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit_ridge<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The ridge.mod object stores the estimated coefficients in Ridge regression models for 100 different values of <span class="math inline">\(\lambda\)</span>. It chooses them equally spaced on a logarithmic scale from about <span class="math inline">\(e^{-5}\)</span> to <span class="math inline">\(e^4\)</span>. You can see the largest by</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ridge.mod<span class="sc">$</span>lambda[<span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fit_ridge<span class="sc">$</span>lambda[<span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 59.3588</code></pre>
 </div>
 </div>
 <p>and the smallest by</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ridge.mod<span class="sc">$</span>lambda[<span class="dv">100</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fit_ridge<span class="sc">$</span>lambda[<span class="dv">100</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.00593588</code></pre>
 </div>
 </div>
-<p>The ridge.mod object stores 100 different models, one for each value of <span class="math inline">\(\lambda\)</span> The coefficients for these models are stored as columns in the coef matrix. Furthermore, even though the variables were standardized prior to fitting the model, the coefficients are returned on the original scale of the variables. The code below shows how to extract the coefficients for the first and last models, which correspond to the largest and smallest values of <span class="math inline">\(\lambda\)</span> respectively:</p>
+<p>The <code>fit_ridge</code> object stores 100 different models, one for each value of <span class="math inline">\(\lambda\)</span> The coefficients for these models are stored as columns in the coef matrix. Furthermore, even though the variables were standardized prior to fitting the model, the coefficients are returned on the original scale of the variables. The code below shows how to extract the coefficients for the first and last models, which correspond to the largest and smallest values of <span class="math inline">\(\lambda\)</span> respectively:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge.mod)[,<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">100</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit_ridge)[,<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">100</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>9 x 2 sparse Matrix of class "dgCMatrix"
                          s0           s99
@@ -446,14 +461,14 @@ non.white     -2.681367e-37 -1.446864e-01</code></pre>
 </div>
 <p>Notice that the coefficients for large lambda (column 1) are orders of magnitude smaller than the coefficients for small lambda. You can also compare their <span class="math inline">\(\ell_2\)</span>-norms and see that the smaller value of <span class="math inline">\(\lambda\)</span> gives much larger coefficients.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="fu">sum</span>(<span class="fu">coef</span>(ridge.mod)[,<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span>),<span class="fu">sum</span>(<span class="fu">coef</span>(ridge.mod)[,<span class="dv">100</span>]<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="fu">sum</span>(<span class="fu">coef</span>(fit_ridge)[,<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span>),<span class="fu">sum</span>(<span class="fu">coef</span>(fit_ridge)[,<span class="dv">100</span>]<span class="sc">^</span><span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1]  0.249001 10.953628</code></pre>
 </div>
 </div>
 <p>Luckily, the predict function works with the output of glmnet as well. The only weirdness is that you have to specify which lambda to use by “s=…”. For example, if we want to predict trump.vote for the first five states in our dataset using the largest value of <span class="math inline">\(\lambda\)</span>, we use</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(ridge.mod,<span class="at">s=</span>ridge.mod<span class="sc">$</span>lambda[<span class="dv">1</span>], <span class="at">newx=</span>X[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(fit_ridge,<span class="at">s=</span>fit_ridge<span class="sc">$</span>lambda[<span class="dv">1</span>], <span class="at">newx=</span>X[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  s=59.3588
 1     0.499
@@ -465,7 +480,7 @@ non.white     -2.681367e-37 -1.446864e-01</code></pre>
 </div>
 <p>Notice that with this large value of <span class="math inline">\(\lambda\)</span>, the predictions are dominated by the intercept because the coefficients have been shrunk so much. We could say that this model has high bias, but low variance. In contrast, using the smallest value of <span class="math inline">\(\lambda\)</span>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(ridge.mod,<span class="at">s=</span>ridge.mod<span class="sc">$</span>lambda[<span class="dv">100</span>], <span class="at">newx=</span>X[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">predict</span>(fit_ridge,<span class="at">s=</span>fit_ridge<span class="sc">$</span>lambda[<span class="dv">100</span>], <span class="at">newx=</span>X[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  s=0.00593588
 1    0.5829050
@@ -478,39 +493,39 @@ non.white     -2.681367e-37 -1.446864e-01</code></pre>
 <p>There is more variability in predictions (and less bias).</p>
 <p>One can also perform <span class="math inline">\(k\)</span>-Fold cross validation to obtain an optimal lambda using the cv.glmnet function (nfolds is the “k” from our previous work):</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>cv.ridge<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.ridge)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ridge_cv<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ridge_cv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes3_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes3_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>So the optimal value of <span class="math inline">\(\lambda\)</span> appears to be on the smaller side ( below <span class="math inline">\(log \lambda \approx -4\)</span>. The first dashed line<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> on the left displays the minimum and the exact value can be found using the lambda.min command</p>
+<p>So the optimal value of <span class="math inline">\(\lambda\)</span> appears to be on the smaller side ( below <span class="math inline">\(\log \lambda \approx -4\)</span>). The second dashed line<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> from the left displays the minimum. Its exact value can be found using the lambda.min command</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>cv.ridge<span class="sc">$</span>lambda.min</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ridge_cv<span class="sc">$</span>lambda.min</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.00593588</code></pre>
+<pre><code>[1] 0.02886382</code></pre>
 </div>
 </div>
 <p>Now we can go back and use the minimum value of <span class="math inline">\(\lambda\)</span> to refit our model</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ridge.opt<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">lambda =</span> cv.ridge<span class="sc">$</span>lambda.min,<span class="at">alpha=</span><span class="dv">0</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge.opt)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ridge_best<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">lambda =</span> ridge_cv<span class="sc">$</span>lambda.min,<span class="at">alpha=</span><span class="dv">0</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge_best)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>9 x 1 sparse Matrix of class "dgCMatrix"
                          s0
-(Intercept)    2.536158e+00
-median.income -5.157240e-06
-unemployed    -9.910443e-01
-metro         -1.044331e-01
-high.school   -1.044458e+00
-non.citizen   -5.640770e-01
-white.pov     -6.637537e-01
-income.ineq   -1.291939e+00
-non.white     -1.448079e-01</code></pre>
+(Intercept)    1.717092e+00
+median.income -3.557624e-06
+unemployed    -5.377620e-01
+metro         -9.918872e-02
+high.school   -5.910017e-01
+non.citizen   -5.861636e-01
+white.pov      3.444558e-02
+income.ineq   -7.768835e-01
+non.white     -9.870536e-02</code></pre>
 </div>
 </div>
 </section>
@@ -526,84 +541,84 @@ Y = \beta_0 + \beta_1 X_1 + \varepsilon
 \tilde \beta_j = s_{x_j} \beta_j
 \]</span> To compute them in R, first get the sample standard deviations using the apply function</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">apply</span>(X,<span class="dv">2</span>,sd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">apply</span>(X,<span class="dv">2</span>,sd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Then multiply by the corresponding coefficients in ridge.opt</p>
+<p>Then multiply by the corresponding coefficients in our model:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge.opt)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span> s <span class="co"># -1 takes out teh intercept</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge_best)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span> s <span class="co"># -1 takes out teh intercept</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>median.income    unemployed         metro   high.school   non.citizen 
-  -0.04697894   -0.01041591   -0.01878284   -0.03594825   -0.01744195 
+-0.0324075311 -0.0056518965 -0.0178396137 -0.0203411552 -0.0181248992 
     white.pov   income.ineq     non.white 
-  -0.01581225   -0.02303562   -0.02321246 </code></pre>
+ 0.0008205789 -0.0138520389 -0.0158223036 </code></pre>
 </div>
 </div>
 <p>Now THESE numbers are comparable. After sorting by absolute value, we can see that median.income had the largest standardized coefficients (sometimes referred to as effect sizes) followed by high.school, non.white, and income.ineq.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>std_coef<span class="ot">=</span><span class="fu">coef</span>(ridge.opt)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span> s</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">abs</span>(std_coef), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>std_coef<span class="ot">=</span><span class="fu">coef</span>(ridge_best)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span> s</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">abs</span>(std_coef), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>median.income   high.school     non.white   income.ineq         metro 
-   0.04697894    0.03594825    0.02321246    0.02303562    0.01878284 
-  non.citizen     white.pov    unemployed 
-   0.01744195    0.01581225    0.01041591 </code></pre>
+<pre><code>median.income   high.school   non.citizen         metro     non.white 
+ 0.0324075311  0.0203411552  0.0181248992  0.0178396137  0.0158223036 
+  income.ineq    unemployed     white.pov 
+ 0.0138520389  0.0056518965  0.0008205789 </code></pre>
 </div>
 </div>
 </section>
 <section id="lasso-model-fit" class="level2">
 <h2 class="anchored" data-anchor-id="lasso-model-fit">LASSO model fit</h2>
-<p>To alternatively fit a lasso model, we just need to use <span class="math inline">\(\alpha=1\)</span> instead in our call to <code>glmnet</code>. For example, here are the CV errors for lasso models with different <span class="math inline">\(\lambda\)</span>’s:</p>
+<p>To fit a lasso model, we just need to use <span class="math inline">\(\alpha=1\)</span> instead in our call to <code>glmnet</code>. For example, here are the CV errors for lasso models with different <span class="math inline">\(\lambda\)</span>’s:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>cv.lasso<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">1</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.lasso)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>lasso_cv<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">1</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(lasso_cv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes3_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes3_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>The numbers at the top tell you how many parameters are nonzero in the Lasso model. The optimal model coefficients are</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>lasso.opt<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">lambda =</span> cv.lasso<span class="sc">$</span>lambda.min,<span class="at">alpha=</span><span class="dv">1</span>)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(lasso.opt)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>lasso_best<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">lambda =</span> lasso_cv<span class="sc">$</span>lambda.min,<span class="at">alpha=</span><span class="dv">1</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(lasso_best)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>9 x 1 sparse Matrix of class "dgCMatrix"
                          s0
-(Intercept)    9.913771e-01
-median.income -4.690459e-06
-unemployed     .           
-metro         -9.828080e-02
-high.school    .           
-non.citizen   -5.234457e-01
-white.pov      .           
-income.ineq   -2.566650e-01
-non.white     -6.004864e-02</code></pre>
+(Intercept)    3.045777e+00
+median.income -6.102603e-06
+unemployed    -1.230517e+00
+metro         -1.072625e-01
+high.school   -1.332654e+00
+non.citizen   -5.019515e-01
+white.pov     -1.143633e+00
+income.ineq   -1.604293e+00
+non.white     -1.793518e-01</code></pre>
 </div>
 </div>
-<p>Lasso chose a five variable model as optimal. If we compare the mean cross-validation errors for the optimal ridge and lasso models, they are almost identical:</p>
+<p>If we compare the mean cross-validation errors for the optimal ridge and lasso models, they are almost identical:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"CV ridge = "</span>,<span class="fu">min</span>(cv.ridge<span class="sc">$</span>cvm),<span class="st">"</span><span class="sc">\n</span><span class="st">CV lasso = "</span>,<span class="fu">min</span>(cv.lasso<span class="sc">$</span>cvm))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"CV ridge = "</span>,<span class="fu">min</span>(ridge_cv<span class="sc">$</span>cvm),<span class="st">"</span><span class="sc">\n</span><span class="st">CV lasso = "</span>,<span class="fu">min</span>(lasso_cv<span class="sc">$</span>cvm))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CV ridge =  0.005055525 
-CV lasso =  0.00556745</code></pre>
+<pre><code>CV ridge =  0.00527333 
+CV lasso =  0.005571054</code></pre>
 </div>
 </div>
 <p>So it looks like both lasso and ridge found equally “good” models from a prediction perspective.</p>
 <p>Note that if you use a higher lambda (for example the 1se value), lasso drops additional terms and ends up with the three variable model from 4.2.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>lasso.opt2<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">lambda =</span> cv.lasso<span class="sc">$</span>lambda<span class="fl">.1</span>se,<span class="at">alpha=</span><span class="dv">1</span>)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(lasso.opt2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>lasso_best2<span class="ot">=</span><span class="fu">glmnet</span>(X,y,<span class="at">lambda =</span> lasso_cv<span class="sc">$</span>lambda<span class="fl">.1</span>se,<span class="at">alpha=</span><span class="dv">1</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(lasso_best2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>9 x 1 sparse Matrix of class "dgCMatrix"
                          s0
-(Intercept)    6.872967e-01
-median.income -2.354857e-06
+(Intercept)    7.262309e-01
+median.income -2.792117e-06
 unemployed     .           
-metro         -4.351861e-02
+metro         -5.930618e-02
 high.school    .           
-non.citizen   -5.183860e-01
+non.citizen   -5.798846e-01
 white.pov      .           
 income.ineq    .           
 non.white      .           </code></pre>
@@ -614,45 +629,45 @@ non.white      .           </code></pre>
 <h2 class="anchored" data-anchor-id="from-model-to-predictions-start-to-finish">From Model to Predictions: Start to finish</h2>
 <p>I’ll give you that the previous sections are a bit convoluted if you just want the instruction manual of “how do I fit this shit”. You’ll probably recognize by now that I prefer a good story to a manual, but the latter has its place. So here is a more thoroughly worked out example of how we do a 60-40 training/testing split, tune for lambda in a ridge model (its similar for lasso except use alpha = 1), calculate predictions, and check the RMSE of the model on our test set</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load package</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmnet)</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Training-Testing Split</span></span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">44</span>)</span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>p<span class="ot">=</span><span class="fl">0.6</span>  <span class="co"># Fraction for training set</span></span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(election2016)</span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(n,<span class="fu">round</span>(p<span class="sc">*</span>n))</span>
-<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[s,]</span>
-<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span>
-<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Model matrices and outcome</span></span>
-<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">=</span> <span class="fu">names</span>(election2016)[<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]</span>
-<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>formula <span class="ot">=</span> <span class="fu">reformulate</span>(predictors,<span class="at">response=</span><span class="st">"trump.vote"</span>)</span>
-<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>X_train<span class="ot">=</span><span class="fu">model.matrix</span>(formula,train)[,<span class="sc">-</span><span class="dv">1</span>]</span>
-<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>X_test<span class="ot">=</span><span class="fu">model.matrix</span>(formula,test)[,<span class="sc">-</span><span class="dv">1</span>]</span>
-<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>y_train<span class="ot">=</span>train<span class="sc">$</span>trump.vote</span>
-<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>y_test<span class="ot">=</span>test<span class="sc">$</span>trump.vote</span>
-<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Find minimal cross validation error model</span></span>
-<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>ridge_cv<span class="ot">=</span><span class="fu">cv.glmnet</span>(X_train,y_train,<span class="at">alpha=</span><span class="dv">0</span>)</span>
-<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ridge_cv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load package</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(glmnet)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Training-Testing Split</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">44</span>)</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>p<span class="ot">=</span><span class="fl">0.6</span>  <span class="co"># Fraction for training set</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(election2016)</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(n,<span class="fu">round</span>(p<span class="sc">*</span>n))</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[s,]</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Model matrices and outcome</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>predictors <span class="ot">=</span> <span class="fu">names</span>(election2016)[<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>formula <span class="ot">=</span> <span class="fu">reformulate</span>(predictors,<span class="at">response=</span><span class="st">"trump.vote"</span>)</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>X_train<span class="ot">=</span><span class="fu">model.matrix</span>(formula,train)[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>X_test<span class="ot">=</span><span class="fu">model.matrix</span>(formula,test)[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>y_train<span class="ot">=</span>train<span class="sc">$</span>trump.vote</span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>y_test<span class="ot">=</span>test<span class="sc">$</span>trump.vote</span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Find minimal cross validation error model</span></span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>ridge_cv<span class="ot">=</span><span class="fu">cv.glmnet</span>(X_train,y_train,<span class="at">alpha=</span><span class="dv">0</span>)</span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(ridge_cv)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes3_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes3_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Best lambda ="</span>,ridge_cv<span class="sc">$</span>lambda.min,<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Best lambda ="</span>,ridge_cv<span class="sc">$</span>lambda.min,<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Best lambda = 0.08690804 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build and view coefficients in final model</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>ridge_best<span class="ot">=</span><span class="fu">glmnet</span>(X_train,y_train,<span class="at">lambda=</span>ridge_cv<span class="sc">$</span>lambda.min,<span class="at">alpha=</span><span class="dv">0</span>)</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge_best)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Build and view coefficients in final model</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>ridge_best<span class="ot">=</span><span class="fu">glmnet</span>(X_train,y_train,<span class="at">lambda=</span>ridge_cv<span class="sc">$</span>lambda.min,<span class="at">alpha=</span><span class="dv">0</span>)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge_best)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>9 x 1 sparse Matrix of class "dgCMatrix"
                          s0
@@ -666,32 +681,32 @@ white.pov      3.196627e-01
 income.ineq   -6.565793e-01
 non.white     -3.961335e-02</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Variable Importance</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">apply</span>(X_train,<span class="dv">2</span>,sd)</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>coefs<span class="ot">=</span><span class="fu">sort</span>(<span class="fu">abs</span>(<span class="fu">coef</span>(ridge_best)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span>s),<span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"Absolute Value of Standardized Coefficients:"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Variable Importance</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">apply</span>(X_train,<span class="dv">2</span>,sd)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>coefs<span class="ot">=</span><span class="fu">sort</span>(<span class="fu">abs</span>(<span class="fu">coef</span>(ridge_best)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span>s),<span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"Absolute Value of Standardized Coefficients:"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Absolute Value of Standardized Coefficients:"</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>coefs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>coefs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>median.income         metro   non.citizen   income.ineq    unemployed 
   0.021237808   0.017017384   0.016817739   0.012417499   0.011589830 
   high.school     white.pov     non.white 
   0.008439244   0.008299069   0.005664544 </code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict and check Test RMSE</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(ridge_best,<span class="at">newx=</span>X_test)</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RMSE of Best Ridge ="</span>,<span class="fu">sqrt</span>(<span class="fu">mean</span>((yhat<span class="sc">-</span>y_test)<span class="sc">^</span><span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Predict and check Test RMSE</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(ridge_best,<span class="at">newx=</span>X_test)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RMSE of Best Ridge ="</span>,<span class="fu">sqrt</span>(<span class="fu">mean</span>((yhat<span class="sc">-</span>y_test)<span class="sc">^</span><span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>RMSE of Best Ridge = 0.06596271</code></pre>
 </div>
 </div>
 <p>Note that we run cv.glmnet on the training set only. Using the full dataset would leak test information into our lambda selection and give an overly optimistic estimate of performance. Let’s compare with the best OLS model from the last notes (with three predictors)</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>trump_lm_best<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>median.income<span class="sc">+</span>income.ineq<span class="sc">+</span>non.citizen,<span class="at">data=</span>train)</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(trump_lm_best,test)</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RMSE of best OLS ="</span>,<span class="fu">sqrt</span>(<span class="fu">mean</span>((yhat<span class="sc">-</span>y_test)<span class="sc">^</span><span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>trump_lm_best<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>median.income<span class="sc">+</span>income.ineq<span class="sc">+</span>non.citizen,<span class="at">data=</span>train)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(trump_lm_best,test)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RMSE of best OLS ="</span>,<span class="fu">sqrt</span>(<span class="fu">mean</span>((yhat<span class="sc">-</span>y_test)<span class="sc">^</span><span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>RMSE of best OLS = 0.05656374</code></pre>
 </div>
@@ -700,7 +715,7 @@ non.white     -3.961335e-02</code></pre>
 </section>
 <section id="ridge-vs-lasso-general-comments" class="level2">
 <h2 class="anchored" data-anchor-id="ridge-vs-lasso-general-comments">Ridge vs Lasso: General Comments</h2>
-<p>Alright, not fully of I wouldn’t waste your time with it. I highly encourage you to read Secton 6.2.2 of the ISLR book for a full discussion on the topic of lasso vs ridge vs ols, but if you want the brief “CliffsNotes”” version:</p>
+<p>Well not fully or I wouldn’t waste your time with it. I highly encourage you to read Section 6.2.2 of the ISLR book for a full discussion on the topic of lasso vs ridge vs ols, but if you want the brief “CliffsNotes”” version:</p>
 <ul>
 <li>Lasso is better at picking out a small number of significant variables (the signal) mixed in with a large number of insignificant ones (the noise).</li>
 <li>Ridge is better at minimizing error when a large number of variables are actually significant.</li>
@@ -711,28 +726,16 @@ non.white     -3.961335e-02</code></pre>
 <p>These are not hard and fast rules so when possible, it is always best to fit multiple models and compare the results on a test set, but we can see a few of the above features popping up in the previous example. For example, compare the two cross-validation plots from the previous sections. All the best ridge models include all eight variables, but lasso includes some pretty comparable models with only three variables (for example, the 1se model shown earlier). Thus, lasso models can indeed be more “interpretable”.</p>
 <p>As another example of an advantage of lasso, suppose that we generate fake data in which there is only one significant variable in a sea of 40 meaningless ones</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>fake<span class="ot">=</span><span class="fu">data.frame</span>(<span class="fu">replicate</span>(<span class="dv">41</span>,<span class="fu">rnorm</span>(<span class="dv">1000</span>)))</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fake) <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"x"</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">41</span>)</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>y<span class="ot">=</span><span class="dv">1</span><span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>fake<span class="sc">$</span>x21<span class="sc">+</span><span class="fu">rnorm</span>(<span class="dv">1000</span>,<span class="at">sd=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>fake<span class="ot">=</span><span class="fu">data.frame</span>(<span class="fu">replicate</span>(<span class="dv">41</span>,<span class="fu">rnorm</span>(<span class="dv">1000</span>)))</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(fake) <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"x"</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">41</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>fake<span class="sc">$</span>y<span class="ot">=</span><span class="dv">1</span><span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>fake<span class="sc">$</span>x21<span class="sc">+</span><span class="fu">rnorm</span>(<span class="dv">1000</span>,<span class="at">sd=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now if you run ridge, the MSE levels off at 41 variable models:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>fake<span class="sc">$</span>y</span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>X<span class="ot">=</span><span class="fu">model.matrix</span>(y<span class="sc">~</span>.,<span class="at">data=</span>fake)</span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>cv.ridge<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.ridge)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="notes3_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>But if you run LASSO, we can see the MSE is pretty much the same up until we get to 1 variable models:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>cv.lasso<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">1</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.lasso)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>fake<span class="sc">$</span>y</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>X<span class="ot">=</span><span class="fu">model.matrix</span>(y<span class="sc">~</span>.,<span class="at">data=</span>fake)</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>cv.ridge<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.ridge)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -741,20 +744,32 @@ non.white     -3.961335e-02</code></pre>
 </div>
 </div>
 </div>
+<p>But if you run LASSO, we can see the MSE is pretty much the same up until we get to 1 variable models:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>cv.lasso<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">1</span>,<span class="at">nfolds =</span> <span class="dv">10</span>)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(cv.lasso)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 <p>This shows how lasso can be better at finding a “needle in the haystack”.</p>
 <p>On the other hand, ridge deals better with correlated predictors. For example, suppose that our fake data this time has only two predictors that are highly correlated with the same coefficient:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>N <span class="ot">=</span> <span class="dv">100</span></span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">runif</span>(N)</span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">=</span> x1 <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="at">sd =</span> <span class="fl">0.05</span>)</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">rnorm</span>(N)</span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>df<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">x1=</span>x1,<span class="at">x2=</span>x2,<span class="at">y=</span>y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>N <span class="ot">=</span> <span class="dv">100</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">=</span> <span class="fu">runif</span>(N)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>x2 <span class="ot">=</span> x1 <span class="sc">+</span> <span class="fu">rnorm</span>(N, <span class="at">sd =</span> <span class="fl">0.05</span>)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>y <span class="ot">=</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> <span class="fu">rnorm</span>(N)</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>df<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">x1=</span>x1,<span class="at">x2=</span>x2,<span class="at">y=</span>y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Lasso gets the coefficient estimates wrong and places too much weight on one of the two:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>X<span class="ot">=</span><span class="fu">matrix</span>(<span class="fu">c</span>(x1,x2),<span class="at">nrow=</span>N,<span class="at">ncol=</span><span class="dv">2</span>)</span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>fake_lasso<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">1</span>)</span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fake_lasso,<span class="at">s=</span>fake_lasso<span class="sc">$</span>lambda.min)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>X<span class="ot">=</span><span class="fu">matrix</span>(<span class="fu">c</span>(x1,x2),<span class="at">nrow=</span>N,<span class="at">ncol=</span><span class="dv">2</span>)</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>fake_lasso<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">1</span>)</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fake_lasso,<span class="at">s=</span>fake_lasso<span class="sc">$</span>lambda.min)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>3 x 1 sparse Matrix of class "dgCMatrix"
             s=0.01364724
@@ -765,8 +780,8 @@ V2             .        </code></pre>
 </div>
 <p>Ridge does a better job:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>fake_ridge<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>)</span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fake_ridge,<span class="at">s=</span>fake_ridge<span class="sc">$</span>lambda.min)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>fake_ridge<span class="ot">=</span><span class="fu">cv.glmnet</span>(X,y,<span class="at">alpha=</span><span class="dv">0</span>)</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fake_ridge,<span class="at">s=</span>fake_ridge<span class="sc">$</span>lambda.min)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>3 x 1 sparse Matrix of class "dgCMatrix"
             s=0.1889988
@@ -797,7 +812,7 @@ V2            0.6210358</code></pre>
 <ol>
 <li id="fn1"><p>The 1/2 is not important as you can always rescale <span class="math inline">\(\lambda\)</span>, but the R documentation and most descriptions of this include it so I left it in too. The main reason is because the more general version uses log-likelihoods and the log likelihood of a normal distribution has a 1/2 in there.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>I mentioned this idea earlier with KNN too. Standardizing usually means you convert each column to z-scores by subtracting the mean (centering) and dividing by the standard deviation (scaling).<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>The second dashed line shows the largest lambda within one standard error of the minimum and can be found using cv.ridge$lambda.1se. This value is good to use if you want more regularization since higher lambda leads to a “simpler” model with smaller coefficients<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The other dashed line shows the largest lambda within one standard error of the minimum and can be found using ridge_cv$lambda.1se. This value is good to use if you want more regularization since higher lambda leads to a “simpler” model with smaller coefficients<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>Recall I said that glmnet standardizes to fits but reports coefficients as unstandardized. Keep up!<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
