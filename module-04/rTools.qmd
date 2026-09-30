@@ -31,21 +31,34 @@ To build up to hyperparameter tuning, let's first see how the workflow looks for
 
 ## Warm Up: OLS with tidymodels
 
-```{r}
-# Step 0: Load data and packages
+Let's start by loading the election data and package:
+
+```{r,message=F,warning=F}
 library(tidymodels)
 set.seed(516)
 df_url = "https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
 election2016 = read.csv(df_url)
+```
 
+Then we'll begin the `tidymodels` process. The first step is model specification where we tell the package what type of model we are fitting and which R function ("engine") we will use to fit it: 
+
+```{r}
 # Step 1: Model specification
 lm_spec = linear_reg() |>
   set_engine("lm")
+```
 
+Next, we'll define a resampling plan. The function `vfold_cv` sets it as cross-validation with the paramater $v$ denoting our "K": 
+
+```{r}
 # Step 2: Resampling plan; using 10-Fold CV with 10 repeats for additional stability
 cv_plan = vfold_cv(election2016[,2:10], v = 10, repeats = 10)
+```
 
-# Step 3: Evaluate (no hyperparameters to tune here)
+Next, we fit our model and compute cross validated evaluation metrics (the default is RMSE and $R^2$): 
+
+```{r}
+# Step 3: Fit and evaluate model
 lm_fit = fit_resamples(
   lm_spec,
   trump.vote ~ .,
@@ -61,7 +74,7 @@ For OLS there are no hyperparameters so Step 3 uses `fit_resamples()` rather tha
 
 ```{r}
 # Step 4: Fit final model
-library(broom)
+library(broom) #Load for better summary display 
 final_fit_lm = fit(lm_spec, trump.vote ~ ., data = election2016[,2:10])
 tidy(final_fit_lm)
 ```
@@ -76,7 +89,7 @@ fit_lm= linear_reg() |>
 tidy(fit_lm)
 ```
 
-This is fine but honestly `lm()` directly is simpler for OLS — the real payoff of tidymodels comes when we need to tune hyperparameters, as we'll see next.
+This is fine but honestly `lm()` directly is simpler for OLS. The real payoff of `tidymodels` comes when we need to tune hyperparameters, as we'll see next.
 
 ## The Main Event: Hyperparameter Tuning
 
@@ -179,7 +192,7 @@ knn_spec = nearest_neighbor(neighbors = tune()) |>
 
 # Step 2: Resampling plan (stratified by outcome for classification)
 election2016$outcome=as.factor(election2016$outcome)
-cv_plan = vfold_cv(election2016[,c(2:9,11)], v = 5,repeats=10,strata=outcome)
+cv_plan = vfold_cv(election2016[,c(2:9,11)], v = 5,strata=outcome) #Can add repeats but it add time
 
 # Step 3: Tune K
 k_grid = grid_regular(neighbors(range = c(1, 30)), levels = 30)
@@ -188,8 +201,7 @@ knn_fit = tune_grid(
   knn_spec,
   outcome ~ .,
   resamples = cv_plan,
-  grid = k_grid,
-  metrics = metric_set(accuracy, bal_accuracy)
+  grid = k_grid
 )
 
 autoplot(knn_fit)
@@ -268,6 +280,60 @@ For the three classes of models discussed in this section, the tidymodels workfl
 | **Extract** | `tidy(final_fit)` | `tidy(final_fit)` |
 
 The key insight is that the workflow is identical regardless of whether you are tuning $\lambda$ in ridge, $K$ in KNN, or any other hyperparameter in any other model. That uniformity is what makes tidymodels worth learning!
+
+## Bonus: Recipes and Workflows
+
+If you want to do any preprocessing on your data (for example, normalizing variables), using recipes and workflows can provide additional uniformity and ease to the tidymodels framework. A recipe is basically a dataset and model formula, combined with pre-processing steps while a workflow add a model to a recipe. For example, let's revisit our knn fit, but with variable scaling applied before the model is kit: 
+
+```{r}
+election2016$outcome=as.factor(election2016$outcome)
+# Step 1: Define model
+knn_specs = nearest_neighbor(neighbors = tune()) |>
+  set_engine("kknn") |>
+  set_mode("classification") # Default is regression 
+
+# Step 2: Define recipe
+knn_recipe=recipe(outcome~.,
+                  data=election2016[,c(2:9,11)]) |>
+  step_normalize(all_predictors())
+
+# Step 3: Combine into workflow
+
+knn_wf= workflow() |>
+  add_recipe(knn_recipe) |> 
+  add_model(knn_specs)
+```
+
+The tuning step is similar to before, but now we pass the workflow to `tune_grid` instead of the formula and model separately: 
+
+```{r}
+cv_plan = vfold_cv(election2016[,c(2:9,11)], v = 5,strata=outcome)
+
+k_grid = grid_regular(neighbors(range = c(1, 30)), levels = 30)
+
+knn_fit = tune_grid(
+  knn_wf,
+  resamples = cv_plan,
+  grid = k_grid
+)
+```
+
+Notice that we get an improved accuracy and different K due to the variable scaling: 
+
+```{r}
+autoplot(knn_fit)
+best_k = select_best(knn_fit, metric = "accuracy")
+print(best_k)
+```
+
+To finalize the model, we use `finalize_workflow`: 
+
+```{r}
+final_knn = finalize_workflow(knn_wf,best_k)
+final_fit_knn = fit(final_knn, data = election2016[,c(2:9,11)])
+```
+
+And now you know. 
 
 ## Practice
 
