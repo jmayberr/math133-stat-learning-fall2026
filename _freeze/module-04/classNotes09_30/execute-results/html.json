@@ -1,0 +1,17 @@
+{
+  "hash": "bc58a5266d20f3e940421df8a52f81fe",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Class Notes from 09-30\"\nformat: html\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(glmnet)\ndf_url=\"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv\"\nelection2016=read.csv(df_url)\n```\n:::\n\n\nDefine predictor matrix and response vector:\n\n\n::: {.cell}\n\n```{.r .cell-code}\ny=election2016$trump.vote\npredictors=names(election2016)[2:9]\nformula=reformulate(predictors,response=\"trump.vote\")\nX=model.matrix(formula,data=election2016)[,-1]\n```\n:::\n\n\nTune $\\lambda$ using `cv.glmnet`\n\n\n::: {.cell}\n\n```{.r .cell-code}\nset.seed(1)\nlasso_cv=cv.glmnet(X,y,alpha=1,nfolds=10) #alpha = 0 for ridge\nplot(lasso_cv)\n```\n\n::: {.cell-output-display}\n![](classNotes09_30_files/figure-html/unnamed-chunk-3-1.png){width=672}\n:::\n:::\n\n\nFit optimal model:\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlasso_best=glmnet(X,y,lambda =lasso_cv$lambda.min,alpha=1)\ncoef(lasso_best)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n9 x 1 sparse Matrix of class \"dgCMatrix\"\n                         s0\n(Intercept)    3.034719e+00\nmedian.income -6.091006e-06\nunemployed    -1.224114e+00\nmetro         -1.071069e-01\nhigh.school   -1.325331e+00\nnon.citizen   -5.019193e-01\nwhite.pov     -1.133753e+00\nincome.ineq   -1.598766e+00\nnon.white     -1.786800e-01\n```\n\n\n:::\n:::\n\n\nCalculate predictions:\n\n\n::: {.cell}\n\n```{.r .cell-code}\nyhat=predict(lasso_best,newx=X)\nhead(cbind(election2016$state,yhat))\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n               s0                 \n1 \"Alabama\"    \"0.583866659506304\"\n2 \"Alaska\"     \"0.427789904806766\"\n3 \"Arizona\"    \"0.478046587236923\"\n4 \"Arkansas\"   \"0.596649154878981\"\n5 \"California\" \"0.392657770173529\"\n6 \"Colorado\"   \"0.44985722282705\" \n```\n\n\n:::\n:::\n\n\nStandardized coefficients\n\n\n::: {.cell}\n\n```{.r .cell-code}\ns=apply(X,2,sd)\nstd.coef=s*coef(lasso_best)[-1]\nsort(abs(std.coef),decreasing = TRUE)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nmedian.income   high.school     non.white   income.ineq     white.pov \n   0.05548492    0.04561539    0.02864210    0.02850643    0.02700881 \n        metro   non.citizen    unemployed \n   0.01926375    0.01551996    0.01286548 \n```\n\n\n:::\n:::\n\n",
+    "supporting": [
+      "classNotes09_30_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

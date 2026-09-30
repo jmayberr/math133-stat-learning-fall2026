@@ -6,7 +6,7 @@ title: "Module 4 R Tools: Hyperparameter Tuning with Tidymodels"
 
 Module 4 has primarily focused on alternative methods for finding coefficients in the linear regression model
 $$
-Y = X \beta + \varepsilon
+Y = \beta_0 + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
 $$
 with a brief address of classification models as well. We have seen several different functions useful for estimating $\beta$:
 
