@@ -365,9 +365,9 @@ window.Quarto = {
 </section>
 <section id="ridge-vs-lasso-theory" class="level2">
 <h2 class="anchored" data-anchor-id="ridge-vs-lasso-theory">Ridge vs LASSO: Theory</h2>
-<p>To understand shrinkage methods, let’s first recall the ordinary least squares (henceforth OLS) method for estimating coefficients in a simple linear model: we choose a vector of <span class="math inline">\(p+1\)</span> coefficients <span class="math inline">\(\hat{\beta} = (\hat{\beta}_0,\hat{\beta}_1,...,\hat{\beta}_p)^T\)</span> such that the resulting prediction <span class="math inline">\(\hat{y} = \beta_0 + \beta_1 X_1+ \cdots \beta_p X_p\)</span> minimizes the sum of squared errors <span class="math display">\[
+<p>To understand shrinkage methods, let’s first recall the ordinary least squares (henceforth OLS) method for estimating coefficients in a simple linear model: we choose a vector of <span class="math inline">\(p+1\)</span> coefficients <span class="math inline">\(\hat{\beta} = (\hat{\beta}_0,\hat{\beta}_1,...,\hat{\beta}_p)^T\)</span> such that the resulting predictions <span class="math inline">\(\hat{y} = \beta_0 + \beta_1 X_1+ \cdots \beta_p X_p\)</span> minimize the sum of squared errors <span class="math display">\[
 SSE = \sum (y_i - \hat{y}_i)^2.
-\]</span> or equivalently, <span class="math inline">\(MSE = RSS/n\)</span>.</p>
+\]</span></p>
 <p>The concept of norms can greatly ease the notation involved in representing regression penalty functions. Given a vector <span class="math inline">\(x=(x_1,...,x_n)^T\)</span>, its <span class="math inline">\(\ell_2\)</span>-norm is defined as its (physics) magnitude <span class="math display">\[
 \|x\|_2 = \left(\sum_{i=1}^n x_i^2\right)^{1/2}
 \]</span> In contrast, the <span class="math inline">\(\ell_1\)</span>-norm is the sum of the absolute values of its components</p>
@@ -375,11 +375,11 @@ SSE = \sum (y_i - \hat{y}_i)^2.
 \|x\|_1 = \sum_{i=1}^n |x_i|
 \]</span></p>
 <p>The <span class="math inline">\(\ell_1\)</span>-norm is often called the “taxicab distance” because it measures the distance you would have to travel to get to <span class="math inline">\(x\)</span> if you could only travel at right angles (like on a city grid) from the origin.</p>
-<p>With the norm notation, we can rewrite MSE in terms of the <span class="math inline">\(\ell_2\)</span>-norm of the residuals</p>
+<p>Note that with the norm notation, we can rewrite SSE in terms of the <span class="math inline">\(\ell_2\)</span>-norm of the residuals</p>
 <p><span class="math display">\[
-MSE = \frac{1}{n} \| y-\hat{y} \|_2^2
+SSE =  \| y-\hat{y} \|_2^2
 \]</span></p>
-<p>Ridge and lasso (LASSO = least absolute shrinkage and selection operator) regression both add penalties to the RSS for large parameters, but how they quantify largeness differs. Ridge uses the <span class="math inline">\(\ell_2\)</span>-norm; lasso uses the <span class="math inline">\(\ell_1\)</span>-norm. Each has a hyper-parameter <span class="math inline">\(\lambda\)</span>, called the tuning parameter, which decides how much weight to put on the size of the coefficients. More specifically, ridge regression attempts to minimize the function<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> <span class="math display">\[
+<p>Ridge and lasso (LASSO = least absolute shrinkage and selection operator) regression both add penalties to the SSE for large parameters, but how they quantify largeness differs. Ridge uses the <span class="math inline">\(\ell_2\)</span>-norm; lasso uses the <span class="math inline">\(\ell_1\)</span>-norm. Each has a hyper-parameter <span class="math inline">\(\lambda\)</span>, called the tuning parameter, which decides how much weight to put on the size of the coefficients. More specifically, ridge regression attempts to minimize the function<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> <span class="math display">\[
 \frac{1}{2}MSE + \lambda \|\beta\|_2^2
 \]</span> while lasso tries to minimize <span class="math display">\[
 \frac{1}{2} MSE + \lambda \|\beta\|_1.
@@ -389,7 +389,7 @@ MSE = \frac{1}{n} \| y-\hat{y} \|_2^2
 <li>Choose a grid of <span class="math inline">\(\lambda\)</span> values and fit a model with each.</li>
 <li>Compute the cross-validation MSE (or RMSE) for each value of <span class="math inline">\(\lambda\)</span> and compare.</li>
 </ul>
-<p>This is the process of “hyperparameter tuning” earlier stated as a second major goal of this section. Yay, we did it. We will demonstrate with an example below.</p>
+<p>This is the process of “hyperparameter tuning” earlier stated as a second major goal of this section. We will demonstrate with an example below.</p>
 </section>
 <section id="ridge-model-fit-in-r" class="level2">
 <h2 class="anchored" data-anchor-id="ridge-model-fit-in-r">Ridge Model fit in R</h2>
@@ -507,7 +507,7 @@ non.white     -2.681367e-37 -1.446864e-01</code></pre>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ridge_cv<span class="sc">$</span>lambda.min</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.02886382</code></pre>
+<pre><code>[1] 0.007846884</code></pre>
 </div>
 </div>
 <p>Now we can go back and use the minimum value of <span class="math inline">\(\lambda\)</span> to refit our model</p>
@@ -517,15 +517,15 @@ non.white     -2.681367e-37 -1.446864e-01</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>9 x 1 sparse Matrix of class "dgCMatrix"
                          s0
-(Intercept)    1.717092e+00
-median.income -3.557624e-06
-unemployed    -5.377620e-01
-metro         -9.918872e-02
-high.school   -5.910017e-01
-non.citizen   -5.861636e-01
-white.pov      3.444558e-02
-income.ineq   -7.768835e-01
-non.white     -9.870536e-02</code></pre>
+(Intercept)    2.414310e+00
+median.income -4.929684e-06
+unemployed    -9.281363e-01
+metro         -1.038780e-01
+high.school   -9.757893e-01
+non.citizen   -5.734696e-01
+white.pov     -5.526376e-01
+income.ineq   -1.216797e+00
+non.white     -1.372423e-01</code></pre>
 </div>
 </div>
 </section>
@@ -545,12 +545,12 @@ Y = \beta_0 + \beta_1 X_1 + \varepsilon
 </div>
 <p>Then multiply by the corresponding coefficients in our model:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge_best)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span> s <span class="co"># -1 takes out teh intercept</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(ridge_best)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span> s <span class="co"># -1 takes out the intercept</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>median.income    unemployed         metro   high.school   non.citizen 
--0.0324075311 -0.0056518965 -0.0178396137 -0.0203411552 -0.0181248992 
+ -0.044906064  -0.009754744  -0.018683004  -0.033584815  -0.017732385 
     white.pov   income.ineq     non.white 
- 0.0008205789 -0.0138520389 -0.0158223036 </code></pre>
+ -0.013165193  -0.021695821  -0.021999703 </code></pre>
 </div>
 </div>
 <p>Now THESE numbers are comparable. After sorting by absolute value, we can see that median.income had the largest standardized coefficients (sometimes referred to as effect sizes) followed by high.school, non.white, and income.ineq.</p>
@@ -558,10 +558,10 @@ Y = \beta_0 + \beta_1 X_1 + \varepsilon
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>std_coef<span class="ot">=</span><span class="fu">coef</span>(ridge_best)[<span class="sc">-</span><span class="dv">1</span>]<span class="sc">*</span> s</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">abs</span>(std_coef), <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>median.income   high.school   non.citizen         metro     non.white 
- 0.0324075311  0.0203411552  0.0181248992  0.0178396137  0.0158223036 
-  income.ineq    unemployed     white.pov 
- 0.0138520389  0.0056518965  0.0008205789 </code></pre>
+<pre><code>median.income   high.school     non.white   income.ineq         metro 
+  0.044906064   0.033584815   0.021999703   0.021695821   0.018683004 
+  non.citizen     white.pov    unemployed 
+  0.017732385   0.013165193   0.009754744 </code></pre>
 </div>
 </div>
 </section>
@@ -586,23 +586,23 @@ Y = \beta_0 + \beta_1 X_1 + \varepsilon
 <div class="cell-output cell-output-stdout">
 <pre><code>9 x 1 sparse Matrix of class "dgCMatrix"
                          s0
-(Intercept)    3.045777e+00
-median.income -6.102603e-06
-unemployed    -1.230517e+00
-metro         -1.072625e-01
-high.school   -1.332654e+00
-non.citizen   -5.019515e-01
-white.pov     -1.143633e+00
-income.ineq   -1.604293e+00
-non.white     -1.793518e-01</code></pre>
+(Intercept)    2.837811e+00
+median.income -5.884508e-06
+unemployed    -1.110098e+00
+metro         -1.043377e-01
+high.school   -1.194940e+00
+non.citizen   -5.013443e-01
+white.pov     -9.578208e-01
+income.ineq   -1.500346e+00
+non.white     -1.667172e-01</code></pre>
 </div>
 </div>
 <p>If we compare the mean cross-validation errors for the optimal ridge and lasso models, they are almost identical:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"CV ridge = "</span>,<span class="fu">min</span>(ridge_cv<span class="sc">$</span>cvm),<span class="st">"</span><span class="sc">\n</span><span class="st">CV lasso = "</span>,<span class="fu">min</span>(lasso_cv<span class="sc">$</span>cvm))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>CV ridge =  0.00527333 
-CV lasso =  0.005571054</code></pre>
+<pre><code>CV ridge =  0.004924518 
+CV lasso =  0.005408188</code></pre>
 </div>
 </div>
 <p>So it looks like both lasso and ridge found equally “good” models from a prediction perspective.</p>
@@ -715,7 +715,7 @@ non.white     -3.961335e-02</code></pre>
 </section>
 <section id="ridge-vs-lasso-general-comments" class="level2">
 <h2 class="anchored" data-anchor-id="ridge-vs-lasso-general-comments">Ridge vs Lasso: General Comments</h2>
-<p>Well not fully or I wouldn’t waste your time with it. I highly encourage you to read Section 6.2.2 of the ISLR book for a full discussion on the topic of lasso vs ridge vs ols, but if you want the brief “CliffsNotes”” version:</p>
+<p>Well not fully or I wouldn’t waste your time with it. I highly encourage you to read Section 6.2.2 of the ISLR book for a full discussion on the topic of lasso vs ridge vs ols, but if you want the brief “CliffsNotes” version:</p>
 <ul>
 <li>Lasso is better at picking out a small number of significant variables (the signal) mixed in with a large number of insignificant ones (the noise).</li>
 <li>Ridge is better at minimizing error when a large number of variables are actually significant.</li>

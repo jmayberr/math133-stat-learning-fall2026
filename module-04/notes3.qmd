@@ -9,11 +9,10 @@ Module 4.2 discussed variable selection methods that use either parameter adjust
 
 ## Ridge vs LASSO: Theory
 
-To understand shrinkage methods, let's first recall the ordinary least squares (henceforth OLS) method for estimating coefficients in a simple linear model: we choose a vector of $p+1$ coefficients $\hat{\beta} = (\hat{\beta}_0,\hat{\beta}_1,...,\hat{\beta}_p)^T$ such that the resulting prediction $\hat{y} = \beta_0 + \beta_1 X_1+ \cdots \beta_p X_p$ minimizes the sum of squared errors
+To understand shrinkage methods, let's first recall the ordinary least squares (henceforth OLS) method for estimating coefficients in a simple linear model: we choose a vector of $p+1$ coefficients $\hat{\beta} = (\hat{\beta}_0,\hat{\beta}_1,...,\hat{\beta}_p)^T$ such that the resulting predictions $\hat{y} = \beta_0 + \beta_1 X_1+ \cdots \beta_p X_p$ minimize the sum of squared errors
 $$
 SSE = \sum (y_i - \hat{y}_i)^2.
 $$
-or equivalently, $MSE = RSS/n$.
 
 The concept of norms can greatly ease the notation involved in representing regression penalty functions. Given a vector $x=(x_1,...,x_n)^T$, its $\ell_2$-norm is defined as its (physics) magnitude
 $$
@@ -27,13 +26,13 @@ $$
 
 The $\ell_1$-norm is often called the "taxicab distance" because it measures the distance you would have to travel to get to $x$ if you could only travel at right angles (like on a city grid) from the origin. 
 
-With the norm notation, we can rewrite MSE in terms of the $\ell_2$-norm of the residuals 
+Note that with the norm notation, we can rewrite SSE in terms of the $\ell_2$-norm of the residuals 
 
 $$
-MSE = \frac{1}{n} \| y-\hat{y} \|_2^2
+SSE =  \| y-\hat{y} \|_2^2
 $$
 
-Ridge and lasso (LASSO = least absolute shrinkage and selection operator) regression both add penalties to the RSS for large parameters, but how they quantify largeness differs. Ridge uses the $\ell_2$-norm; lasso uses the $\ell_1$-norm. Each has a hyper-parameter $\lambda$, called the tuning parameter, which decides how much weight to put on the size of the coefficients. More specifically, ridge regression attempts to minimize the function^[The 1/2 is not important as you can always rescale $\lambda$, but the R documentation and most descriptions of this include it so I left it in too. The main reason is because the more general version uses log-likelihoods and the log likelihood of a normal distribution has a 1/2 in there.]
+Ridge and lasso (LASSO = least absolute shrinkage and selection operator) regression both add penalties to the SSE for large parameters, but how they quantify largeness differs. Ridge uses the $\ell_2$-norm; lasso uses the $\ell_1$-norm. Each has a hyper-parameter $\lambda$, called the tuning parameter, which decides how much weight to put on the size of the coefficients. More specifically, ridge regression attempts to minimize the function^[The 1/2 is not important as you can always rescale $\lambda$, but the R documentation and most descriptions of this include it so I left it in too. The main reason is because the more general version uses log-likelihoods and the log likelihood of a normal distribution has a 1/2 in there.]
 $$
 \frac{1}{2}MSE + \lambda \|\beta\|_2^2
 $$
@@ -48,7 +47,7 @@ As mentioned above, the tuning parameter $\lambda$ describes how much weight to 
 * Choose a grid of $\lambda$ values and fit a model with each.
 * Compute the cross-validation MSE (or RMSE) for each value of $\lambda$ and compare. 
 
-This is the process of "hyperparameter tuning" earlier stated as a second major goal of this section. Yay, we did it. We will demonstrate with an example below. 
+This is the process of "hyperparameter tuning" earlier stated as a second major goal of this section. We will demonstrate with an example below. 
 
 ## Ridge Model fit in R
 
@@ -174,7 +173,7 @@ s=apply(X,2,sd)
 Then multiply by the corresponding coefficients in our model:
 
 ```{r}
-coef(ridge_best)[-1]* s # -1 takes out teh intercept
+coef(ridge_best)[-1]* s # -1 takes out the intercept
 ```
 
 Now THESE numbers are comparable. After sorting by absolute value, we can see that median.income had the largest standardized coefficients (sometimes referred to as effect sizes) followed by high.school, non.white, and income.ineq. 
@@ -276,7 +275,7 @@ Interesting, OLS did better! Haha, proves that ridge is a fucking waste of time,
 
 ## Ridge vs Lasso: General Comments
 
-Well not fully or I wouldn't waste your time with it. I highly encourage you to read Section 6.2.2 of the ISLR book for a full discussion on the topic of lasso vs ridge vs ols, but if you want the brief "CliffsNotes"" version:
+Well not fully or I wouldn't waste your time with it. I highly encourage you to read Section 6.2.2 of the ISLR book for a full discussion on the topic of lasso vs ridge vs ols, but if you want the brief "CliffsNotes" version:
 
 * Lasso is better at picking out a small number of significant variables (the signal) mixed in with a large number of insignificant ones (the noise). 
 * Ridge is better at minimizing error when a large number of variables are actually significant.
