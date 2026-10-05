@@ -1,0 +1,56 @@
+---
+title: "Class Notes for 10-05"
+format: html
+---
+
+```{r}
+library(tidymodels)
+set.seed(516)
+df_url = "https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016 = read.csv(df_url)
+```
+
+Specify model (LASSO; `mixture = 1`):
+
+```{r}
+lasso_spec=linear_reg(penalty = tune(),mixture=1) |>
+  set_engine("glmnet")
+  
+```
+
+Set CV plan
+
+```{r}
+cv_plan=vfold_cv(election2016[,2:10],v=10)
+```
+
+Tune hyperparameter $\lambda$ ("penalty"):
+
+```{r}
+# c(-3,-1) changes the range of penalties considered to
+# between 10^(-3) and 10^(-1)
+lambda_grid=grid_regular(penalty(c(-3,-1)),levels=50)
+lasso_fit=tune_grid(lasso_spec,
+                    trump.vote ~ .,
+                    cv_plan,
+                    grid = lambda_grid)
+autoplot(lasso_fit)
+collect_metrics(lasso_fit)
+```
+
+Finalize Model
+
+```{r}
+best_lambda=select_best(lasso_fit,metric="rmse")
+final_lasso=finalize_model(lasso_spec,best_lambda)
+final_fit_lasso=fit(final_lasso,
+                    trump.vote~.,
+                    election2016[,2:10])
+```
+
+View Model Coefficients:
+
+```{r}
+library(broom)
+tidy(final_fit_lasso)
+```
