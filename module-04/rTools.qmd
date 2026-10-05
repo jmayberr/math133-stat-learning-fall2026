@@ -2,30 +2,28 @@
 title: "Module 4 R Tools: Hyperparameter Tuning with Tidymodels"
 ---
 
-## One Ring to Rule Them All 
+## One Ring to Rule Them All
 
-Module 4 has primarily focused on alternative methods for finding coefficients in the linear regression model
-$$
-Y = \beta_0 + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
-$$
-with a brief address of classification models as well. We have seen several different functions useful for estimating $\beta$:
+Module 4 has primarily focused on alternative methods for finding coefficients in the linear regression model $$Y = \beta_0 + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon$$ with a brief address of classification models as well. We have seen several different functions useful for estimating $\beta$:
 
-* `lm()`: core R function which uses OLS to estimate $\beta$
-* `regsubsets()`: function in the `leaps` package which determines the best OLS model with $i$ predictors for $i=1,...,p$ and produces complexity metrics for comparison
-* `glmnet()`: function from the `glmnet` package which applies ridge, lasso, or elastic net to estimate $\beta$
+- `lm()`: core R function which uses OLS to estimate $\beta$
+- `regsubsets()`: function in the `leaps` package which determines the best OLS model with $i$ predictors for $i=1,...,p$ and produces complexity metrics for comparison
+- `glmnet()`: function from the `glmnet` package which applies ridge, lasso, or elastic net to estimate $\beta$
 
 We also saw that cross-validation is an important tool for model evaluation and hyper-parameter tuning. In Module 3, we developed KNN and logistic regression for classification problems and had to write our own loops to tune $K$ in KNN.
 
-As our toolbox grows, it would be nice to have a unified framework that smooths out syntax across different models and automates the workflow hyper-parameter tuning. The `tidymodels` package is designed with exactly that purpose in mind^[Although like the one ring, it takes a toll on its user.]. In these notes we'll focus on its most powerful application: **hyperparameter tuning**.
+As our toolbox grows, it would be nice to have a unified framework that smooths out syntax across different models and automates the workflow hyper-parameter tuning. The `tidymodels` package is designed with exactly that purpose in mind[^1]. In these notes we'll focus on its most powerful application: **hyperparameter tuning**.
+
+[^1]: Although like the one ring, it takes a toll on its user.
 
 ## The Tidymodels Workflow
 
 There is a four step process to using the `tidymodels` framework:
 
-1. **Model specification:** specify which model to use and which R package ("engine") to use for fitting
-2. **Resampling plan:** describe how to split the data for model evaluation (e.g. 10-fold cross-validation, LOO)
-3. **Tuning and evaluation:** fit the specified model across a grid of hyperparameter values using the resampling plan and calculate model performance metrics (e.g. RMSE, $R^2$, accuracy)
-4. **Final fit:** select the best hyperparameters and fit the final model to the full training dataset
+1.  **Model specification:** specify which model to use and which R package ("engine") to use for fitting
+2.  **Resampling plan:** describe how to split the data for model evaluation (e.g. 10-fold cross-validation, LOO)
+3.  **Tuning and evaluation:** fit the specified model across a grid of hyperparameter values using the resampling plan and calculate model performance metrics (e.g. RMSE, $R^2$, accuracy)
+4.  **Final fit:** select the best hyperparameters and fit the final model to the full training dataset
 
 To build up to hyperparameter tuning, let's first see how the workflow looks for a simple OLS model with no hyperparameters to tune.
 
@@ -40,7 +38,7 @@ df_url = "https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2
 election2016 = read.csv(df_url)
 ```
 
-Then we'll begin the `tidymodels` process. The first step is model specification where we tell the package what type of model we are fitting and which R function ("engine") we will use to fit it: 
+Then we'll begin the `tidymodels` process. The first step is model specification where we tell the package what type of model we are fitting and which R function ("engine") we will use to fit it:
 
 ```{r}
 # Step 1: Model specification
@@ -48,14 +46,14 @@ lm_spec = linear_reg() |>
   set_engine("lm")
 ```
 
-Next, we'll define a resampling plan. The function `vfold_cv` sets it as cross-validation with the paramater $v$ denoting our "K": 
+Next, we'll define a resampling plan. The function `vfold_cv` sets it as cross-validation with the paramater $v$ denoting our "K":
 
 ```{r}
 # Step 2: Resampling plan; using 10-Fold CV with 10 repeats for additional stability
 cv_plan = vfold_cv(election2016[,2:10], v = 10, repeats = 10)
 ```
 
-Next, we fit our model and compute cross validated evaluation metrics (the default is RMSE and $R^2$): 
+Next, we fit our model and compute cross validated evaluation metrics (the default is RMSE and $R^2$):
 
 ```{r}
 # Step 3: Fit and evaluate model
@@ -68,7 +66,7 @@ lm_fit = fit_resamples(
 collect_metrics(lm_fit)
 ```
 
-The `mean` column shows the average metric across all folds and `std_err` is its standard deviation across folds. Using `repeats = 10` gives a more stable estimate of the cross-validated RMSE than a single fold split. 
+The `mean` column shows the average metric across all folds and `std_err` is its standard deviation across folds. Using `repeats = 10` gives a more stable estimate of the cross-validated RMSE than a single fold split.
 
 For OLS there are no hyperparameters so Step 3 uses `fit_resamples()` rather than `tune_grid()`. Once we are happy with the evaluation, Step 4 fits the final model to the full dataset:
 
@@ -93,7 +91,7 @@ This is fine but honestly `lm()` directly is simpler for OLS. The real payoff of
 
 ## The Main Event: Hyperparameter Tuning
 
-Now let's see where tidymodels really earns its keep. We'll tune the penalty parameter $\lambda$ in a ridge model, something that required the somewhat clunky `cv.glmnet()` workflow in the last notes. Note that "mixture" is the alpha from Module 4.3 and "penalty" is the lambda.     
+Now let's see where tidymodels really earns its keep. We'll tune the penalty parameter $\lambda$ in a ridge model, something that required the somewhat clunky `cv.glmnet()` workflow in the last notes. Note that "mixture" is the alpha from Module 4.3 and "penalty" is the lambda.
 
 ```{r}
 # Step 1: Model specification with penalty to tune
@@ -104,7 +102,8 @@ ridge_spec = linear_reg(penalty = tune(), mixture = 0) |>
 cv_plan = vfold_cv(election2016[,2:10], v = 10)
 
 # Step 3: Define grid of lambda values and tune
-lambda_grid = grid_regular(penalty(), levels = 50)
+# Note: c(-3,0) sets the range of lambda from 10^(-3) to 10^0
+lambda_grid = grid_regular(penalty(c(-3,0)), levels = 50)
 
 ridge_fit = tune_grid(
   ridge_spec,
@@ -123,16 +122,16 @@ best_lambda
 
 The `autoplot()` shows how RMSE changes across the grid of $\lambda$ values. You can see it decrease and then increase again as $\lambda$ gets too large, which is the bias-variance tradeoff in action!
 
-After completing tuning, we can look at our final model. 
+After completing tuning, we can look at our final model.
 
 ```{r}
 # Step 4: Finalize and fit
-final_ridge <- finalize_model(ridge_spec, best_lambda)
-final_fit_ridge <- fit(final_ridge, trump.vote ~ ., data = election2016[,2:10])
+final_ridge = finalize_model(ridge_spec, best_lambda)
+final_fit_ridge = fit(final_ridge, trump.vote ~ ., data = election2016[,2:10])
 tidy(final_fit_ridge)
 ```
 
-Notice how clean this is compared to the `cv.glmnet()` workflow from the last notes. There is no manual matrix conversion, no `lambda.min` extraction, and `tidy()` gives us a clean coefficient table directly! 
+Notice how clean this is compared to the `cv.glmnet()` workflow from the last notes. There is no manual matrix conversion, no `lambda.min` extraction, and `tidy()` gives us a clean coefficient table directly!
 
 ## Tuning Both Parameters: Elastic Net
 
@@ -149,8 +148,8 @@ cv_plan = vfold_cv(election2016[,2:10], v = 10)
 # Step 3: 10x10 grid over both parameters (100 models total) 
 # Could do 20x20  by switching levels = 20 but it takes a while to run
 elastic_grid = grid_regular(
-  penalty(),
-  mixture(),
+  penalty(c(-3,-1)),
+  mixture(c(0,1)),
   levels = 10
 )
 
@@ -166,12 +165,14 @@ best_params = select_best(elastic_fit, metric = "rmse")
 best_params
 ```
 
-The `autoplot()` is particularly informative here since it shows performance across both dimensions simultaneously. You can see at a glance whether ridge ($\alpha = 0$), lasso ($\alpha = 1$), or something in between works best for this data. In this case, it turns out ridge was best
+The `autoplot()` is particularly informative^[Although note that some of the $R^2$ values drop off the map. This is because the variation in predicted values is too small for these models which leads to an error in how `tidymodels` computes $R^2$. I don't love this because $R^2$ can technically still be computed in these scenarios as $1- SSE/SST$; it would just be a number $< 0$. Either way, you can treat this issue as saying that the model sucks for these hyperparameters.] here since it shows performance across both dimensions simultaneously. You can see at a glance whether ridge ($\alpha = 0$), lasso ($\alpha = 1$), or something in between works best for this data. In this case, it turns out ridge was best.
 
 ```{r}
 # Step 4: Finalize and fit
-final_elastic <- finalize_model(elastic_spec, best_params)
-final_fit_elastic <- fit(final_elastic, trump.vote ~ ., data = election2016[,2:10])
+final_elastic = finalize_model(elastic_spec, best_params)
+final_fit_elastic = fit(final_elastic, 
+                        trump.vote ~ ., 
+                        data = election2016[,2:10])
 tidy(final_fit_elastic)
 ```
 
@@ -181,7 +182,7 @@ Notice that the only change from the ridge example was adding `mixture = tune()`
 
 As another example of where the "one ring" idea really pays off, recall from Module 3 that we had to write a clunky for loop to find the optimal $K$ in KNN. With tidymodels, the workflow is almost identical to the ridge example above. We just change the model specification!
 
-We'll demonstrate by predicting the binary outcome in election2016. Note that you'll need to install and load the `kknn` package first. Note that we will decrease the number of folds to 5 here because with $K=10$ there are only 5 observations per fold and the accuracy will always be 0, 0.2, 0.4, 0.6, 0.8 or 1. Note also the addition of the "strata" argument for resampling. This ensures that when the folds are formed they will have representation from both classes of our outcome (red/blue). 
+We'll demonstrate by predicting the binary outcome in election2016. Note that you'll need to install and load the `kknn` package first. Note that we will decrease the number of folds to 5 here because with $K=10$ there are only 5 observations per fold and the accuracy will always be 0, 0.2, 0.4, 0.6, 0.8 or 1. Note also the addition of the "strata" argument for resampling. This ensures that when the folds are formed they will have representation from both classes of our outcome (red/blue).
 
 ```{r,warning=F,message=F}
 library(kknn)
@@ -195,7 +196,7 @@ election2016$outcome=as.factor(election2016$outcome)
 cv_plan = vfold_cv(election2016[,c(2:9,11)], v = 5,strata=outcome) #Can add repeats but it add time
 
 # Step 3: Tune K
-k_grid = grid_regular(neighbors(range = c(1, 30)), levels = 30)
+k_grid = grid_regular(neighbors(c(1, 30)), levels = 30)
 
 knn_fit = tune_grid(
   knn_spec,
@@ -220,7 +221,7 @@ Compare how much cleaner this is than the for loop from Module 3! And critically
 
 ## Logistic Regression with Elastic Net Tuning
 
-You can also apply elastic net regularization to logistic regression which is useful when you have many predictors and want to do feature selection and classification simultaneously. The workflow is identical to the ridge/lasso examples after a couple small modifications to Step 1: 
+You can also apply elastic net regularization to logistic regression which is useful when you have many predictors and want to do feature selection and classification simultaneously. The workflow is identical to the ridge/lasso examples after a couple small modifications to Step 1:
 
 ```{r}
 election2016$outcome = as.factor(election2016$outcome)
@@ -258,24 +259,20 @@ final_fit_log <- fit(final_log, outcome ~ ., data = election2016[,c(2:9,11)])
 tidy(final_fit_log)
 ```
 
-
-
-
-
 ## Summary
 
 For the three classes of models discussed in this section, the tidymodels workflow is:
 
 | Step | No hyperparameters | With hyperparameters |
-|------|-------------------|---------------------|
+|------------------------|------------------------|------------------------|
 | **Spec** | `linear_reg() |> set_engine("lm")` | `linear_reg(penalty = tune()) |> set_engine("glmnet")` |
-| | `logistic_reg() |> set_engine("glm")` | `logistic_reg(penalty = tune(), mixture = tune()) |> set_engine("glmnet")` |
-| | `nearest_neighbor(neighbors = 5) |> set_engine("kknn")` | `nearest_neighbor(neighbors = tune()) |> set_engine("kknn")` |
+|  | `logistic_reg() |> set_engine("glm")` | `logistic_reg(penalty = tune(), mixture = tune()) |> set_engine("glmnet")` |
+|  | `nearest_neighbor(neighbors = 5) |> set_engine("kknn")` | `nearest_neighbor(neighbors = tune()) |> set_engine("kknn")` |
 | **Resample** | `vfold_cv(data, v = 10)` | `vfold_cv(data, v = 10)` |
-| | `vfold_cv(data, v = 10, strata = outcome)` | `vfold_cv(data, v = 10, strata = outcome)` |
+|  | `vfold_cv(data, v = 10, strata = outcome)` | `vfold_cv(data, v = 10, strata = outcome)` |
 | **Evaluate** | `fit_resamples()` | `tune_grid(..., grid = my_grid)` |
 | **Metrics** | `metric_set(rmse, rsq)` | `metric_set(rmse, rsq)` |
-| | `metric_set(accuracy, bal_accuracy)` | `metric_set(accuracy, bal_accuracy)` |
+|  | `metric_set(accuracy, bal_accuracy)` | `metric_set(accuracy, bal_accuracy)` |
 | **Finalize** | `fit(spec, formula, data)` | `finalize_model(spec, best_params)` then `fit()` |
 | **Extract** | `tidy(final_fit)` | `tidy(final_fit)` |
 
@@ -283,7 +280,7 @@ The key insight is that the workflow is identical regardless of whether you are 
 
 ## Bonus: Recipes and Workflows
 
-If you want to do any preprocessing on your data (for example, normalizing variables), using recipes and workflows can provide additional uniformity and ease to the tidymodels framework. A recipe is basically a dataset and model formula, combined with pre-processing steps while a workflow add a model to a recipe. For example, let's revisit our knn fit, but with variable scaling applied before the model is kit: 
+If you want to do any preprocessing on your data (for example, normalizing variables), using recipes and workflows can provide additional uniformity and ease to the tidymodels framework. A recipe is basically a dataset and model formula, combined with pre-processing steps while a workflow add a model to a recipe. For example, let's revisit our knn fit, but with variable scaling applied before the model is kit:
 
 ```{r}
 election2016$outcome=as.factor(election2016$outcome)
@@ -304,7 +301,7 @@ knn_wf= workflow() |>
   add_model(knn_specs)
 ```
 
-The tuning step is similar to before, but now we pass the workflow to `tune_grid` instead of the formula and model separately: 
+The tuning step is similar to before, but now we pass the workflow to `tune_grid` instead of the formula and model separately:
 
 ```{r}
 cv_plan = vfold_cv(election2016[,c(2:9,11)], v = 5,strata=outcome)
@@ -318,7 +315,7 @@ knn_fit = tune_grid(
 )
 ```
 
-Notice that we get an improved accuracy and different K due to the variable scaling: 
+Notice that we get an improved accuracy and different K due to the variable scaling:
 
 ```{r}
 autoplot(knn_fit)
@@ -326,17 +323,17 @@ best_k = select_best(knn_fit, metric = "accuracy")
 print(best_k)
 ```
 
-To finalize the model, we use `finalize_workflow`: 
+To finalize the model, we use `finalize_workflow`:
 
 ```{r}
 final_knn = finalize_workflow(knn_wf,best_k)
 final_fit_knn = fit(final_knn, data = election2016[,c(2:9,11)])
 ```
 
-And now you know. 
+And now you know.
 
 ## Practice
 
 Repeat the practice problems from 4.3 using the `tidymodels` workflow (applied to the training data). Which do you prefer?
 
-Bonus: Tune the model for both penalty and mixture using `tidymodels`. Compute the test RMSE for this model and compare with the optimal lasso/ridge from 4.3. 
+Bonus: Tune the model for both penalty and mixture using `tidymodels`. Compute the test RMSE for this model and compare with the optimal lasso/ridge from 4.3.

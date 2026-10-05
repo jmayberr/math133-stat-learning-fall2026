@@ -361,9 +361,7 @@ window.Quarto = {
 
 <section id="one-ring-to-rule-them-all" class="level2">
 <h2 class="anchored" data-anchor-id="one-ring-to-rule-them-all">One Ring to Rule Them All</h2>
-<p>Module 4 has primarily focused on alternative methods for finding coefficients in the linear regression model <span class="math display">\[
-Y = \beta_0 + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
-\]</span> with a brief address of classification models as well. We have seen several different functions useful for estimating <span class="math inline">\(\beta\)</span>:</p>
+<p>Module 4 has primarily focused on alternative methods for finding coefficients in the linear regression model <span class="math display">\[Y = \beta_0 + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon\]</span> with a brief address of classification models as well. We have seen several different functions useful for estimating <span class="math inline">\(\beta\)</span>:</p>
 <ul>
 <li><code>lm()</code>: core R function which uses OLS to estimate <span class="math inline">\(\beta\)</span></li>
 <li><code>regsubsets()</code>: function in the <code>leaps</code> package which determines the best OLS model with <span class="math inline">\(i\)</span> predictors for <span class="math inline">\(i=1,...,p\)</span> and produces complexity metrics for comparison</li>
@@ -479,17 +477,18 @@ Y = \beta_0 + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>cv_plan <span class="ot">=</span> <span class="fu">vfold_cv</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>], <span class="at">v =</span> <span class="dv">10</span>)</span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Define grid of lambda values and tune</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>lambda_grid <span class="ot">=</span> <span class="fu">grid_regular</span>(<span class="fu">penalty</span>(), <span class="at">levels =</span> <span class="dv">50</span>)</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>ridge_fit <span class="ot">=</span> <span class="fu">tune_grid</span>(</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  ridge_spec,</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  trump.vote <span class="sc">~</span> .,</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">resamples =</span> cv_plan,</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">grid =</span> lambda_grid</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize tuning results</span></span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(ridge_fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Note: c(-3,0) sets the range of lambda from 10^(-3) to 10^0</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>lambda_grid <span class="ot">=</span> <span class="fu">grid_regular</span>(<span class="fu">penalty</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>,<span class="dv">0</span>)), <span class="at">levels =</span> <span class="dv">50</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>ridge_fit <span class="ot">=</span> <span class="fu">tune_grid</span>(</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  ridge_spec,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  trump.vote <span class="sc">~</span> .,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">resamples =</span> cv_plan,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">grid =</span> lambda_grid</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize tuning results</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(ridge_fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -504,29 +503,29 @@ Y = \beta_0 + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
 <pre><code># A tibble: 1 × 2
   penalty .config         
     &lt;dbl&gt; &lt;chr&gt;           
-1  0.0233 pre0_mod42_post0</code></pre>
+1  0.0222 pre0_mod23_post0</code></pre>
 </div>
 </div>
 <p>The <code>autoplot()</code> shows how RMSE changes across the grid of <span class="math inline">\(\lambda\)</span> values. You can see it decrease and then increase again as <span class="math inline">\(\lambda\)</span> gets too large, which is the bias-variance tradeoff in action!</p>
 <p>After completing tuning, we can look at our final model.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 4: Finalize and fit</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>final_ridge <span class="ot">&lt;-</span> <span class="fu">finalize_model</span>(ridge_spec, best_lambda)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>final_fit_ridge <span class="ot">&lt;-</span> <span class="fu">fit</span>(final_ridge, trump.vote <span class="sc">~</span> ., <span class="at">data =</span> election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>final_ridge <span class="ot">=</span> <span class="fu">finalize_model</span>(ridge_spec, best_lambda)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>final_fit_ridge <span class="ot">=</span> <span class="fu">fit</span>(final_ridge, trump.vote <span class="sc">~</span> ., <span class="at">data =</span> election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(final_fit_ridge)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 9 × 3
   term             estimate penalty
   &lt;chr&gt;               &lt;dbl&gt;   &lt;dbl&gt;
-1 (Intercept)    1.84        0.0233
-2 median.income -0.00000380  0.0233
-3 unemployed    -0.607       0.0233
-4 metro         -0.100       0.0233
-5 high.school   -0.656       0.0233
-6 non.citizen   -0.590       0.0233
-7 white.pov     -0.0574      0.0233
-8 income.ineq   -0.854       0.0233
-9 non.white     -0.105       0.0233</code></pre>
+1 (Intercept)    1.86        0.0222
+2 median.income -0.00000386  0.0222
+3 unemployed    -0.622       0.0222
+4 metro         -0.101       0.0222
+5 high.school   -0.670       0.0222
+6 non.citizen   -0.591       0.0222
+7 white.pov     -0.0781      0.0222
+8 income.ineq   -0.871       0.0222
+9 non.white     -0.106       0.0222</code></pre>
 </div>
 </div>
 <p>Notice how clean this is compared to the <code>cv.glmnet()</code> workflow from the last notes. There is no manual matrix conversion, no <code>lambda.min</code> extraction, and <code>tidy()</code> gives us a clean coefficient table directly!</p>
@@ -545,8 +544,8 @@ Y = \beta_0 + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: 10x10 grid over both parameters (100 models total) </span></span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Could do 20x20  by switching levels = 20 but it takes a while to run</span></span>
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>elastic_grid <span class="ot">=</span> <span class="fu">grid_regular</span>(</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">penalty</span>(),</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mixture</span>(),</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">penalty</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>,<span class="sc">-</span><span class="dv">1</span>)),</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mixture</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>)),</span>
 <span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="dv">10</span></span>
 <span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
@@ -571,28 +570,30 @@ Y = \beta_0 + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
 <pre><code># A tibble: 1 × 3
   penalty mixture .config          
     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;            
-1 0.00599       0 pre0_mod071_post0</code></pre>
+1 0.00774       0 pre0_mod041_post0</code></pre>
 </div>
 </div>
-<p>The <code>autoplot()</code> is particularly informative here since it shows performance across both dimensions simultaneously. You can see at a glance whether ridge (<span class="math inline">\(\alpha = 0\)</span>), lasso (<span class="math inline">\(\alpha = 1\)</span>), or something in between works best for this data. In this case, it turns out ridge was best</p>
+<p>The <code>autoplot()</code> is particularly informative<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> here since it shows performance across both dimensions simultaneously. You can see at a glance whether ridge (<span class="math inline">\(\alpha = 0\)</span>), lasso (<span class="math inline">\(\alpha = 1\)</span>), or something in between works best for this data. In this case, it turns out ridge was best.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 4: Finalize and fit</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>final_elastic <span class="ot">&lt;-</span> <span class="fu">finalize_model</span>(elastic_spec, best_params)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>final_fit_elastic <span class="ot">&lt;-</span> <span class="fu">fit</span>(final_elastic, trump.vote <span class="sc">~</span> ., <span class="at">data =</span> election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(final_fit_elastic)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>final_elastic <span class="ot">=</span> <span class="fu">finalize_model</span>(elastic_spec, best_params)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>final_fit_elastic <span class="ot">=</span> <span class="fu">fit</span>(final_elastic, </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                        trump.vote <span class="sc">~</span> ., </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">data =</span> election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="fu">tidy</span>(final_fit_elastic)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 9 × 3
   term             estimate penalty
   &lt;chr&gt;               &lt;dbl&gt;   &lt;dbl&gt;
-1 (Intercept)    2.53       0.00599
-2 median.income -0.00000516 0.00599
-3 unemployed    -0.988      0.00599
-4 metro         -0.104      0.00599
-5 high.school   -1.04       0.00599
-6 non.citizen   -0.565      0.00599
-7 white.pov     -0.660      0.00599
-8 income.ineq   -1.29       0.00599
-9 non.white     -0.144      0.00599</code></pre>
+1 (Intercept)    2.42       0.00774
+2 median.income -0.00000495 0.00774
+3 unemployed    -0.930      0.00774
+4 metro         -0.104      0.00774
+5 high.school   -0.978      0.00774
+6 non.citizen   -0.574      0.00774
+7 white.pov     -0.559      0.00774
+8 income.ineq   -1.22       0.00774
+9 non.white     -0.138      0.00774</code></pre>
 </div>
 </div>
 <p>Notice that the only change from the ridge example was adding <code>mixture = tune()</code> to the model specification and including <code>mixture()</code> in the grid. Everything else (the resampling plan, <code>tune_grid()</code>, <code>select_best()</code>, and <code>finalize_model()</code>) stayed exactly the same. That’s the one ring in action!</p>
@@ -717,9 +718,9 @@ Y = \beta_0 + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
 <p>For the three classes of models discussed in this section, the tidymodels workflow is:</p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 13%">
-<col style="width: 41%">
-<col style="width: 45%">
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -855,6 +856,7 @@ Y = \beta_0 + \beta_1 X_1 + \cdots \beta_p X_p + \varepsilon
 
 <ol>
 <li id="fn1"><p>Although like the one ring, it takes a toll on its user.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Although note that some of the <span class="math inline">\(R^2\)</span> values drop off the map. This is because the variation in predicted values is too small for these models which leads to an error in how <code>tidymodels</code> computes <span class="math inline">\(R^2\)</span>. I don’t love this because <span class="math inline">\(R^2\)</span> can technically still be computed in these scenarios as <span class="math inline">\(1- SSE/SST\)</span>; it would just be a number <span class="math inline">\(&lt; 0\)</span>. Either way, you can treat this issue as saying that the model sucks for these hyperparameters.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
