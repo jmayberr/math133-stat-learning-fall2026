@@ -1,0 +1,46 @@
+---
+title: "Class Notes for 10-07"
+format: html
+---
+
+Load nfl player data regular season data from 2025 (RB, TE, WR)
+
+```{r,message=F,warning=F}
+library(nflreadr)
+library(tidyverse)
+fantasy2025 <- load_player_stats(2025, summary_level = "reg") |>
+  dplyr::filter(position %in% c("TE","WR","RB")) |>
+  select(player_display_name,position,games,
+         carries,rushing_yards,rushing_tds,
+         receptions,targets,receiving_yards,receiving_tds,
+         fantasy_points_ppr)
+glimpse(fantasy2025)
+```
+
+Perform PCA
+
+```{r}
+
+```
+
+Create Biplots:
+
+```{r}
+
+```
+
+Plot projection onto first two PCs with points colored by position
+
+```{r}
+cb_palette <- c(
+  "#000000",  # black
+  "#E69F00",  # orange
+  "#56B4E9",  # sky blue
+  "#009E73",  # bluish green
+  "#F0E442",  # yellow
+  "#0072B2",  # blue
+  "#D55E00",  # vermillion
+  "#CC79A7"   # reddish purple
+)
+
+```
