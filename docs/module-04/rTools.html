@@ -614,7 +614,7 @@ window.Quarto = {
 <span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>cv_plan <span class="ot">=</span> <span class="fu">vfold_cv</span>(election2016[,<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>,<span class="dv">11</span>)], <span class="at">v =</span> <span class="dv">5</span>,<span class="at">strata=</span>outcome) <span class="co">#Can add repeats but it add time</span></span>
 <span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Tune K</span></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>k_grid <span class="ot">=</span> <span class="fu">grid_regular</span>(<span class="fu">neighbors</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">30</span>)), <span class="at">levels =</span> <span class="dv">30</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>k_grid <span class="ot">=</span> <span class="fu">grid_regular</span>(<span class="fu">neighbors</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">30</span>)), <span class="at">levels =</span> <span class="dv">30</span>)</span>
 <span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>knn_fit <span class="ot">=</span> <span class="fu">tune_grid</span>(</span>
 <span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  knn_spec,</span>

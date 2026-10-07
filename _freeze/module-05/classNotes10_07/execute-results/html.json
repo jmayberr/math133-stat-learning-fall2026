@@ -1,0 +1,15 @@
+{
+  "hash": "b569d5f9616940178741d1d3e63690dc",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Class Notes for 10-07\"\nformat: html\n---\n\nLoad nfl player data regular season data from 2025 (RB, TE, WR)\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(nflreadr)\nlibrary(tidyverse)\nfantasy2025 <- load_player_stats(2025, summary_level = \"reg\") |>\n  dplyr::filter(position %in% c(\"TE\",\"WR\",\"RB\")) |>\n  select(player_display_name,position,games,\n         carries,rushing_yards,rushing_tds,\n         receptions,targets,receiving_yards,receiving_tds,\n         fantasy_points_ppr)\nglimpse(fantasy2025)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nRows: 529\nColumns: 11\n$ player_display_name <chr> \"Marcedes Lewis\", \"Adam Thielen\", \"Zach Ertz\", \"Ke…\n$ position            <chr> \"TE\", \"WR\", \"TE\", \"WR\", \"TE\", \"WR\", \"WR\", \"WR\", \"W…\n$ games               <int> 1, 14, 13, 17, 17, 17, 13, 14, 8, 4, 17, 9, 12, 4,…\n$ carries             <int> 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 22, 0, 14, 0, …\n$ rushing_yards       <int> 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 4, 104, 0, 60, 0,…\n$ rushing_tds         <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,…\n$ receptions          <int> 0, 19, 50, 81, 76, 22, 24, 60, 30, 1, 85, 24, 12, …\n$ targets             <int> 0, 35, 72, 122, 108, 39, 36, 114, 62, 2, 102, 34, …\n$ receiving_yards     <int> 0, 186, 504, 777, 851, 330, 279, 789, 368, 7, 1013…\n$ receiving_tds       <int> 0, 0, 4, 4, 5, 2, 0, 14, 3, 0, 4, 6, 0, 0, 0, 1, 1…\n$ fantasy_points_ppr  <dbl> 0.0, 39.6, 126.4, 182.7, 193.2, 67.0, 51.9, 222.9,…\n```\n\n\n:::\n:::\n\n\nPerform PCA\n\n\n::: {.cell}\n\n:::\n\n\nCreate Biplots:\n\n\n::: {.cell}\n\n:::\n\n\nPlot projection onto first two PCs with points colored by position\n\n\n::: {.cell}\n\n```{.r .cell-code}\ncb_palette <- c(\n  \"#000000\",  # black\n  \"#E69F00\",  # orange\n  \"#56B4E9\",  # sky blue\n  \"#009E73\",  # bluish green\n  \"#F0E442\",  # yellow\n  \"#0072B2\",  # blue\n  \"#D55E00\",  # vermillion\n  \"#CC79A7\"   # reddish purple\n)\n```\n:::\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
