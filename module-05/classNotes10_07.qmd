@@ -10,7 +10,7 @@ library(nflreadr)
 library(tidyverse)
 fantasy2025 <- load_player_stats(2025, summary_level = "reg") |>
   dplyr::filter(position %in% c("TE","WR","RB")) |>
-  select(player_display_name,position,games,
+  select(player_display_name,recent_team,position,games,
          carries,rushing_yards,rushing_tds,
          receptions,targets,receiving_yards,receiving_tds,
          fantasy_points_ppr)
@@ -20,16 +20,23 @@ glimpse(fantasy2025)
 Perform PCA
 
 ```{r}
-
+football_pc=prcomp(fantasy2025[,4:12],scale=TRUE)
+summary(football_pc)
 ```
 
 Create Biplots:
 
 ```{r}
-
+#Correlation
+biplot(football_pc)
 ```
 
-Plot projection onto first two PCs with points colored by position
+```{r}
+#Distance
+biplot(football_pc,scale=0)
+```
+
+Plot projection onto first two PCs with points colored by position and showing player name
 
 ```{r}
 cb_palette <- c(
@@ -42,5 +49,60 @@ cb_palette <- c(
   "#D55E00",  # vermillion
   "#CC79A7"   # reddish purple
 )
+# COmbine component scores with dataset
+fantasy2025_withPC=cbind(fantasy2025,football_pc$x)
+fantasy2025_withPC |>
+  ggplot(aes(x=PC1,y=PC2,col=position,label=player_display_name))+
+  geom_point()+
+  scale_color_manual(values=cb_palette[2:4])+
+  geom_text()
+```
 
+Find a player
+
+```{r}
+ggplot(fantasy2025_withPC, aes(x = PC1, y = PC2, col = position)) +
+  geom_point() +
+  scale_color_manual(values = cb_palette[2:4]) +
+  geom_point(
+    data = subset(fantasy2025_withPC, player_display_name == "Bijan Robinson"),
+    size = 4,
+    color = "black"
+  ) +
+  geom_text(
+    data = subset(fantasy2025_withPC, player_display_name == "Bijan Robinson"),
+    aes(label = player_display_name),
+    color = "black",
+    vjust = -1
+  )
+```
+
+Find a team
+
+```{r}
+ggplot(fantasy2025_withPC, aes(x = PC1, y = PC2, col = position)) +
+  geom_point() +
+  scale_color_manual(values = cb_palette[2:4]) +
+  geom_point(
+    data = subset(fantasy2025_withPC, recent_team == "SF"),
+    size = 3,
+    color = "black"
+  ) +
+  geom_text(
+    data = subset(fantasy2025_withPC, recent_team == "SF"),
+    aes(label = player_display_name),
+    color = "black",
+    vjust = -1
+  )
+```
+
+Plotly tooltip (thanks to Ethan):
+
+```{r}
+library(plotly)
+fant_plot=fantasy2025_withPC |>
+  ggplot(aes(x=PC1,y=PC2,col=position,label=player_display_name))+
+  geom_point()+
+  scale_color_manual(values=cb_palette[2:4])
+ggplotly(fant_plot,tooltip = "label")
 ```
