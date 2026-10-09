@@ -29,9 +29,9 @@ Create Biplots:
 ```{r}
 #Correlation
 biplot(football_pc,
-       xlabs = rep(".", nrow(fantasy2025)), #replaces row labels with .
-       cex=0.5,    # Changes label sizes
-       expand=1.1) #Expand vectors to create additional separation in labels
+       cex=c(0.000001,.5), # Change size of points, variables
+       col=c(alpha("deeppink",0.7), # Change color, opacity of points 
+             alpha("darkred",0.7))) # Change color, opacity of variables
 ```
 
 ```{r}
