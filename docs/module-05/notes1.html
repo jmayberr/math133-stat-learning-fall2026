@@ -483,12 +483,18 @@ PC_1 = -0.991*(non.white-mean(non.white))-0.134*(non.citizen-mean(non.citizen))
 -0.03607264 -0.03616800 </code></pre>
 </div>
 </div>
-</section>
-<section id="biplots" class="level2">
-<h2 class="anchored" data-anchor-id="biplots">Biplots</h2>
-<p>An additional tool for visualizing the relationship between the rotated PCs and the original variables is called a biplot. There are two main types: distance and correlation. Both are based upon different scalings of the rotation matrix<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> The former emphasizes clustering of observations while the latter emphasizes correlations between variables. Correlation is the default so let’s look at that first:</p>
+<p>Here is a plot of the points in the new <span class="math inline">\((PC1, PC2)\)</span> space (think orange direction, blue direction coordinates<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>)</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pc_data<span class="ot">=</span><span class="fu">cbind</span>(election2016,states_pc<span class="sc">$</span>x)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>pc_data <span class="sc">|&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>PC1,PC2))<span class="sc">+</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">data=</span><span class="fu">subset</span>(pc_data,state<span class="sc">==</span><span class="st">"Alabama"</span>),</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">label=</span>state),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">vjust=</span><span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">size=</span><span class="dv">3</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">color=</span>cb_palette[<span class="dv">7</span>]</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>            )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -497,14 +503,39 @@ PC_1 = -0.991*(non.white-mean(non.white))-0.134*(non.citizen-mean(non.citizen))
 </div>
 </div>
 </div>
-<p>The red vectors are the (scaled) coordinates of non.white and non.citizen in terms of (PC1, PC2). The acute angle between non.white and non.citizen indicates a positive correlation between the two variables.</p>
-<p>For a distance biplot, switch to <code>scale=0</code>:</p>
+</section>
+<section id="biplots" class="level2">
+<h2 class="anchored" data-anchor-id="biplots">Biplots</h2>
+<p>An additional tool for visualizing the relationship between the rotated PCs and the original variables is called a biplot. There are two main types: distance and correlation. Both are based upon different scalings of the rotation matrix<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> The former emphasizes clustering of observations while the latter emphasizes correlations between variables. Correlation is the default so let’s look at that first:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc,<span class="at">scale=</span><span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="notes1_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The red vectors are the (scaled) coordinates of non.white and non.citizen in terms of (PC1, PC2). The acute angle between non.white and non.citizen indicates a positive correlation between the two variables. Another way to see this is with a heatmap:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggcorr</span>(pc_data[,<span class="fu">c</span>(<span class="st">"PC1"</span>,<span class="st">"PC2"</span>,<span class="st">"non.white"</span>,<span class="st">"non.citizen"</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here we can see that non.white is strongly negatively correlated with PC1 and uncorrelated with PC2 while non.citizen is more weakly negatively correlated with PC1 and strongly positively correlated with PC2. The PCs are uncorrelated with each other as they should be.</p>
+<p>For a distance biplot, switch to <code>scale=0</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc,<span class="at">scale=</span><span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -515,14 +546,14 @@ PC_1 = -0.991*(non.white-mean(non.white))-0.134*(non.citizen-mean(non.citizen))
 <h2 class="anchored" data-anchor-id="explained-variance">Explained Variance</h2>
 <p>As previously mentioned, one goal of principal components is to describe as much of the variance in our data as possible from as few components as possible. To quantify this in PCA, we look at the <em>proportion of variance</em> for component <span class="math inline">\(i\)</span> which is defined as <span class="math inline">\(s_i^2/\sum s_j^2\)</span> where <span class="math inline">\(s_i\)</span> is the standard deviation of component <span class="math inline">\(i\)</span>. Notice this is the variance of component <span class="math inline">\(i\)</span> divided by the total variance of all components. Using our output, we can calculate the proportion of variance explained by each PC using the command</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>states_pc<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span><span class="fu">sum</span>(states_pc<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>states_pc<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span><span class="sc">/</span><span class="fu">sum</span>(states_pc<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.98146661 0.01853339</code></pre>
 </div>
 </div>
 <p>Alternatively, you can get them from the summary function</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(states_pc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(states_pc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Importance of components:
                           PC1     PC2
@@ -537,8 +568,8 @@ Cumulative Proportion  0.9815 1.00000</code></pre>
 <h2 class="anchored" data-anchor-id="many-become-fewer">Many become fewer</h2>
 <p>The PCA framework can easily extend to more than two predictors. For example, let’s look at the full principal component decomposition for our predictors in the election2016 dataset. Note that we are adding the <code>scale=TRUE</code> command which scales each variable by its standard deviation prior to computing the principal components. This is important here because the variable median.income is on a completely different scale than the other variables and would dominate the PCs if not scaled.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>states_pc_full<span class="ot">=</span><span class="fu">prcomp</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>],<span class="at">scale=</span><span class="cn">TRUE</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(states_pc_full)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>states_pc_full<span class="ot">=</span><span class="fu">prcomp</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>],<span class="at">scale=</span><span class="cn">TRUE</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(states_pc_full)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Importance of components:
                           PC1    PC2     PC3     PC4     PC5    PC6     PC7
@@ -551,41 +582,10 @@ Proportion of Variance 0.01562
 Cumulative Proportion  1.00000</code></pre>
 </div>
 </div>
-<p>Notice that the first PC describes only about 43% of the predictor variance between states, but keep in mind that we are now trying to summarize eight variables with one so that’s better than the 12.5% we would get by just randomly choosing one of eight directions! The first two principal components together<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> explain more than 77% of the variance in all eight variables. After that, we don’t gain much per additional component.</p>
+<p>Notice that the first PC describes only about 43% of the predictor variance between states, but keep in mind that we are now trying to summarize eight variables with one so that’s better than the 12.5% we would get by just randomly choosing one of eight directions! The first two principal components together<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> explain more than 77% of the variance in all eight variables. After that, we don’t gain much per additional component.</p>
 <p>These results suggest we may be able to summarize all eight predictors with just those first two specially chosen linear combinations given by PC1 and PC2. Let’s look at how those first two components are related to our original variables via a correlation biplot:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc_full)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Notice (feels like I am saying that a lot in these notes) how certain groups of variables are clustered together like non.citizen, metro, and non.white. This indicates the high amount of correlation between these variables. Vectors pointing in opposite directions indicate negative correlation (for example, white.pov and median.income). Vectors pointing in orthogonal directions indicate very little correlation (eg. high school and metro)</p>
-<p>To interpret what PCs mean for the states, let’s switch to a distance plot:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc_full,<span class="at">scale =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>We make the following observations<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a></p>
-<ul>
-<li>States with positive PC1 and PC2 (upper right) have high median income and high school graduation rates with low white.pov</li>
-<li>States with positive PC2 but negative PC1 (upper left) are very metropolitan and diverse</li>
-<li>States with negative PC1 and PC2 (lower left) are poor and less educated with high unemployment and white.pov rates.</li>
-<li>Points with positive PC1 but negative PC2 (lower right) are very white and rural</li>
-</ul>
-<p>With these observations in mind, let’s revisit the distance biplot with points labeled by states</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(states_pc_full<span class="sc">$</span>x)<span class="ot">=</span>election2016<span class="sc">$</span>state</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc_full,<span class="at">scale =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc_full)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -594,26 +594,57 @@ Cumulative Proportion  1.00000</code></pre>
 </div>
 </div>
 </div>
-<p>How do our observations about the meaning of the principal components match up with what you know about the states? We leave it to the reader to decide<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>.</p>
+<p>Notice (feels like I am saying that a lot in these notes) how certain groups of variables are clustered together like non.citizen, metro, and non.white. This indicates the high amount of correlation between these variables. Vectors pointing in opposite directions indicate negative correlation (for example, white.pov and median.income). Vectors pointing in orthogonal directions indicate very little correlation (eg. high school and metro)</p>
+<p>To interpret what PCs mean for the states, let’s switch to a distance plot:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc_full,<span class="at">scale =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We make the following observations<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a></p>
+<ul>
+<li>States with positive PC1 and PC2 (upper right) have high median income and high school graduation rates with low white.pov</li>
+<li>States with positive PC2 but negative PC1 (upper left) are very metropolitan and diverse</li>
+<li>States with negative PC1 and PC2 (lower left) are poor and less educated with high unemployment and white.pov rates.</li>
+<li>Points with positive PC1 but negative PC2 (lower right) are very white and rural</li>
+</ul>
+<p>With these observations in mind, let’s revisit the distance biplot with points labeled by states</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(states_pc_full<span class="sc">$</span>x)<span class="ot">=</span>election2016<span class="sc">$</span>state</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc_full,<span class="at">scale =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>How do our observations about the meaning of the principal components match up with what you know about the states? We leave it to the reader to decide<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>.</p>
 </section>
 <section id="how-is-pca-unsupervised-learning" class="level2">
 <h2 class="anchored" data-anchor-id="how-is-pca-unsupervised-learning">How is PCA unsupervised learning?</h2>
 <p>So far, what we have done is start to visually group states together based on where they lay in this two-dimensional plot. Let’s do something a little more concrete by placing groups into “clusters” based on which quadrant they fall in. Note that the first line add the component scores to our original dataset for easier use with ggplot2:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>electionPC<span class="ot">=</span><span class="fu">cbind</span>(election2016,states_pc_full<span class="sc">$</span>x)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>electionPC<span class="sc">$</span>cluster<span class="ot">=</span><span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&gt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&gt;</span><span class="dv">0</span>,<span class="st">"I"</span>,</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&lt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&gt;</span><span class="dv">0</span>,<span class="st">"II"</span>,</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&lt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&lt;</span><span class="dv">0</span>,<span class="st">"III"</span>,</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"IV"</span>)))</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>electionPC <span class="sc">|&gt;</span></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>PC1,<span class="at">y=</span>PC2,<span class="at">label=</span>state,<span class="at">col=</span>cluster))<span class="sc">+</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>()<span class="sc">+</span></span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span>cb_palette[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>electionPC<span class="ot">=</span><span class="fu">cbind</span>(election2016,states_pc_full<span class="sc">$</span>x)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>electionPC<span class="sc">$</span>cluster<span class="ot">=</span><span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&gt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&gt;</span><span class="dv">0</span>,<span class="st">"I"</span>,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&lt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&gt;</span><span class="dv">0</span>,<span class="st">"II"</span>,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&lt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&lt;</span><span class="dv">0</span>,<span class="st">"III"</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"IV"</span>)))</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>electionPC <span class="sc">|&gt;</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>PC1,<span class="at">y=</span>PC2,<span class="at">label=</span>state,<span class="at">col=</span>cluster))<span class="sc">+</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>()<span class="sc">+</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span>cb_palette[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes1_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -624,7 +655,7 @@ Cumulative Proportion  1.00000</code></pre>
 <h2 class="anchored" data-anchor-id="pca-as-dimension-reduction">PCA as dimension reduction</h2>
 <p>PCA can also be used in feature selection, but with a very different approach from complexity metrics or regularization. Instead of trying to choose a subset of features, it tries to reduce the number of variables by removing unnecessary correlations. For example, suppose that we use the component scores in a model for trump.vote instead of our original eight features. These were added to our original dataset when we created electionPC above:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(electionPC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(electionPC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "state"         "median.income" "unemployed"    "metro"        
  [5] "high.school"   "non.citizen"   "white.pov"     "income.ineq"  
@@ -635,51 +666,51 @@ Cumulative Proportion  1.00000</code></pre>
 </div>
 <p>The full model for trump.vote had an <span class="math inline">\(R^2\)</span> value of around</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>full_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(full_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>full_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(full_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.6510282</code></pre>
 </div>
 </div>
 <p>Now suppose we use the first three PCs (which accounted for over 80% of the total variance):</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>pcs_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>PC1<span class="sc">+</span>PC2<span class="sc">+</span>PC3,<span class="at">data=</span>electionPC)</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(pcs_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>pcs_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>PC1<span class="sc">+</span>PC2<span class="sc">+</span>PC3,<span class="at">data=</span>electionPC)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(pcs_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.5354155</code></pre>
 </div>
 </div>
 <p>Not too much worse. If you look at the best three variable model its better though:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>best3_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>median.income<span class="sc">+</span>non.citizen<span class="sc">+</span>income.ineq,<span class="at">data=</span>electionPC)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(best3_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>best3_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>median.income<span class="sc">+</span>non.citizen<span class="sc">+</span>income.ineq,<span class="at">data=</span>electionPC)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(best3_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.573087</code></pre>
 </div>
 </div>
-<p>so maybe in this example PCA driven dimension reduction is not the way to go. The problem is that PCA doesn’t do anything to account for the importance of variables in their explanation of trump.vote so there isn’t a great reason to expect its components do well as predictors. Another tool called <em>partial least squares</em> adjusts for predictive purposes, but we won’t have time to cover it in these notes<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>.</p>
+<p>so maybe in this example PCA driven dimension reduction is not the way to go. The problem is that PCA doesn’t do anything to account for the importance of variables in their explanation of trump.vote so there isn’t a great reason to expect its components do well as predictors. Another tool called <em>partial least squares</em> adjusts for predictive purposes, but we won’t have time to cover it in these notes<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>.</p>
 </section>
 <section id="issue-with-pca" class="level2">
 <h2 class="anchored" data-anchor-id="issue-with-pca">Issue with PCA</h2>
-<p>The problem with using PCA for unsupervised learning is twofold. First, there are no great rules for choosing how many PCs to look at in classifying points. A <em>scree plot</em> is one commonly used tool for this purpose which plots the standard deviations of the principal components vs component number and looks for “elbows<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>”</p>
+<p>The problem with using PCA for unsupervised learning is twofold. First, there are no great rules for choosing how many PCs to look at in classifying points. A <em>scree plot</em> is one commonly used tool for this purpose which plots the standard deviations of the principal components vs component number and looks for “elbows<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>”</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>scree<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">Component=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,<span class="at">Std.Dev=</span>states_pc_full<span class="sc">$</span>sdev )</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(scree,<span class="fu">aes</span>(<span class="at">x=</span>Component,<span class="at">y=</span>Std.Dev))<span class="sc">+</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">name=</span><span class="st">"Number of Principal Components"</span>, </span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">breaks=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,<span class="at">label=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>scree<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">Component=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,<span class="at">Std.Dev=</span>states_pc_full<span class="sc">$</span>sdev )</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(scree,<span class="fu">aes</span>(<span class="at">x=</span>Component,<span class="at">y=</span>Std.Dev))<span class="sc">+</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">name=</span><span class="st">"Number of Principal Components"</span>, </span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">breaks=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,<span class="at">label=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes1_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>It seems like this plot has an “elbow” around PC3 so we could justify using three principal components. On the other hand, it bends at a weird angle after tat so should the elbow be higher at 6? It’s inexact enough that you can see why it’s qualitative. Others use an exact cutoff to decide on PCs, for example, choose enough PCs to account for 90% of the variation. This is a little more quantitative but may add too many PCs. And once we get past two, we lose the powerful visualization tools of biplots anyways so there may not be much point.</p>
-<p>A second issue with principal component analysis is deciding on boundaries between clusters of like points. For example, should Maryland and Hawaii really go with the other “black” states even though they are kind of off in their own little world? And some states that are pretty close together end up in different clusters (like Oregon and Delaware). Clustering methods get around this issue by developing an algorithm for “combining” points into “optimal clusters.” For these reasons, other algorithms which actually have clustering in the name are often preferable for unsupervised learning<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>. Those will be the topic of the next two sections.</p>
+<p>A second issue with principal component analysis is deciding on boundaries between clusters of like points. For example, should Maryland and Hawaii really go with the other “black” states even though they are kind of off in their own little world? And some states that are pretty close together end up in different clusters (like Oregon and Delaware). Clustering methods get around this issue by developing an algorithm for “combining” points into “optimal clusters.” For these reasons, other algorithms which actually have clustering in the name are often preferable for unsupervised learning<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a>. Those will be the topic of the next two sections.</p>
 </section>
 <section id="practice" class="level2">
 <h2 class="anchored" data-anchor-id="practice">Practice</h2>
@@ -706,13 +737,14 @@ Cumulative Proportion  1.00000</code></pre>
 <li id="fn1"><p>Even if all our states can be a bit one-dimensional at times.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>Confusingly, there is another base function princomp which also does PCA, but in a less stable way; more on computation of principal components in the Module 5 Theory supplement<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>Stored as x instead of scores for prcomp.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>See Module 5 Theory supplement for details.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>The <span class="math inline">\(i\)</span>th entry in the cumulative proportion row tells you the cumulative proportion of variance explained by the first <span class="math inline">\(i\)</span> components in case that isn’t obvious.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>Notice I avoided saying notice again. Ah crap, I did it anyways.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>I can’t help but point out my home state of CA though which has the lowest value of PC1 and a high PC2. This is because CA is above average in diversity and metropolitan-ness (negative PC1) but has a high median income and low white poverty rate both of which require a high PC2 to offset the negative effects from PC1.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn8"><p>Gotta save some fun for those late night AI dives.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn9"><p>The name scree plot comes from the connection to elbows.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn10"><p>Although as we’ll see they can be used in conjunction with PCA.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>With the caveat that this is a rotated version of our original plot in which the positive directions would actually be left and down because of how R chose the loadings. This is because loadings are only unique up to scalar multiple. <code>prcomp</code> chooses one of two possibilities which are normalized to have length 1 and differ by a factor <span class="math inline">\(-1\)</span>.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>See Module 5 Theory supplement for details.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>The <span class="math inline">\(i\)</span>th entry in the cumulative proportion row tells you the cumulative proportion of variance explained by the first <span class="math inline">\(i\)</span> components in case that isn’t obvious.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Notice I avoided saying notice again. Ah crap, I did it anyways.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>I can’t help but point out my home state of CA though which has the lowest value of PC1 and a high PC2. This is because CA is above average in diversity and metropolitan-ness (negative PC1) but has a high median income and low white poverty rate both of which require a high PC2 to offset the negative effects from PC1.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>Gotta save some fun for those late night AI dives.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>The name scree plot comes from the connection to elbows.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>Although as we’ll see they can be used in conjunction with PCA.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

@@ -28,7 +28,10 @@ Create Biplots:
 
 ```{r}
 #Correlation
-biplot(football_pc)
+biplot(football_pc,
+       xlabs = rep(".", nrow(fantasy2025)), #replaces row labels with .
+       cex=0.5,    # Changes label sizes
+       expand=1.1) #Expand vectors to create additional separation in labels
 ```
 
 ```{r}
@@ -105,4 +108,25 @@ fant_plot=fantasy2025_withPC |>
   geom_point()+
   scale_color_manual(values=cb_palette[2:4])
 ggplotly(fant_plot,tooltip = "label")
+```
+
+Heatmap of Correlations:
+
+```{r}
+library(GGally)
+ggcorr(fantasy2025_withPC[,4:21])
+```
+
+Scree plot
+
+```{r}
+#Std dev
+scree=data.frame(Components=1:9,Std.dev=football_pc$sdev)
+# Prop of Variance
+scree = scree |>
+  mutate(Prop.var=Std.dev^2/sum(football_pc$sdev^2))
+scree |>
+  ggplot(aes(x=Components,y=Prop.var))+
+  geom_point()+
+  geom_line()
 ```

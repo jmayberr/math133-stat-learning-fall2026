@@ -114,6 +114,21 @@ This state has been transformed to the new coordinates[^3]
 ```{r}
 states_pc$x[1,]
 ```
+Here is a plot of the points in the new $(PC1, PC2)$ space (think orange direction, blue direction coordinates^[With the caveat that this is a rotated version of our original plot in which the positive directions would actually be left and down because of how R chose the loadings. This is because loadings are only unique up to scalar multiple. `prcomp` chooses one of two possibilities which are normalized to have length 1 and differ by a factor $-1$.])
+
+```{r}
+pc_data=cbind(election2016,states_pc$x)
+pc_data |>
+  ggplot(aes(x=PC1,PC2))+
+  geom_point()+
+  geom_text(data=subset(pc_data,state=="Alabama"),
+            aes(label=state),
+            vjust=-1,
+            size=3,
+            color=cb_palette[7]
+            )
+
+```
 
 ## Biplots
 
@@ -125,7 +140,13 @@ An additional tool for visualizing the relationship between the rotated PCs and 
 biplot(states_pc)
 ```
 
-The red vectors are the (scaled) coordinates of non.white and non.citizen in terms of (PC1, PC2). The acute angle between non.white and non.citizen indicates a positive correlation between the two variables.
+The red vectors are the (scaled) coordinates of non.white and non.citizen in terms of (PC1, PC2). The acute angle between non.white and non.citizen indicates a positive correlation between the two variables. Another way to see this is with a heatmap:
+
+```{r}
+ggcorr(pc_data[,c("PC1","PC2","non.white","non.citizen")])
+```
+
+Here we can see that non.white is strongly negatively correlated with PC1 and uncorrelated with PC2 while non.citizen is more weakly negatively correlated with PC1 and strongly positively correlated with PC2. The PCs are uncorrelated with each other as they should be. 
 
 For a distance biplot, switch to `scale=0`:
 
