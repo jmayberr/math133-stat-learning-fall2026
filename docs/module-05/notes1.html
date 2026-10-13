@@ -594,14 +594,28 @@ Cumulative Proportion  1.00000</code></pre>
 </div>
 </div>
 </div>
-<p>Notice (feels like I am saying that a lot in these notes) how certain groups of variables are clustered together like non.citizen, metro, and non.white. This indicates the high amount of correlation between these variables. Vectors pointing in opposite directions indicate negative correlation (for example, white.pov and median.income). Vectors pointing in orthogonal directions indicate very little correlation (eg. high school and metro)</p>
-<p>To interpret what PCs mean for the states, let’s switch to a distance plot:</p>
+<p>Hmm, that’s a little hard to see. Let’s work on the legibility with a few adjustments:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc_full,<span class="at">scale =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc_full,</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>       <span class="at">cex=</span><span class="fu">c</span>(<span class="fl">0.000001</span>,.<span class="dv">5</span>), <span class="co"># Change size of points, variables</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">col=</span><span class="fu">c</span>(<span class="fu">alpha</span>(<span class="st">"black"</span>,<span class="fl">0.7</span>), <span class="co"># Change color, opacity of points </span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>             <span class="fu">alpha</span>(<span class="st">"darkred"</span>,<span class="fl">0.7</span>))) <span class="co"># Change color, opacity of variables</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="notes1_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Notice (feels like I am saying that a lot in these notes) how certain groups of variables are clustered together like non.citizen, metro, and non.white. This indicates the high amount of correlation between these variables. Vectors pointing in opposite directions indicate negative correlation (for example, white.pov and median.income). Vectors pointing in orthogonal directions indicate very little correlation (eg. high school and metro)</p>
+<p>To interpret what PCs mean for the states, let’s switch to a distance plot:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc_full,<span class="at">scale =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes1_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -615,12 +629,12 @@ Cumulative Proportion  1.00000</code></pre>
 </ul>
 <p>With these observations in mind, let’s revisit the distance biplot with points labeled by states</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(states_pc_full<span class="sc">$</span>x)<span class="ot">=</span>election2016<span class="sc">$</span>state</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc_full,<span class="at">scale =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(states_pc_full<span class="sc">$</span>x)<span class="ot">=</span>election2016<span class="sc">$</span>state</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">biplot</span>(states_pc_full,<span class="at">scale =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes1_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -631,20 +645,20 @@ Cumulative Proportion  1.00000</code></pre>
 <h2 class="anchored" data-anchor-id="how-is-pca-unsupervised-learning">How is PCA unsupervised learning?</h2>
 <p>So far, what we have done is start to visually group states together based on where they lay in this two-dimensional plot. Let’s do something a little more concrete by placing groups into “clusters” based on which quadrant they fall in. Note that the first line add the component scores to our original dataset for easier use with ggplot2:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>electionPC<span class="ot">=</span><span class="fu">cbind</span>(election2016,states_pc_full<span class="sc">$</span>x)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>electionPC<span class="sc">$</span>cluster<span class="ot">=</span><span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&gt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&gt;</span><span class="dv">0</span>,<span class="st">"I"</span>,</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&lt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&gt;</span><span class="dv">0</span>,<span class="st">"II"</span>,</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&lt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&lt;</span><span class="dv">0</span>,<span class="st">"III"</span>,</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"IV"</span>)))</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>electionPC <span class="sc">|&gt;</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>PC1,<span class="at">y=</span>PC2,<span class="at">label=</span>state,<span class="at">col=</span>cluster))<span class="sc">+</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>()<span class="sc">+</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span>cb_palette[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>electionPC<span class="ot">=</span><span class="fu">cbind</span>(election2016,states_pc_full<span class="sc">$</span>x)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>electionPC<span class="sc">$</span>cluster<span class="ot">=</span><span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&gt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&gt;</span><span class="dv">0</span>,<span class="st">"I"</span>,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                          <span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&lt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&gt;</span><span class="dv">0</span>,<span class="st">"II"</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">ifelse</span>(electionPC<span class="sc">$</span>PC1<span class="sc">&lt;</span><span class="dv">0</span><span class="sc">&amp;</span>electionPC<span class="sc">$</span>PC2<span class="sc">&lt;</span><span class="dv">0</span>,<span class="st">"III"</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"IV"</span>)))</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>electionPC <span class="sc">|&gt;</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>PC1,<span class="at">y=</span>PC2,<span class="at">label=</span>state,<span class="at">col=</span>cluster))<span class="sc">+</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>()<span class="sc">+</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span>cb_palette[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes1_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -655,7 +669,7 @@ Cumulative Proportion  1.00000</code></pre>
 <h2 class="anchored" data-anchor-id="pca-as-dimension-reduction">PCA as dimension reduction</h2>
 <p>PCA can also be used in feature selection, but with a very different approach from complexity metrics or regularization. Instead of trying to choose a subset of features, it tries to reduce the number of variables by removing unnecessary correlations. For example, suppose that we use the component scores in a model for trump.vote instead of our original eight features. These were added to our original dataset when we created electionPC above:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(electionPC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(electionPC)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "state"         "median.income" "unemployed"    "metro"        
  [5] "high.school"   "non.citizen"   "white.pov"     "income.ineq"  
@@ -666,24 +680,24 @@ Cumulative Proportion  1.00000</code></pre>
 </div>
 <p>The full model for trump.vote had an <span class="math inline">\(R^2\)</span> value of around</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>full_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(full_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>full_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(full_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.6510282</code></pre>
 </div>
 </div>
 <p>Now suppose we use the first three PCs (which accounted for over 80% of the total variance):</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>pcs_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>PC1<span class="sc">+</span>PC2<span class="sc">+</span>PC3,<span class="at">data=</span>electionPC)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(pcs_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>pcs_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>PC1<span class="sc">+</span>PC2<span class="sc">+</span>PC3,<span class="at">data=</span>electionPC)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(pcs_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.5354155</code></pre>
 </div>
 </div>
 <p>Not too much worse. If you look at the best three variable model its better though:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>best3_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>median.income<span class="sc">+</span>non.citizen<span class="sc">+</span>income.ineq,<span class="at">data=</span>electionPC)</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(best3_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>best3_lm<span class="ot">=</span><span class="fu">lm</span>(trump.vote<span class="sc">~</span>median.income<span class="sc">+</span>non.citizen<span class="sc">+</span>income.ineq,<span class="at">data=</span>electionPC)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(best3_lm)<span class="sc">$</span>r.squared</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.573087</code></pre>
 </div>
@@ -694,17 +708,17 @@ Cumulative Proportion  1.00000</code></pre>
 <h2 class="anchored" data-anchor-id="issue-with-pca">Issue with PCA</h2>
 <p>The problem with using PCA for unsupervised learning is twofold. First, there are no great rules for choosing how many PCs to look at in classifying points. A <em>scree plot</em> is one commonly used tool for this purpose which plots the standard deviations of the principal components vs component number and looks for “elbows<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a>”</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>scree<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">Component=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,<span class="at">Std.Dev=</span>states_pc_full<span class="sc">$</span>sdev )</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(scree,<span class="fu">aes</span>(<span class="at">x=</span>Component,<span class="at">y=</span>Std.Dev))<span class="sc">+</span></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">name=</span><span class="st">"Number of Principal Components"</span>, </span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">breaks=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,<span class="at">label=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>scree<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">Component=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,<span class="at">Std.Dev=</span>states_pc_full<span class="sc">$</span>sdev )</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(scree,<span class="fu">aes</span>(<span class="at">x=</span>Component,<span class="at">y=</span>Std.Dev))<span class="sc">+</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">name=</span><span class="st">"Number of Principal Components"</span>, </span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">breaks=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>,<span class="at">label=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes1_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes1_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>

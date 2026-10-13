@@ -9,7 +9,7 @@ library(factoextra)
 library(tidyverse)
 df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
 election2016=read.csv(df_url)
-cb_palette <- c(
+cb_palette = c(
   "#000000",  # black
   "#E69F00",  # orange
   "#56B4E9",  # sky blue
@@ -26,7 +26,7 @@ cb_palette <- c(
 Recall that a scree plot shows the percentage of variation explained by component number. The command for recreating this is `fviz_eig()` (note that changing the row names of election2016 to the state names before computing PCs is the easiest way to ensure nice labeling in other plots below): 
 
 ```{r,warning=F}
-rownames(election2016) <- election2016$state
+rownames(election2016) = election2016$state
 election_pc=prcomp(election2016[,2:9],scale=TRUE)
 fviz_eig(election_pc,addlabels = T)
 ```
@@ -41,7 +41,7 @@ fviz_pca_ind(
 )
 ```
 
-On nice feature of this is that you can add colors through the habillage^[French for dressing or style.] argument. Just choose any categorical variable (like outcome) you want to group points by and throw it in there: 
+One nice feature of this is that you can add colors through the habillage^[French for dressing or style.] argument. Just choose any categorical variable (like outcome) you want to group points by and throw it in there: 
 
 ```{r}
 fviz_pca_ind(

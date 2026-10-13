@@ -191,6 +191,15 @@ These results suggest we may be able to summarize all eight predictors with just
 biplot(states_pc_full)
 ```
 
+Hmm, that's a little hard to see. Let's work on the legibility with a few adjustments:
+
+```{r}
+biplot(states_pc_full,
+       cex=c(0.000001,.5), # Change size of points, variables
+       col=c(alpha("black",0.7), # Change color, opacity of points 
+             alpha("darkred",0.7))) # Change color, opacity of variables
+```
+
 Notice (feels like I am saying that a lot in these notes) how certain groups of variables are clustered together like non.citizen, metro, and non.white. This indicates the high amount of correlation between these variables. Vectors pointing in opposite directions indicate negative correlation (for example, white.pov and median.income). Vectors pointing in orthogonal directions indicate very little correlation (eg. high school and metro)
 
 To interpret what PCs mean for the states, let's switch to a distance plot:
