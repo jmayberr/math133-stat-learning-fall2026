@@ -74,7 +74,15 @@ It looks a little busy, but pretty. The ellipses are a confidence region for eac
 
 ## Tools for K-means
 
-The most important one here is a cluster visualization:
+First, here is a quick way of making scree plots to suggest an optimal number of clusters:
+
+```{r}
+fviz_nbclust(scale(election2016[,2:9]),
+             kmeans, 
+             method="wss")
+```
+
+But the most important visualization tool for kmeans here is a cluster plot:
 
 ```{r}
 election_kmeans=kmeans(scale(election2016[,2:9]),centers = 3,nstart=100)
@@ -83,14 +91,25 @@ fviz_cluster(election_kmeans,
   palette=cb_palette[2:4])
 ```
 
-We made a similar plot from scratch with ggplot in Module 5.2, but this one looks prettier. The points are plotted based on their first two PCS and the clusters are colored according to the k-means output. 
-
-You can also make scree plots to suggest an optimal number of clusters:
+We made a similar plot from scratch with ggplot in Module 5.2, but this one looks prettier. The points are plotted based on their first two PCS and the clusters are colored according to the k-means output. You can add state labels as well by changing the rownames of the dataset you pass:
 
 ```{r}
-fviz_nbclust(scale(election2016[,2:9]),
-             kmeans, 
-             method="wss")
+election_scale=data.frame(scale(election2016[,2:9]))
+rownames(election_scale)=election2016$state
+fviz_cluster(election_kmeans,
+             data=election_scale,
+  palette=cb_palette[2:4])
+```
+
+If you don't like the cluttering of names, you can shrink the labels and add a tooltip instead using the `ggplotly` function from the `plotly` package. Then you can scroll over a point to reveal the state:
+
+```{r}
+library(plotly)
+cluster_plot=fviz_cluster(election_kmeans,
+             data=election_scale,
+             labelsize=0.1,
+  palette=cb_palette[2:4])
+ggplotly(cluster_plot,tooltip = "text")
 ```
 
 Unfortunately, there are no functions for doing the center visualizations (eg. bar, heatmap) so you'll still have to do that the longer way!

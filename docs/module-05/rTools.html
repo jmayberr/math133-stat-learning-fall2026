@@ -105,6 +105,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<link href="../site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+
+<script src="../site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<script src="../site_libs/plotly-binding-4.12.0/plotly.js"></script>
+
+<script src="../site_libs/typedarray-0.1/typedarray.min.js"></script>
+
+<script src="../site_libs/jquery-3.5.1/jquery.min.js"></script>
+
+<link href="../site_libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
+
+<script src="../site_libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+
+<link href="../site_libs/plotly-htmlwidgets-css-2.25.2/plotly-htmlwidgets.css" rel="stylesheet">
+
+<script src="../site_libs/plotly-main-2.25.2/plotly-latest.min.js"></script>
+
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -452,12 +470,11 @@ window.Quarto = {
 </section>
 <section id="tools-for-k-means" class="level2">
 <h2 class="anchored" data-anchor-id="tools-for-k-means">Tools for K-means</h2>
-<p>The most important one here is a cluster visualization:</p>
+<p>First, here is a quick way of making scree plots to suggest an optimal number of clusters:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>election_kmeans<span class="ot">=</span><span class="fu">kmeans</span>(<span class="fu">scale</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),<span class="at">centers =</span> <span class="dv">3</span>,<span class="at">nstart=</span><span class="dv">100</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cluster</span>(election_kmeans,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">data=</span><span class="fu">scale</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_nbclust</span>(<span class="fu">scale</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>             kmeans, </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">method=</span><span class="st">"wss"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -466,12 +483,12 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>We made a similar plot from scratch with ggplot in Module 5.2, but this one looks prettier. The points are plotted based on their first two PCS and the clusters are colored according to the k-means output.</p>
-<p>You can also make scree plots to suggest an optimal number of clusters:</p>
+<p>But the most important visualization tool for kmeans here is a cluster plot:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_nbclust</span>(<span class="fu">scale</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>             kmeans, </span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">method=</span><span class="st">"wss"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>election_kmeans<span class="ot">=</span><span class="fu">kmeans</span>(<span class="fu">scale</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),<span class="at">centers =</span> <span class="dv">3</span>,<span class="at">nstart=</span><span class="dv">100</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cluster</span>(election_kmeans,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">data=</span><span class="fu">scale</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -480,16 +497,12 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Unfortunately, there are no functions for doing the center visualizations (eg. bar, heatmap) so you’ll still have to do that the longer way!</p>
-</section>
-<section id="tools-for-hierarchichal-clustering" class="level2">
-<h2 class="anchored" data-anchor-id="tools-for-hierarchichal-clustering">Tools for Hierarchichal Clustering</h2>
-<p>To create a dendrogram with three groups colored by cluster, you can use</p>
+<p>We made a similar plot from scratch with ggplot in Module 5.2, but this one looks prettier. The points are plotted based on their first two PCS and the clusters are colored according to the k-means output. You can add state labels as well by changing the rownames of the dataset you pass:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>election_hc<span class="ot">=</span><span class="fu">hclust</span>(<span class="fu">dist</span>(<span class="fu">scale</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>])),<span class="at">method=</span><span class="st">"complete"</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_dend</span>(election_hc,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">k=</span><span class="dv">3</span>,</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">color_labels_by_k =</span> T,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>election_scale<span class="ot">=</span><span class="fu">data.frame</span>(<span class="fu">scale</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(election_scale)<span class="ot">=</span>election2016<span class="sc">$</span>state</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cluster</span>(election_kmeans,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">data=</span>election_scale,</span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
@@ -499,33 +512,65 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>One cool option is to turn this into a circle:</p>
+<p>If you don’t like the cluttering of names, you can shrink the labels and add a tooltip instead using the <code>ggplotly</code> function from the <code>plotly</code> package. Then you can scroll over a point to reveal the state:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_dend</span>(election_hc,</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">k=</span><span class="dv">3</span>,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">color_labels_by_k =</span> T,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">type=</span><span class="st">"circular"</span>,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>cluster_plot<span class="ot">=</span><span class="fu">fviz_cluster</span>(election_kmeans,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">data=</span>election_scale,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">labelsize=</span><span class="fl">0.1</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(cluster_plot,<span class="at">tooltip =</span> <span class="st">"text"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-8c93e593dcd35da8ef87" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-8c93e593dcd35da8ef87">{"x":{"data":[{"x":[-2.2976920950619757,-3.4579815063430837,0.65488316007940039,-0.57306391682508706,0.10679401038089226,-2.3336397779250557,-2.088062601642922,0.61618628385279894,-1.0571038629020169,0.027167697426979553,-0.59820230288701914,0.11837066415154505,-2.2112814622806525,-1.465712456721405,-2.7086221065581784,-0.37187135645302105,-0.066341571462854715,-1.3825811885629014,-2.5402287656728735,-0.073178625344907128,0.16345016286404679],"y":[0.70633242639587879,1.8857588150984332,1.3328566945280842,2.1121720222998186,0.89800796899391133,0.1943778542753947,0.27934656190753604,3.1169013071066534,1.0820385997528874,3.2338253654451612,1.8179302593667013,-0.050095664925867908,0.86213487791744614,2.5789790146882621,0.83037449932062701,0.49513706772535027,-0.063602067651514771,1.155238372670339,1.4341327912183277,1.7217792535681351,1.0980789493058363],"text":"","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(230,159,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(230,159,0,1)"}},"hoveron":"points","name":"1","legendgroup":"1","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1.3749407601728492,1.3600943502645158,0.5124428856252885,2.687874176440936,1.0627972742148741,2.0844133489057728,2.2263062589325067,0.44930860848333115,2.7809815971655016,2.3712428318529777,3.4557327395988047,2.9293465380405919,0.5191293231431795,2.309326966475842,2.3533730322955675,3.0538987993089375,1.8044548304996253,3.268952776649404],"y":[1.3889740276872915,-0.74942661917558984,-1.3018384138704417,-0.15542681620354867,-0.68818471183037411,-1.8525110921412142,1.8615265381799257,0.0075294636184669861,-1.772664005874574,0.58326511888020582,1.3653393019025726,-0.20253340775355808,-0.80729059305616424,-0.60385617903777444,0.99896504659684204,-1.2374827373584121,-0.02219390885203229,-1.0404805811247406],"text":"","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(86,180,233,1)","opacity":1,"size":5.6692913385826778,"symbol":"triangle-up","line":{"width":1.8897637795275593,"color":"rgba(86,180,233,1)"}},"hoveron":"points","name":"(2,1)","legendgroup":"(2,1)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-1.6313116065848672,-0.95242981851338049,-0.92734416591119184,-2.1632404335808748,-1.8457131087741316,-2.5362975801474823,-1.4176371027357724,0.045702562624385337,-1.1918789994133645,-1.6533223162591157,-0.79243291088642143],"y":[-2.360600722364866,-1.844265037110024,-3.7045720074914681,-1.875211165773792,-3.6838476316817066,-0.59977868777620136,-0.77128527910468192,-1.0299785953675664,-0.92490467957479028,-1.8738762021509057,-3.8250953911982823],"text":"","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,158,115,1)","opacity":1,"size":5.6692913385826778,"symbol":"square","line":{"width":1.8897637795275593,"color":"rgba(0,158,115,1)"}},"hoveron":"points","name":"(3,1)","legendgroup":"(3,1)","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[0.65488316007940039,0.11837066415154505,-0.066341571462854715,-2.3336397779250557,-3.4579815063430837,0.027167697426979553,0.61618628385279894,0.65488316007940039],"y":[1.3328566945280842,-0.050095664925867908,-0.063602067651514771,0.1943778542753947,1.8857588150984332,3.2338253654451612,3.1169013071066534,1.3328566945280842],"text":"","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(230,159,0,0.2)","dash":"solid"},"fill":"toself","fillcolor":"rgba(230,159,0,0.2)","hoveron":"fills","name":"1","legendgroup":"1","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[3.268952776649404,2.7809815971655016,2.0844133489057728,0.5124428856252885,0.44930860848333115,1.3749407601728492,2.2263062589325067,3.4557327395988047,3.268952776649404],"y":[-1.0404805811247406,-1.772664005874574,-1.8525110921412142,-1.3018384138704417,0.0075294636184669861,1.3889740276872915,1.8615265381799257,1.3653393019025726,-1.0404805811247406],"text":"","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(86,180,233,0.2)","dash":"solid"},"fill":"toself","fillcolor":"rgba(86,180,233,0.2)","hoveron":"fills","name":"(2,1)","legendgroup":"(2,1)","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-0.79243291088642143,-1.8457131087741316,-2.5362975801474823,-1.4176371027357724,0.045702562624385337,-0.79243291088642143],"y":[-3.8250953911982823,-3.6838476316817066,-0.59977868777620136,-0.77128527910468192,-1.0299785953675664,-3.8250953911982823],"text":"","type":"scatter","mode":"lines","line":{"width":1.8897637795275593,"color":"rgba(0,158,115,0.2)","dash":"solid"},"fill":"toself","fillcolor":"rgba(0,158,115,0.2)","hoveron":"fills","name":"(3,1)","legendgroup":"(3,1)","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-1.0256529341851568],"y":[1.2724621413813049],"text":"","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(230,159,0,1)","opacity":1,"size":11.338582677165356,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(230,159,0,1)"}},"hoveron":"points","name":"1","legendgroup":"1","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[2.0335898387816949],"y":[-0.23490497607850663],"text":"","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(86,180,233,1)","opacity":1,"size":11.338582677165356,"symbol":"triangle-up","line":{"width":1.8897637795275593,"color":"rgba(86,180,233,1)"}},"hoveron":"points","name":"(2,1)","legendgroup":"(2,1)","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-1.3696277709256561],"y":[-2.044855945417662],"text":"","type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,158,115,1)","opacity":1,"size":11.338582677165356,"symbol":"square","line":{"width":1.8897637795275593,"color":"rgba(0,158,115,1)"}},"hoveron":"points","name":"(3,1)","legendgroup":"(3,1)","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[-1.6313116065848672,1.3749407601728492,-2.2976920950619757,-0.95242981851338049,-3.4579815063430837,0.65488316007940039,-0.57306391682508706,0.10679401038089226,-2.3336397779250557,-2.088062601642922,0.61618628385279894,1.3600943502645158,-1.0571038629020169,0.5124428856252885,2.687874176440936,1.0627972742148741,-0.92734416591119184,-2.1632404335808748,2.0844133489057728,0.027167697426979553,-0.59820230288701914,0.11837066415154505,2.2263062589325067,-1.8457131087741316,0.44930860848333115,2.7809815971655016,2.3712428318529777,-2.2112814622806525,3.4557327395988047,-1.465712456721405,-2.5362975801474823,-2.7086221065581784,-1.4176371027357724,2.9293465380405919,0.5191293231431795,0.045702562624385337,-0.37187135645302105,-0.066341571462854715,-1.3825811885629014,-1.1918789994133645,2.309326966475842,-1.6533223162591157,-2.5402287656728735,2.3533730322955675,3.0538987993089375,-0.073178625344907128,0.16345016286404679,-0.79243291088642143,1.8044548304996253,3.268952776649404],"y":[-2.360600722364866,1.3889740276872915,0.70633242639587879,-1.844265037110024,1.8857588150984332,1.3328566945280842,2.1121720222998186,0.89800796899391133,0.1943778542753947,0.27934656190753604,3.1169013071066534,-0.74942661917558984,1.0820385997528874,-1.3018384138704417,-0.15542681620354867,-0.68818471183037411,-3.7045720074914681,-1.875211165773792,-1.8525110921412142,3.2338253654451612,1.8179302593667013,-0.050095664925867908,1.8615265381799257,-3.6838476316817066,0.0075294636184669861,-1.772664005874574,0.58326511888020582,0.86213487791744614,1.3653393019025726,2.5789790146882621,-0.59977868777620136,0.83037449932062701,-0.77128527910468192,-0.20253340775355808,-0.80729059305616424,-1.0299785953675664,0.49513706772535027,-0.063602067651514771,1.155238372670339,-0.92490467957479028,-0.60385617903777444,-1.8738762021509057,1.4341327912183277,0.99896504659684204,-1.2374827373584121,1.7217792535681351,1.0980789493058363,-3.8250953911982823,-0.02219390885203229,-1.0404805811247406],"text":["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"],"hovertext":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],"textfont":{"size":13.858267716535433,"color":"rgba(255,255,255,0)"},"type":"scatter","mode":"text","hoveron":"points","showlegend":false,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":37.260273972602747},"plot_bgcolor":"rgba(235,235,235,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Cluster plot","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-3.8036672186401779,3.8014184518958993],"tickmode":"array","ticktext":["-2","0","2"],"tickvals":[-2,0,2],"categoryorder":"array","categoryarray":["-2","0","2"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Dim1 (43%)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-4.1780414290304542,3.5867714032773335],"tickmode":"array","ticktext":["-4","-2","0","2"],"tickvals":[-4,-2,0,2],"categoryorder":"array","categoryarray":["-4","-2","0","2"],"nticks":null,"ticks":"outside","tickcolor":"rgba(0,0,0,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(255,255,255,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Dim2 (34.2%)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[],"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.8897637795275593,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"cluster","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"2d40558046ec":{"x":{},"y":{},"colour":{},"shape":{},"type":"scatter"},"2d4067814365":{"x":{},"y":{},"colour":{},"fill":{}},"2d40623e6bd8":{"x":{},"y":{},"colour":{},"shape":{}},"2d40638a2a20":{"x":{},"y":{},"label":{}}},"cur_data":"2d40558046ec","visdat":{"2d40558046ec":["function (y) ","x"],"2d4067814365":["function (y) ","x"],"2d40623e6bd8":["function (y) ","x"],"2d40638a2a20":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>Unfortunately, there are no functions for doing the center visualizations (eg. bar, heatmap) so you’ll still have to do that the longer way!</p>
+</section>
+<section id="tools-for-hierarchichal-clustering" class="level2">
+<h2 class="anchored" data-anchor-id="tools-for-hierarchichal-clustering">Tools for Hierarchichal Clustering</h2>
+<p>To create a dendrogram with three groups colored by cluster, you can use</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>election_hc<span class="ot">=</span><span class="fu">hclust</span>(<span class="fu">dist</span>(<span class="fu">scale</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>])),<span class="at">method=</span><span class="st">"complete"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_dend</span>(election_hc,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">k=</span><span class="dv">3</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">color_labels_by_k =</span> T,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="rTools_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="rTools_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>One cool option is to turn this into a circle:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_dend</span>(election_hc,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">k=</span><span class="dv">3</span>,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">color_labels_by_k =</span> T,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">type=</span><span class="st">"circular"</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="rTools_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Another is to go bio on its ass and turn it into a phylogenic tree:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_dend</span>(election_hc,</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">k=</span><span class="dv">3</span>,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">color_labels_by_k =</span> T,</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">type=</span><span class="st">"phylogenic"</span>,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">repel=</span>T,</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_dend</span>(election_hc,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">k=</span><span class="dv">3</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">color_labels_by_k =</span> T,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">type=</span><span class="st">"phylogenic"</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">repel=</span>T,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="rTools_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="rTools_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -536,24 +581,24 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="silhouette-diagrams">Silhouette Diagrams</h2>
 <p>We do not cover these types of plots in Module 5.1-5.3, but they are a commonly used tool for validating a clustering and can be applied to either k-means or hierarchichal outputs. The idea is to assign each data point a number between <span class="math inline">\(-1\)</span> and 1 called the Silhouette Width<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> (Si). Si values closer to 1 indicate a point that is “well-clustered” while values closer to -1 indicate poor clustering.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cluster)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>election_scaled <span class="ot">=</span> <span class="fu">scale</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>])</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>election_sil<span class="ot">=</span><span class="fu">silhouette</span>(election_kmeans<span class="sc">$</span>cluster,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">dist</span>(election_scaled))</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(election_sil) <span class="ot">=</span> election2016<span class="sc">$</span>state  <span class="co"># to display state names</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_silhouette</span>(election_sil,</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">label=</span>T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cluster)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>election_scaled <span class="ot">=</span> <span class="fu">scale</span>(election2016[,<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>])</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>election_sil<span class="ot">=</span><span class="fu">silhouette</span>(election_kmeans<span class="sc">$</span>cluster,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">dist</span>(election_scaled))</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(election_sil) <span class="ot">=</span> election2016<span class="sc">$</span>state  <span class="co"># to display state names</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_silhouette</span>(election_sil,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">label=</span>T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  cluster size ave.sil.width
-1       1   11          0.35
+1       1   21          0.21
 2       2   18          0.35
-3       3   21          0.21</code></pre>
+3       3   11          0.35</code></pre>
 </div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="rTools_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="rTools_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -561,10 +606,10 @@ window.Quarto = {
 <p>The red dashed line shows the average Si across all observations so the higher the value, the better. In our example, only one state had a negative Si so our clustering seems to work pretty well at separating states.</p>
 <p>The process only needs a slight modification for hierarchical clustering.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>hc_cut <span class="ot">=</span> <span class="fu">hcut</span>(election_scaled, <span class="at">k =</span> <span class="dv">3</span>,<span class="at">method=</span><span class="st">"complete"</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_silhouette</span>(hc_cut,</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">label=</span>T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>hc_cut <span class="ot">=</span> <span class="fu">hcut</span>(election_scaled, <span class="at">k =</span> <span class="dv">3</span>,<span class="at">method=</span><span class="st">"complete"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_silhouette</span>(hc_cut,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">palette=</span>cb_palette[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">label=</span>T)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  cluster size ave.sil.width
 1       1    9          0.42
@@ -574,7 +619,7 @@ window.Quarto = {
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="rTools_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="rTools_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
