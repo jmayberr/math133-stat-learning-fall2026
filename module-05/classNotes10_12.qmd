@@ -12,6 +12,16 @@ fantasy2025 <- load_player_stats(2025, summary_level = "reg") |>
          carries,rushing_yards,rushing_tds,
          receptions,targets,receiving_yards,receiving_tds,
          fantasy_points_ppr)
+cb_palette = c(
+  "#000000",  # black
+  "#E69F00",  # orange
+  "#56B4E9",  # sky blue
+  "#009E73",  # bluish green
+  "#F0E442",  # yellow
+  "#0072B2",  # blue
+  "#D55E00",  # vermillion
+  "#CC79A7"   # reddish purple
+)
 glimpse(fantasy2025)
 ```
 
@@ -35,6 +45,15 @@ errors |>
   geom_line()
 ```
 
+Alternative using `factoextra` :
+
+```{r}
+library(factoextra)
+fviz_nbclust(scale(fantasy2025[,4:12]),
+             kmeans,
+             method="wss")
+```
+
 ```{r}
 # Best 3 cluster model
 fantasy_kmeans=kmeans(scale(fantasy2025[,4:12]),centers=3,nstart=100)
@@ -50,7 +69,8 @@ centers_df |>
              col=factor(cluster),group=cluster))+
   geom_line()+
   geom_point() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  scale_color_manual(values=cb_palette[2:4],name="Cluster")
 ```
 
 ```{r}
@@ -66,10 +86,28 @@ centers_df |>
   labs(y = "Cluster", x = NULL)
 ```
 
+Cluster plot with`factoextra`
+
 ```{r}
-# 2D projection (carries,targets)
-fantasy2025 |>
-  mutate(cluster=fantasy_kmeans$cluster) |>
-  ggplot(aes(x=carries,y=targets,col=factor(cluster)))+
-  geom_point()
+fviz_cluster(fantasy_kmeans,
+             data=scale(fantasy2025[,4:12]),
+             palette=cb_palette[2:4])
+```
+
+```{r}
+fantasy_scaled=scale(fantasy2025[,4:12])
+rownames(fantasy_scaled)=fantasy2025$player_display_name
+fviz_cluster(fantasy_kmeans,
+             data=fantasy_scaled,
+             labelsize=6,
+             palette=cb_palette[2:4])
+```
+
+```{r}
+library(plotly)
+cluster_plot=fviz_cluster(fantasy_kmeans,
+             data=fantasy_scaled,
+             labelsize=6,
+             palette=cb_palette[2:4])
+ggplotly(cluster_plot,tooltip="text")
 ```
