@@ -23,14 +23,13 @@ cb_palette = c(
 
 ## Tools for PCA
 
-Recall that a scree plot shows the percentage of variation explained by component number. The command for recreating this is `fviz_eig()` (note that changing the row names of election2016 to the state names before computing PCs is the easiest way to ensure nice labeling in other plots below): 
+Recall that a scree plot shows the percentage of variation explained by component number. The command for recreating this is `fviz_eig()` (note that changing the row names of election2016 to the state names before computing PCs is the easiest way to ensure nice labeling in other plots below):
 
 ```{r,warning=F}
 rownames(election2016) = election2016$state
 election_pc=prcomp(election2016[,2:9],scale=TRUE)
 fviz_eig(election_pc,addlabels = T)
 ```
-
 
 To plot the first two principal components (alternative to what we did in Section 5.1 usig ggplot), we can use `fviz_pca_ind()`:
 
@@ -41,7 +40,9 @@ fviz_pca_ind(
 )
 ```
 
-One nice feature of this is that you can add colors through the habillage^[French for dressing or style.] argument. Just choose any categorical variable (like outcome) you want to group points by and throw it in there: 
+One nice feature of this is that you can add colors through the habillage[^1] argument. Just choose any categorical variable (like outcome) you want to group points by and throw it in there:
+
+[^1]: French for dressing or style.
 
 ```{r}
 fviz_pca_ind(
@@ -52,15 +53,19 @@ fviz_pca_ind(
 )
 ```
 
-Variable correlations can be examined with a similar function^[The plot created here is basically what you get using base `biplot` function with `scale = 1` except it doesn't show the transformed points and hence is not really a "biplot". ]: 
+Variable correlations can be examined with a similar function[^2]:
+
+[^2]: The plot created here is basically what you get using base `biplot` function with `scale = 1` except it doesn't show the transformed points and hence is not really a "biplot".
 
 ```{r,message=F,warning=F}
 fviz_pca_var(election_pc)
 ```
 
-The arrows represent the correlation between the original variable and (PC1,PC2). Variables which are close together are themselves highly correlated. See Module 5.1 for additional interpretation. 
+The arrows represent the correlation between the original variable and (PC1,PC2). Variables which are close together are themselves highly correlated. See Module 5.1 for additional interpretation.
 
-The final function to cover for PCa is `fviz_pca_biplot` which shows a different type of biplot in which the variables and observations are given a balanced scaling^[See Module 5 Theory Supplement.]:
+The final function to cover for PCa is `fviz_pca_biplot` which shows a different type of biplot in which the variables and observations are given a balanced scaling[^3]:
+
+[^3]: See Module 5 Theory Supplement.
 
 ```{r}
 fviz_pca_biplot(election_pc,
@@ -70,7 +75,7 @@ fviz_pca_biplot(election_pc,
   col.var = "black")
 ```
 
-It looks a little busy, but pretty. The ellipses are a confidence region for each group in (PC1,PC2) space. Any points in one ellipse but not the other are clearly predicted by the PCA, but points in the overlap are uncertain. 
+It looks a little busy, but pretty. The ellipses are a confidence region for each group in (PC1,PC2) space. Any points in one ellipse but not the other are clearly predicted by the PCA, but points in the overlap are uncertain.
 
 ## Tools for K-means
 
@@ -99,17 +104,6 @@ rownames(election_scale)=election2016$state
 fviz_cluster(election_kmeans,
              data=election_scale,
   palette=cb_palette[2:4])
-```
-
-If you don't like the cluttering of names, you can shrink the labels and add a tooltip instead using the `ggplotly` function from the `plotly` package. Then you can scroll over a point to reveal the state:
-
-```{r}
-library(plotly)
-cluster_plot=fviz_cluster(election_kmeans,
-             data=election_scale,
-             labelsize=0.1,
-  palette=cb_palette[2:4])
-ggplotly(cluster_plot,tooltip = "text")
 ```
 
 Unfortunately, there are no functions for doing the center visualizations (eg. bar, heatmap) so you'll still have to do that the longer way!
@@ -152,8 +146,9 @@ And now you know.
 
 ## Silhouette Diagrams
 
-We do not cover these types of plots in Module 5.1-5.3, but they are a commonly used tool for validating a clustering and can be applied to either k-means or hierarchichal outputs. The idea is to assign each data point a number between $-1$ and 1 called the Silhouette Width^[It is calculated as follows. First, calculate the average distance between point $i$ and all other points in its cluster; call this distance $a_i$. Then calculate the minimum distance between the point and all points outside its cluster; call this $b_i$. The Si for point $i$ is then $(b_i-a_i)/\max(a_i,b_i)$. See [this site](https://www.datanovia.com/en/lessons/cluster-validation-statistics-must-know-methods/) for more on validation statistics.] (Si). Si values closer to 1 indicate a point that is "well-clustered" while values closer to -1 indicate poor clustering.
+We do not cover these types of plots in Module 5.1-5.3, but they are a commonly used tool for validating a clustering and can be applied to either k-means or hierarchichal outputs. The idea is to assign each data point a number between $-1$ and 1 called the Silhouette Width[^4] (Si). Si values closer to 1 indicate a point that is "well-clustered" while values closer to -1 indicate poor clustering.
 
+[^4]: It is calculated as follows. First, calculate the average distance between point $i$ and all other points in its cluster; call this distance $a_i$. Then calculate the minimum distance between the point and all points outside its cluster; call this $b_i$. The Si for point $i$ is then $(b_i-a_i)/\max(a_i,b_i)$. See [this site](https://www.datanovia.com/en/lessons/cluster-validation-statistics-must-know-methods/) for more on validation statistics.
 
 ```{r}
 library(cluster)
@@ -167,9 +162,9 @@ fviz_silhouette(election_sil,
   
 ```
 
-The red dashed line shows the average Si across all observations so the higher the value, the better. In our example, only one state had a negative Si so our clustering seems to work pretty well at separating states. 
+The red dashed line shows the average Si across all observations so the higher the value, the better. In our example, only one state had a negative Si so our clustering seems to work pretty well at separating states.
 
-The process only needs a slight modification for hierarchical clustering. 
+The process only needs a slight modification for hierarchical clustering.
 
 ```{r}
 hc_cut = hcut(election_scaled, k = 3,method="complete")
@@ -178,5 +173,4 @@ fviz_silhouette(hc_cut,
   label=T)
 ```
 
-This looks both better and worse than the k-means. Clusters 1 and 2 contain mostly well separated states but Cluster 2 contains a lot of states which were hard to classify. 
-
+This looks both better and worse than the k-means. Clusters 1 and 2 contain mostly well separated states but Cluster 2 contains a lot of states which were hard to classify.
