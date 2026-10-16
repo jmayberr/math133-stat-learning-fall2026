@@ -645,10 +645,10 @@ unemployed       unemployed  0.4813118</code></pre>
 <p>As in Module 6.3, drop all rows containing NA from the dataset and perform a 70-30 training split using <code>set.seed(55)</code> for consistency.</p>
 <ol type="1">
 <li><p>Fit a model to this data using the default settings in <code>gbm</code> (don’t forget to use <code>distribution="multinomial"</code>). Look at the model summary and identify the most important variables.</p></li>
-<li><p>Calculate the accuracy and balanced accuracy of your model on the test set. <strong>Note</strong>: Predict is a bit funky for multinomial distributions and gbm. It will return a 3D array of class probabilities. To instead get class predictions, apply tyhe following two commands to your gbm model output:</p>
+<li><p>Calculate the accuracy and balanced accuracy of your model on the test set. <strong>Note</strong>: Predict is a bit funky for multinomial distributions and gbm. It will return a 3D array of class probabilities. To instead get class predictions, apply the following two commands to your gbm model output:</p>
 <p><code>class_probs=predict(species_gbm,test_set,type="response")[,,1]</code></p>
 <p><code>pred_class = colnames(class_probs)[max.col(class_probs)]</code></p></li>
-<li><p>(Bonus)</p></li>
+<li><p>(Bonus) Tune the hyperparameters in your model using <code>tidymodels</code> and calculate the resulting accuracy of the predictions.</p></li>
 </ol>
 
 
