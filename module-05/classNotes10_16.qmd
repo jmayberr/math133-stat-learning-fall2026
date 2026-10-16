@@ -1,0 +1,47 @@
+---
+title: "Class Notes 10-16"
+format: html
+---
+
+```{r}
+library(nflreadr)
+library(tidyverse)
+fantasy2025_wr <- load_player_stats(2025, summary_level = "reg") |>
+  dplyr::filter(position %in% c("WR")) |>
+  select(player_display_name,recent_team,position,games,
+         carries,rushing_yards,rushing_tds,
+         receptions,targets,receiving_yards,receiving_tds,
+         fantasy_points_ppr)|>
+  as.data.frame() |>
+  dplyr::filter(games>=14,fantasy_points_ppr>=30) 
+
+cb_palette = c(
+  "#000000",  # black
+  "#E69F00",  # orange
+  "#56B4E9",  # sky blue
+  "#009E73",  # bluish green
+  "#F0E442",  # yellow
+  "#0072B2",  # blue
+  "#D55E00",  # vermillion
+  "#CC79A7"   # reddish purple
+)
+glimpse(fantasy2025_wr)
+```
+
+```{r}
+rownames(fantasy2025_wr)=fantasy2025_wr$player_display_name
+wr_clust=hclust(dist(scale(fantasy2025_wr[,4:12])),
+                method="complete")
+plot(wr_clust,hang=-1,cex=0.3)
+```
+
+```{r}
+library(factoextra)
+fviz_dend(wr_clust,
+          k=8,
+          color_labels_by_k = TRUE,
+          palette=cb_palette,
+          type="circular",
+          repel = TRUE,
+          cex=0.5)
+```

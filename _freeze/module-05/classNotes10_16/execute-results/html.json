@@ -1,0 +1,17 @@
+{
+  "hash": "d47753cb940a05e435184c60fb64ea30",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Class Notes 10-16\"\nformat: html\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(nflreadr)\nlibrary(tidyverse)\nfantasy2025_wr <- load_player_stats(2025, summary_level = \"reg\") |>\n  dplyr::filter(position %in% c(\"WR\")) |>\n  select(player_display_name,recent_team,position,games,\n         carries,rushing_yards,rushing_tds,\n         receptions,targets,receiving_yards,receiving_tds,\n         fantasy_points_ppr)|>\n  as.data.frame() |>\n  dplyr::filter(games>=14,fantasy_points_ppr>=30) \n\ncb_palette = c(\n  \"#000000\",  # black\n  \"#E69F00\",  # orange\n  \"#56B4E9\",  # sky blue\n  \"#009E73\",  # bluish green\n  \"#F0E442\",  # yellow\n  \"#0072B2\",  # blue\n  \"#D55E00\",  # vermillion\n  \"#CC79A7\"   # reddish purple\n)\nglimpse(fantasy2025_wr)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nRows: 86\nColumns: 12\n$ player_display_name <chr> \"Adam Thielen\", \"Keenan Allen\", \"DeAndre Hopkins\",…\n$ recent_team         <chr> \"PIT\", \"LAC\", \"BAL\", \"LA\", \"NE\", \"LV\", \"DET\", \"SF\"…\n$ position            <chr> \"WR\", \"WR\", \"WR\", \"WR\", \"WR\", \"WR\", \"WR\", \"WR\", \"W…\n$ games               <int> 14, 17, 17, 14, 17, 17, 15, 14, 14, 14, 17, 16, 17…\n$ carries             <int> 0, 0, 0, 0, 0, 0, 2, 1, 0, 1, 0, 0, 0, 15, 5, 4, 0…\n$ rushing_yards       <int> 0, 0, 0, 0, 0, 0, 19, 6, 0, 4, 0, 0, 0, 79, 13, 25…\n$ rushing_tds         <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,…\n$ receptions          <int> 19, 81, 22, 60, 85, 32, 24, 22, 37, 46, 33, 47, 74…\n$ targets             <int> 35, 122, 39, 114, 102, 55, 30, 35, 53, 65, 45, 70,…\n$ receiving_yards     <int> 186, 777, 330, 789, 1013, 291, 289, 276, 551, 550,…\n$ receiving_tds       <int> 0, 4, 2, 14, 4, 1, 1, 1, 0, 2, 1, 2, 7, 6, 3, 2, 1…\n$ fantasy_points_ppr  <dbl> 39.60, 182.70, 67.00, 222.90, 210.30, 67.10, 66.80…\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nrownames(fantasy2025_wr)=fantasy2025_wr$player_display_name\nwr_clust=hclust(dist(scale(fantasy2025_wr[,4:12])),\n                method=\"complete\")\nplot(wr_clust,hang=-1,cex=0.3)\n```\n\n::: {.cell-output-display}\n![](classNotes10_16_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(factoextra)\nfviz_dend(wr_clust,\n          k=8,\n          color_labels_by_k = TRUE,\n          palette=cb_palette,\n          type=\"circular\",\n          repel = TRUE,\n          cex=0.5)\n```\n\n::: {.cell-output-display}\n![](classNotes10_16_files/figure-html/unnamed-chunk-3-1.png){width=672}\n:::\n:::\n\n",
+    "supporting": [
+      "classNotes10_16_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
