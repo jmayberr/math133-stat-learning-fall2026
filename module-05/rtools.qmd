@@ -106,17 +106,6 @@ fviz_cluster(election_kmeans,
   palette=cb_palette[2:4])
 ```
 
-If you don't like the cluttering of names, you can shrink the labels and add a tooltip instead using the `ggplotly` function from the `plotly` package. Then you can scroll over a point to reveal the state:
-
-```{r}
-library(plotly)
-cluster_plot=fviz_cluster(election_kmeans,
-             data=election_scale,
-             labelsize=0.1,
-  palette=cb_palette[2:4])
-ggplotly(cluster_plot,tooltip = "text")
-```
-
 Unfortunately, there are no functions for doing the center visualizations (eg. bar, heatmap) so you'll still have to do that the longer way!
 
 ## Tools for Hierarchichal Clustering
