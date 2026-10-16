@@ -277,10 +277,10 @@ As in Module 6.3, drop all rows containing NA from the dataset and perform a 70-
 
 1.  Fit a model to this data using the default settings in `gbm` (don't forget to use `distribution="multinomial"`). Look at the model summary and identify the most important variables.
 
-2.  Calculate the accuracy and balanced accuracy of your model on the test set. **Note**: Predict is a bit funky for multinomial distributions and gbm. It will return a 3D array of class probabilities. To instead get class predictions, apply tyhe following two commands to your gbm model output:
+2.  Calculate the accuracy and balanced accuracy of your model on the test set. **Note**: Predict is a bit funky for multinomial distributions and gbm. It will return a 3D array of class probabilities. To instead get class predictions, apply the following two commands to your gbm model output:
 
     `class_probs=predict(species_gbm,test_set,type="response")[,,1]`
 
     `pred_class = colnames(class_probs)[max.col(class_probs)]`
 
-3.  (Bonus)
+3.  (Bonus) Tune the hyperparameters in your model using `tidymodels` and calculate the resulting accuracy of the predictions. 
