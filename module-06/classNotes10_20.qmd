@@ -1,0 +1,49 @@
+---
+title: "Class Notes for 10-20"
+format: html
+---
+
+```{r}
+library(nflreadr)
+library(tidyverse)
+fantasy2026 <- load_player_stats(2026, summary_level = "reg") |>
+  dplyr::filter(position %in% c("RB","WR","TE")) |>
+  select(player_display_name,position,games,
+         carries,rushing_yards,rushing_tds,
+         receptions,targets,receiving_yards,receiving_tds,
+         fantasy_points_ppr)|>
+  as.data.frame() 
+glimpse(fantasy2026)
+```
+
+```{r}
+library(rpart)
+library(rattle)
+fantasy_tree=rpart(fantasy_points_ppr~.,data=fantasy2026[,2:11])
+fancyRpartPlot(fantasy_tree)
+```
+
+Pruning
+
+```{r}
+plotcp(fantasy_tree,upper="splits")
+```
+
+PLot looks good (x-val error goes down) but say we want to prune to 5 splits
+
+```{r}
+fantasy_tree$cptable
+```
+
+```{r}
+fantasy_prune=prune(fantasy_tree,cp=0.025)
+fancyRpartPlot(fantasy_prune)
+```
+
+```{r}
+table(fantasy_tree$where)
+```
+
+```{r}
+fantasy2026$player_display_name[fantasy_tree$where==15]
+```
