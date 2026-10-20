@@ -72,7 +72,7 @@ Additionally, we might as well choose $f$ so that $f$ is non-negative with $f(0)
 
 *Gini Choice*: $f(p)=2p(1-p)$
 
-*Entropy/Information Choice*: $f(p) = -[p \log(p)+(1-p)*\log(1-p)]$
+*Entropy/Information Choice*: $f(p) = -[p \log(p)+(1-p)*\log(1-p)]$ (with $f(0) = f(1) = 0$)
 
 A comparison of these two impurity functions is shown below
 
@@ -87,51 +87,65 @@ Other than having a slightly different scale on the $y$-axis, they are essential
 
 Entropy has some deep roots in the fields of probability, statistics, and information theory, but Gini has a more natural intuition as demonstrated by the following problem. Suppose we have an urn containing 1 red and 3 blue balls. We reach in and draw one ball at random, recording its color before replacing it in the urn. Our friend then comes along and draws another ball from the urn. What is the probability that we draw balls of different colors?
 
-A little thought gives the answer $$
+A little thought gives the answer 
+$$
 (1/4)(3/4) + (3/4)(1/4).
-$$ If you replace the $1/4$ with $p$, then this is exactly the Gini Index. In other words, the Gini Index is the probability that two randomly selected observations in a node come from different classes. The higher the probability, the less desirable the node.
+$$ 
+If you replace the $1/4$ with $p$, then this is exactly the Gini Index. In other words, the Gini Index is the probability that two randomly selected observations in a node come from different classes. The higher the probability, the less desirable the node.
 
-To summarize, when deciding on a split, we look at either the Gini index or Entropy of the resulting node and choose the split which minimizes the chosen impurity metric. Let's compute each for a simple numeric example.
+Note that Gini index and entropy or computed node by node and then a weighted average is taken to evaluate teh split. when deciding on a split, we look at either the Gini index or Entropy of the resulting node and choose the split which minimizes the chosen impurity metric. Let's compute each for a simple numeric example.
 
-Suppose at some point in our calculation, we have 50 observations left, 30 of which belong to Class 1 and 20 which belong to Class 2. You are deciding between two splits
+Suppose at some point in our calculation, we have 100 observations left, 50 of which belong to Class A and 50 which belong to Class B. You are deciding between two splits
 
-*Split 1:* The left node has a total of 30 observations, 20 from Class 1 and 10 from Class 2.
+*Split 1:* The left node gets 40 As and 10 Bs while the right node gets 10 As and 40 Bs
 
-*Split 2:* The left node has a total of 15 observations, 10 from Class 1 and 5 from Class 2.
+*Split 2:* The left node gets 50 As and 40 Bs while the right node gets no As and 10 Bs
 
-The weighted average of Gini Indices for the two nodes in Split 1 is
+For Split 1, the Gini Index of both nodes is 
 
 ```{r}
-(30/50)*2*(20/30)*10/30+(20/50)*2*(10/20)^2
+2*(4/5)*(1/5) 
 ```
 
-while the Gini Index for Split 2 is
+so we'll assign an overall average index of 0.32 for this split since there are an equal number of points in both node. 
+
+For Split 2, the left node has a Gini index of 
 
 ```{r}
-(15/50)*2*(10/15)*5/15+(35/50)*2*(20/35)*(15/35)
+2*(5/9)*(4/9) 
 ```
 
-So Gini prefers Split 1 (lower is better).
-
-The weighted average of the entropies for each node in Split 1 is
+while the right node has a Gini Index of 0. Since the left node contains 90% of all the observations, we assign the weighted average
 
 ```{r}
-(30/50)*(-(20/30)*log(20/30)-(10/30)*log(10/30))+(20/50)*(-2*(10/20)*log(10/20))
+(9/10)*(40/81) + (1/10)*(0)
 ```
 
-while the entropy for Split 2 is
+to this split.So Gini prefers Split 1 (lower is better).
+
+The entropy of either node in split 1 is 
 
 ```{r}
-(15/50)*(-(10/15)*log(10/15)-(5/15)*log(5/15))+(35/50)*(-(20/35)*log(20/35)-(15/35)*log(15/35))
+-(4/5)*log(4/5)-(1/5)*log(1/5)
+```
+
+while the weighted average of the two entropies for Split 2 is
+
+```{r}
+(9/10)*(-(5/9)*log(5/9)-(4/9)*log(4/9))+(1/10)*0
 ```
 
 So Entropy also has a slight preference for Split 1. Hurrah for consistency!
 
-Note that if we have $K> 2$ classes and let $p_i$ be the proportion of observations in the node from class $i$. Then by the "balls in the urn"" analogy the Gini Index becomes $$
+Note that if we have $K> 2$ classes and let $p_i$ be the proportion of observations in the node from class $i$, then by the "balls in the urn"" analogy the Gini Index becomes 
+$$
 \sum_{i=1}^K \sum_{j \neq i} p_i p_j
-$$ and entropy becomes $$
+$$ 
+and entropy becomes 
+$$
 -\sum_{i=1}^K p_i \log p_i. 
-$$ If $K=2$, then $p_1 = p$, $p_2=1-p$ so both these simplify to the previous functions.
+$$ 
+If $K=2$, then $p_1 = p$, $p_2=1-p$ so both these simplify to the previous functions.
 
 ## A note on Pruning
 

@@ -432,7 +432,7 @@ window.Quarto = {
 </ul>
 <p>Additionally, we might as well choose <span class="math inline">\(f\)</span> so that <span class="math inline">\(f\)</span> is non-negative with <span class="math inline">\(f(0)=f(1)=0\)</span>. There are two common choices of <span class="math inline">\(f\)</span> which meet these criteria</p>
 <p><em>Gini Choice</em>: <span class="math inline">\(f(p)=2p(1-p)\)</span></p>
-<p><em>Entropy/Information Choice</em>: <span class="math inline">\(f(p) = -[p \log(p)+(1-p)*\log(1-p)]\)</span></p>
+<p><em>Entropy/Information Choice</em>: <span class="math inline">\(f(p) = -[p \log(p)+(1-p)*\log(1-p)]\)</span> (with <span class="math inline">\(f(0) = f(1) = 0\)</span>)</p>
 <p>A comparison of these two impurity functions is shown below</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>x<span class="ot">=</span><span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,<span class="at">by=</span>.<span class="dv">1</span>)</span>
@@ -452,41 +452,49 @@ window.Quarto = {
 <p>A little thought gives the answer <span class="math display">\[
 (1/4)(3/4) + (3/4)(1/4).
 \]</span> If you replace the <span class="math inline">\(1/4\)</span> with <span class="math inline">\(p\)</span>, then this is exactly the Gini Index. In other words, the Gini Index is the probability that two randomly selected observations in a node come from different classes. The higher the probability, the less desirable the node.</p>
-<p>To summarize, when deciding on a split, we look at either the Gini index or Entropy of the resulting node and choose the split which minimizes the chosen impurity metric. Let’s compute each for a simple numeric example.</p>
-<p>Suppose at some point in our calculation, we have 50 observations left, 30 of which belong to Class 1 and 20 which belong to Class 2. You are deciding between two splits</p>
-<p><em>Split 1:</em> The left node has a total of 30 observations, 20 from Class 1 and 10 from Class 2.</p>
-<p><em>Split 2:</em> The left node has a total of 15 observations, 10 from Class 1 and 5 from Class 2.</p>
-<p>The weighted average of Gini Indices for the two nodes in Split 1 is</p>
+<p>Note that Gini index and entropy or computed node by node and then a weighted average is taken to evaluate teh split. when deciding on a split, we look at either the Gini index or Entropy of the resulting node and choose the split which minimizes the chosen impurity metric. Let’s compute each for a simple numeric example.</p>
+<p>Suppose at some point in our calculation, we have 100 observations left, 50 of which belong to Class A and 50 which belong to Class B. You are deciding between two splits</p>
+<p><em>Split 1:</em> The left node gets 40 As and 10 Bs while the right node gets 10 As and 40 Bs</p>
+<p><em>Split 2:</em> The left node gets 50 As and 40 Bs while the right node gets no As and 10 Bs</p>
+<p>For Split 1, the Gini Index of both nodes is</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>(<span class="dv">30</span><span class="sc">/</span><span class="dv">50</span>)<span class="sc">*</span><span class="dv">2</span><span class="sc">*</span>(<span class="dv">20</span><span class="sc">/</span><span class="dv">30</span>)<span class="sc">*</span><span class="dv">10</span><span class="sc">/</span><span class="dv">30</span><span class="sc">+</span>(<span class="dv">20</span><span class="sc">/</span><span class="dv">50</span>)<span class="sc">*</span><span class="dv">2</span><span class="sc">*</span>(<span class="dv">10</span><span class="sc">/</span><span class="dv">20</span>)<span class="sc">^</span><span class="dv">2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span><span class="sc">*</span>(<span class="dv">4</span><span class="sc">/</span><span class="dv">5</span>)<span class="sc">*</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.4666667</code></pre>
+<pre><code>[1] 0.32</code></pre>
 </div>
 </div>
-<p>while the Gini Index for Split 2 is</p>
+<p>so we’ll assign an overall average index of 0.32 for this split since there are an equal number of points in both node.</p>
+<p>For Split 2, the left node has a Gini index of</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>(<span class="dv">15</span><span class="sc">/</span><span class="dv">50</span>)<span class="sc">*</span><span class="dv">2</span><span class="sc">*</span>(<span class="dv">10</span><span class="sc">/</span><span class="dv">15</span>)<span class="sc">*</span><span class="dv">5</span><span class="sc">/</span><span class="dv">15</span><span class="sc">+</span>(<span class="dv">35</span><span class="sc">/</span><span class="dv">50</span>)<span class="sc">*</span><span class="dv">2</span><span class="sc">*</span>(<span class="dv">20</span><span class="sc">/</span><span class="dv">35</span>)<span class="sc">*</span>(<span class="dv">15</span><span class="sc">/</span><span class="dv">35</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span><span class="sc">*</span>(<span class="dv">5</span><span class="sc">/</span><span class="dv">9</span>)<span class="sc">*</span>(<span class="dv">4</span><span class="sc">/</span><span class="dv">9</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.4761905</code></pre>
+<pre><code>[1] 0.4938272</code></pre>
 </div>
 </div>
-<p>So Gini prefers Split 1 (lower is better).</p>
-<p>The weighted average of the entropies for each node in Split 1 is</p>
+<p>while the right node has a Gini Index of 0. Since the left node contains 90% of all the observations, we assign the weighted average</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(<span class="dv">30</span><span class="sc">/</span><span class="dv">50</span>)<span class="sc">*</span>(<span class="sc">-</span>(<span class="dv">20</span><span class="sc">/</span><span class="dv">30</span>)<span class="sc">*</span><span class="fu">log</span>(<span class="dv">20</span><span class="sc">/</span><span class="dv">30</span>)<span class="sc">-</span>(<span class="dv">10</span><span class="sc">/</span><span class="dv">30</span>)<span class="sc">*</span><span class="fu">log</span>(<span class="dv">10</span><span class="sc">/</span><span class="dv">30</span>))<span class="sc">+</span>(<span class="dv">20</span><span class="sc">/</span><span class="dv">50</span>)<span class="sc">*</span>(<span class="sc">-</span><span class="dv">2</span><span class="sc">*</span>(<span class="dv">10</span><span class="sc">/</span><span class="dv">20</span>)<span class="sc">*</span><span class="fu">log</span>(<span class="dv">10</span><span class="sc">/</span><span class="dv">20</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>(<span class="dv">9</span><span class="sc">/</span><span class="dv">10</span>)<span class="sc">*</span>(<span class="dv">40</span><span class="sc">/</span><span class="dv">81</span>) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">/</span><span class="dv">10</span>)<span class="sc">*</span>(<span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.6591674</code></pre>
+<pre><code>[1] 0.4444444</code></pre>
 </div>
 </div>
-<p>while the entropy for Split 2 is</p>
+<p>to this split.So Gini prefers Split 1 (lower is better).</p>
+<p>The entropy of either node in split 1 is</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>(<span class="dv">15</span><span class="sc">/</span><span class="dv">50</span>)<span class="sc">*</span>(<span class="sc">-</span>(<span class="dv">10</span><span class="sc">/</span><span class="dv">15</span>)<span class="sc">*</span><span class="fu">log</span>(<span class="dv">10</span><span class="sc">/</span><span class="dv">15</span>)<span class="sc">-</span>(<span class="dv">5</span><span class="sc">/</span><span class="dv">15</span>)<span class="sc">*</span><span class="fu">log</span>(<span class="dv">5</span><span class="sc">/</span><span class="dv">15</span>))<span class="sc">+</span>(<span class="dv">35</span><span class="sc">/</span><span class="dv">50</span>)<span class="sc">*</span>(<span class="sc">-</span>(<span class="dv">20</span><span class="sc">/</span><span class="dv">35</span>)<span class="sc">*</span><span class="fu">log</span>(<span class="dv">20</span><span class="sc">/</span><span class="dv">35</span>)<span class="sc">-</span>(<span class="dv">15</span><span class="sc">/</span><span class="dv">35</span>)<span class="sc">*</span><span class="fu">log</span>(<span class="dv">15</span><span class="sc">/</span><span class="dv">35</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span>(<span class="dv">4</span><span class="sc">/</span><span class="dv">5</span>)<span class="sc">*</span><span class="fu">log</span>(<span class="dv">4</span><span class="sc">/</span><span class="dv">5</span>)<span class="sc">-</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>)<span class="sc">*</span><span class="fu">log</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.6689899</code></pre>
+<pre><code>[1] 0.5004024</code></pre>
+</div>
+</div>
+<p>while the weighted average of the two entropies for Split 2 is</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(<span class="dv">9</span><span class="sc">/</span><span class="dv">10</span>)<span class="sc">*</span>(<span class="sc">-</span>(<span class="dv">5</span><span class="sc">/</span><span class="dv">9</span>)<span class="sc">*</span><span class="fu">log</span>(<span class="dv">5</span><span class="sc">/</span><span class="dv">9</span>)<span class="sc">-</span>(<span class="dv">4</span><span class="sc">/</span><span class="dv">9</span>)<span class="sc">*</span><span class="fu">log</span>(<span class="dv">4</span><span class="sc">/</span><span class="dv">9</span>))<span class="sc">+</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">10</span>)<span class="sc">*</span><span class="dv">0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.6182654</code></pre>
 </div>
 </div>
 <p>So Entropy also has a slight preference for Split 1. Hurrah for consistency!</p>
-<p>Note that if we have <span class="math inline">\(K&gt; 2\)</span> classes and let <span class="math inline">\(p_i\)</span> be the proportion of observations in the node from class <span class="math inline">\(i\)</span>. Then by the “balls in the urn”” analogy the Gini Index becomes <span class="math display">\[
+<p>Note that if we have <span class="math inline">\(K&gt; 2\)</span> classes and let <span class="math inline">\(p_i\)</span> be the proportion of observations in the node from class <span class="math inline">\(i\)</span>, then by the “balls in the urn”” analogy the Gini Index becomes <span class="math display">\[
 \sum_{i=1}^K \sum_{j \neq i} p_i p_j
 \]</span> and entropy becomes <span class="math display">\[
 -\sum_{i=1}^K p_i \log p_i.
@@ -496,7 +504,7 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="a-note-on-pruning">A note on Pruning</h2>
 <p>Pruning can also be performed using complexity parameters although the meaning of this number is slightly different for classification trees. To begin, let’s take a look at the cp table from the output of rpart:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>goal_tree<span class="sc">$</span>cptable</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>goal_tree<span class="sc">$</span>cptable</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>          CP nsplit rel error    xerror       xstd
 1 0.04215852      0 1.0000000 1.0000000 0.03261998
@@ -507,29 +515,29 @@ window.Quarto = {
 <p>The output shows three different subtrees that we could get with 0, 2, and 3 splits. Let’s call the 0 split tree <span class="math inline">\(T_0\)</span>, the second one with 2 splits <span class="math inline">\(T_2\)</span> and the third and final one <span class="math inline">\(T_3\)</span>.</p>
 <p>Notice that the cross-validated error for <span class="math inline">\(T_2\)</span> is similar to <span class="math inline">\(T_3\)</span> so let’s try pruning at Cp=0.04 and looking at this tree</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>goal_tree2<span class="ot">=</span><span class="fu">prune</span>(goal_tree,<span class="at">cp=</span><span class="fl">0.04</span>)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(goal_tree2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>goal_tree2<span class="ot">=</span><span class="fu">prune</span>(goal_tree,<span class="at">cp=</span><span class="fl">0.04</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(goal_tree2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes2_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes2_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>The error rate for this tree can be calculated as for the full tree</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>pred_goals2<span class="ot">=</span><span class="fu">predict</span>(goal_tree2,<span class="at">data=</span>womenShots,<span class="at">type=</span><span class="st">"class"</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>r2<span class="ot">=</span><span class="fu">sum</span>(pred_goals2<span class="sc">!=</span>womenShots<span class="sc">$</span>Goal)<span class="sc">/</span><span class="fu">length</span>(womenShots<span class="sc">$</span>Goal)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>r2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>pred_goals2<span class="ot">=</span><span class="fu">predict</span>(goal_tree2,<span class="at">data=</span>womenShots,<span class="at">type=</span><span class="st">"class"</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>r2<span class="ot">=</span><span class="fu">sum</span>(pred_goals2<span class="sc">!=</span>womenShots<span class="sc">$</span>Goal)<span class="sc">/</span><span class="fu">length</span>(womenShots<span class="sc">$</span>Goal)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>r2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.3378967</code></pre>
 </div>
 </div>
 <p>Now, one natural definition of the Cp would be the relative ratio of this to the overall error rate of always guessing “Not Goal”:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>r0<span class="ot">=</span><span class="fu">sum</span>(womenShots<span class="sc">$</span>Goal<span class="sc">==</span><span class="st">"Goal"</span>)<span class="sc">/</span><span class="fu">length</span>(womenShots<span class="sc">$</span>Goal)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>r2<span class="sc">/</span>r0</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>r0<span class="ot">=</span><span class="fu">sum</span>(womenShots<span class="sc">$</span>Goal<span class="sc">==</span><span class="st">"Goal"</span>)<span class="sc">/</span><span class="fu">length</span>(womenShots<span class="sc">$</span>Goal)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>r2<span class="sc">/</span>r0</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.915683</code></pre>
 </div>
@@ -550,34 +558,34 @@ cp=(\Delta\;  rel.error)/(n_{splits})
 </ul>
 <p>Decision Trees are one of the most visually appealing and easy to interpret models in statistical learning, but they can perform poorly in predictive scenarios because they tend to suffer from high-variance. To demonstrate, let’s reload the election data and perform a 60-40 split, fitting a tree to the training set</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1205</span>)</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">50</span>,<span class="dv">30</span>)</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[s,]</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>trump_tree<span class="ot">=</span><span class="fu">rpart</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>train[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(trump_tree,<span class="at">palettes=</span><span class="st">"OrRd"</span>,<span class="at">sub=</span><span class="st">"Trump Vote Tree 1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1205</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">50</span>,<span class="dv">30</span>)</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[s,]</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>trump_tree<span class="ot">=</span><span class="fu">rpart</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>train[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(trump_tree,<span class="at">palettes=</span><span class="st">"OrRd"</span>,<span class="at">sub=</span><span class="st">"Trump Vote Tree 1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes2_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes2_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <p>Now let’s repeat with a different training set</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1206</span>)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">50</span>,<span class="dv">30</span>)</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[s,]</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>trump_tree<span class="ot">=</span><span class="fu">rpart</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>train[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(trump_tree,<span class="at">palettes=</span><span class="st">"OrRd"</span>,<span class="at">sub=</span><span class="st">"Trump Vote Tree 2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1206</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">50</span>,<span class="dv">30</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[s,]</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>trump_tree<span class="ot">=</span><span class="fu">rpart</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>train[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>])</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="fu">fancyRpartPlot</span>(trump_tree,<span class="at">palettes=</span><span class="st">"OrRd"</span>,<span class="at">sub=</span><span class="st">"Trump Vote Tree 2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes2_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes2_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
