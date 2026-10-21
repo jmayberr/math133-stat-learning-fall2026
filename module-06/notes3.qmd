@@ -4,7 +4,7 @@ title: "Module 6.3: Baggins and the Forest"
 
 ## The Bootstrap
 
-Bagging and random forests are both attempts to remedy the problem illustrated at the end of the last section by growing a large number of trees and assigning predictions to new values by averaging over all trees. Bagging is a special case of random forests and to understand either method, it is helpful to first discuss another important idea in statistics called bootstrapping. And to understand bootstrapping, we need to go back, back in time to the beginning of statistics and re-discuss the core concept of random sampling.
+Bagging and random forests are both attempts to remedy the problem illustrated at the end of the last section by growing a large number of trees and assigning predictions to new values by averaging over them all. Bagging is a special case of random forests, but to understand either method, we first need to talk about bootstrapping. And to understand bootstrapping, we need to go back, back in time to the beginning of statistics and re-discuss the core concept of random sampling.
 
 Suppose that we have a population in which a specific statistic (let's say IQ scores) is normally distributed with a population mean of 100 and a population SD of 15. If we know this information ahead of time, then we can simulate a random sample of 100 IQ scores using a random number generator like
 
@@ -14,15 +14,17 @@ rand.IQ=rnorm(100,mean=100,sd=15)
 hist(rand.IQ,xlab="Sample IQ Scores",main="",breaks=seq(50,150,by=10))
 ```
 
-However, if we don't know the population mean and SD (which is almost always the case in statistics), then we try to estimate them with the sample mean and Sd
+This is called a Monte Carlo Simulation and is all we need for a fully known distribution like the one above. However, if we don't know the population mean and SD (which is almost always the case in statistics), then we try to estimate them with the sample mean and standard deviation 
 
 ```{r}
 cat("Sample mean:",mean(rand.IQ),"\nSample sd:",sd(rand.IQ))
 ```
 
-which are, of course, pretty close, but not exactly equal to the population values of 100 and 15. Usually we want to take this a step further and ask for the standard error of the sample mean, a measure of how close we believe the sample mean will be to the unknown population mean (see Module 1.3). If we assume that our sample is a true random sample (independent and identically distributed draws from the population of interest), the we can compute the standard error of the sample mean from standard probability theory (C...L....T!) via the formula $$
+which are, of course, pretty close, but not exactly equal to the population values of 100 and 15. Usually we want to take this a step further and ask for the standard error of the sample mean, a measure of how close we believe the sample mean will be to the unknown population mean (see Module 1.3). If we assume that our sample is a true random sample (independent and identically distributed draws from the population of interest), then we can compute the standard error of the sample mean from standard probability theory (C...L....T!) via the formula 
+$$
 SE \approx s/\sqrt{n}
-$$ or in our example:
+$$ 
+or in our example:
 
 ```{r}
 SE=sd(rand.IQ)/sqrt(100)
@@ -53,7 +55,7 @@ sd(rand.Medians)
 
 This last number is an approximation of the SE for the sample median of 100 observations in our population. (Note: The role played by the 100 and the 1000 is quite different in this example. The 100 is the sample size; the number of people each researcher is allowed to check. The 1000 is the number of replicates; the number of independent experiments performed. If you reverse their roles, you will get very different results).
 
-Now most researchers don't have the time or resources to select 1000 different samples of size 100. Instead, they get one sample of size 100. Boostrapping is the idea that since we are already using this sample of size 100 to estimate population statistics, we might as well take it a step further and use it as a representation of the population itself. So instead of drawing 1000 samples of size 100 from the whole population, we draw 1000 samples of size 100 WITH REPLACEMENT from the sample. These are called bootstrapped (re)samples[^2] Since our statistics should be as spread out in the sample as they are in the population, we can use the SEs from the bootstrap samples to estimate the true SEs.
+Now most researchers don't have the time or resources to select 1000 different samples of size 100. Instead, they get one sample of size 100. Boostrapping is the idea that since we are already using this sample of size 100 to estimate population statistics, we might as well take it a step further and use it as a representation of the population itself. So instead of drawing 1000 samples of size 100 from the whole population, we draw 1000 samples of size 100 from the sample WITH REPLACEMENT. These are called bootstrapped (re)samples[^2] Since our statistics should be as spread out in the sample as they are in the population, we can use the SEs from the bootstrap samples to estimate the true SEs.
 
 [^2]: The name was introduced in Efron's 1979 paper on the "Bootstrap Method" when he comparing the process to the old phrase "pulling oneself up by one's boostraps". It seems like an impossible task to estimate the standard error of a statistic without more knowledge of the population and yet that is just what we do with this method.
 
@@ -101,7 +103,7 @@ test_set=election2016[-s,]
 
 ```
 
-Then we will fit both a regression tree on trump:
+Then we will fit both a regression tree on trump.vote:
 
 ```{r}
 library(rpart)
@@ -160,7 +162,7 @@ sum(pred_bag_class!=test_set$outcome)/length(test_set$outcome)
 
 ```
 
-Well...that was actually a little worse than the single tree. But remember, the predictors are highly correlated so we might not get much reduction in variance for bagging in this case. Let's try a random forest model with the default values of $m=3$.
+Also an improvement. Let's try random forest models with the default value of $m=3$.
 
 ```{r}
 trump_rf=randomForest(trump.vote~.,data=train_set[,2:10],mtry=3)
@@ -175,7 +177,7 @@ sqrt(mean((pred_rf_reg-test_set$trump.vote)^2))
 
 ```
 
-Ok, not much better than bagging, but close. What about classification?
+Okay, marginal gains over bagging. What about classification?
 
 ```{r}
 pred_rf_class=predict(outcome_rf,test_set,type="class")
@@ -189,14 +191,14 @@ The moral here is that bagging and/or random forests can lead to some gains in p
 
 ## Variable Importance and OOB
 
-There are two other helpful outputs from a bag or random forest model. The first is variable importance. For a regression model, the \_variable importance) of each predictor is calculated as the average reduction in MSE (called "IncNodePurity" in R) whenever that variable was used in a split. For our regression random forest, you can get these using either of the following commands:
+There are two other helpful outputs from a bag or random forest model. The first is variable importance. For a regression model, the variable importance of each predictor is calculated as the average reduction in MSE (called "IncNodePurity" in R) whenever that variable was used in a split. For our regression random forest, you can get these using either of the following commands:
 
 ```{r}
 trump_rf$importance
 varImpPlot(trump_rf)
 ```
 
-So the top five are median.income, non.citizen, metro,non.white, and white.pov. Note that the potential surrogates for non.citizen (metro and non.white) are given some props. That is the advantage of focusing on the whole forest! Also, you can see some advantages of the forest over plain bagging by comparing relative importance of variables:
+It looks like the top five are median.income, non.citizen, metro,non.white, and white.pov. Note that the potential surrogates for non.citizen (metro and non.white) are given some props. That is the advantage of focusing on the whole forest! Also, you can see some advantages of the forest over plain bagging by comparing relative importance of variables:
 
 ```{r}
 varImpPlot(trump_bag)
