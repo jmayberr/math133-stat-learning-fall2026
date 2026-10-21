@@ -1,0 +1,33 @@
+---
+title: "Class Notes 10-21"
+format: html
+---
+
+Iris Data
+
+```{r}
+library(rpart)
+library(rattle)
+species_tree=rpart(Species~.,
+                   data=iris,
+                   method="class")
+fancyRpartPlot(species_tree)
+```
+
+No need to prune:
+
+```{r}
+plotcp(species_tree)
+```
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/mushroom.csv"
+mushroom=read.csv(df_url)
+mush_tree=rpart(class~.,data=mushroom,method="class")
+fancyRpartPlot(mush_tree)
+```
+
+```{r}
+yhat=predict(mush_tree,mushroom,type="class")
+table(yhat,mushroom$class)
+```

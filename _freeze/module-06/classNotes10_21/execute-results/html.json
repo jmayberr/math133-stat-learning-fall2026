@@ -1,0 +1,17 @@
+{
+  "hash": "9e6d3d30dcfac74605086a4409d34cc1",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Class Notes 10-21\"\nformat: html\n---\n\nIris Data\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(rpart)\nlibrary(rattle)\nspecies_tree=rpart(Species~.,\n                   data=iris,\n                   method=\"class\")\nfancyRpartPlot(species_tree)\n```\n\n::: {.cell-output-display}\n![](classNotes10_21_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n:::\n\n\nNo need to prune:\n\n\n::: {.cell}\n\n```{.r .cell-code}\nplotcp(species_tree)\n```\n\n::: {.cell-output-display}\n![](classNotes10_21_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\ndf_url=\"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/mushroom.csv\"\nmushroom=read.csv(df_url)\nmush_tree=rpart(class~.,data=mushroom,method=\"class\")\nfancyRpartPlot(mush_tree)\n```\n\n::: {.cell-output-display}\n![](classNotes10_21_files/figure-html/unnamed-chunk-3-1.png){width=672}\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nyhat=predict(mush_tree,mushroom,type=\"class\")\ntable(yhat,mushroom$class)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n    \nyhat    e    p\n   e 4208   48\n   p    0 3868\n```\n\n\n:::\n:::\n\n",
+    "supporting": [
+      "classNotes10_21_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

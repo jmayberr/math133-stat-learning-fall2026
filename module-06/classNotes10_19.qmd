@@ -1,5 +1,5 @@
 ---
-title: "Class Notes for 10-20"
+title: "Class Notes for 10-19"
 format: html
 ---
 
