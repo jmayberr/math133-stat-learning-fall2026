@@ -361,7 +361,7 @@ window.Quarto = {
 
 <section id="the-bootstrap" class="level2">
 <h2 class="anchored" data-anchor-id="the-bootstrap">The Bootstrap</h2>
-<p>Bagging and random forests are both attempts to remedy the problem illustrated at the end of the last section by growing a large number of trees and assigning predictions to new values by averaging over all trees. Bagging is a special case of random forests and to understand either method, it is helpful to first discuss another important idea in statistics called bootstrapping. And to understand bootstrapping, we need to go back, back in time to the beginning of statistics and re-discuss the core concept of random sampling.</p>
+<p>Bagging and random forests are both attempts to remedy the problem illustrated at the end of the last section by growing a large number of trees and assigning predictions to new values by averaging over them all. Bagging is a special case of random forests, but to understand either method, we first need to talk about bootstrapping. And to understand bootstrapping, we need to go back, back in time to the beginning of statistics and re-discuss the core concept of random sampling.</p>
 <p>Suppose that we have a population in which a specific statistic (let’s say IQ scores) is normally distributed with a population mean of 100 and a population SD of 15. If we know this information ahead of time, then we can simulate a random sample of 100 IQ scores using a random number generator like</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
@@ -375,7 +375,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>However, if we don’t know the population mean and SD (which is almost always the case in statistics), then we try to estimate them with the sample mean and Sd</p>
+<p>This is called a Monte Carlo Simulation and is all we need for a fully known distribution like the one above. However, if we don’t know the population mean and SD (which is almost always the case in statistics), then we try to estimate them with the sample mean and standard deviation</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Sample mean:"</span>,<span class="fu">mean</span>(rand.IQ),<span class="st">"</span><span class="sc">\n</span><span class="st">Sample sd:"</span>,<span class="fu">sd</span>(rand.IQ))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -383,7 +383,7 @@ window.Quarto = {
 Sample sd: 13.47299</code></pre>
 </div>
 </div>
-<p>which are, of course, pretty close, but not exactly equal to the population values of 100 and 15. Usually we want to take this a step further and ask for the standard error of the sample mean, a measure of how close we believe the sample mean will be to the unknown population mean (see Module 1.3). If we assume that our sample is a true random sample (independent and identically distributed draws from the population of interest), the we can compute the standard error of the sample mean from standard probability theory (C…L….T!) via the formula <span class="math display">\[
+<p>which are, of course, pretty close, but not exactly equal to the population values of 100 and 15. Usually we want to take this a step further and ask for the standard error of the sample mean, a measure of how close we believe the sample mean will be to the unknown population mean (see Module 1.3). If we assume that our sample is a true random sample (independent and identically distributed draws from the population of interest), then we can compute the standard error of the sample mean from standard probability theory (C…L….T!) via the formula <span class="math display">\[
 SE \approx s/\sqrt{n}
 \]</span> or in our example:</p>
 <div class="cell">
@@ -411,7 +411,7 @@ SE \approx s/\sqrt{n}
 </div>
 </div>
 <p>This last number is an approximation of the SE for the sample median of 100 observations in our population. (Note: The role played by the 100 and the 1000 is quite different in this example. The 100 is the sample size; the number of people each researcher is allowed to check. The 1000 is the number of replicates; the number of independent experiments performed. If you reverse their roles, you will get very different results).</p>
-<p>Now most researchers don’t have the time or resources to select 1000 different samples of size 100. Instead, they get one sample of size 100. Boostrapping is the idea that since we are already using this sample of size 100 to estimate population statistics, we might as well take it a step further and use it as a representation of the population itself. So instead of drawing 1000 samples of size 100 from the whole population, we draw 1000 samples of size 100 WITH REPLACEMENT from the sample. These are called bootstrapped (re)samples<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> Since our statistics should be as spread out in the sample as they are in the population, we can use the SEs from the bootstrap samples to estimate the true SEs.</p>
+<p>Now most researchers don’t have the time or resources to select 1000 different samples of size 100. Instead, they get one sample of size 100. Boostrapping is the idea that since we are already using this sample of size 100 to estimate population statistics, we might as well take it a step further and use it as a representation of the population itself. So instead of drawing 1000 samples of size 100 from the whole population, we draw 1000 samples of size 100 from the sample WITH REPLACEMENT. These are called bootstrapped (re)samples<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> Since our statistics should be as spread out in the sample as they are in the population, we can use the SEs from the bootstrap samples to estimate the true SEs.</p>
 <p>Here is an example based on our previously drawn sample of 100 IQ scores</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>boot.Medians<span class="ot">=</span><span class="fu">replicate</span>(<span class="dv">1000</span>, </span>
@@ -447,7 +447,7 @@ Var(\bar{X}) = \sum_{i,j=1}^n Cov(X_i,X_j)/n^2
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>train_set<span class="ot">=</span>election2016[s,]</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>test_set<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Then we will fit both a regression tree on trump:</p>
+<p>Then we will fit both a regression tree on trump.vote:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rpart)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rattle)</span>
@@ -511,7 +511,7 @@ Var(\bar{X}) = \sum_{i,j=1}^n Cov(X_i,X_j)/n^2
 <pre><code>[1] 0.3</code></pre>
 </div>
 </div>
-<p>Well…that was actually a little worse than the single tree. But remember, the predictors are highly correlated so we might not get much reduction in variance for bagging in this case. Let’s try a random forest model with the default values of <span class="math inline">\(m=3\)</span>.</p>
+<p>Also an improvement. Let’s try random forest models with the default value of <span class="math inline">\(m=3\)</span>.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>trump_rf<span class="ot">=</span><span class="fu">randomForest</span>(trump.vote<span class="sc">~</span>.,<span class="at">data=</span>train_set[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>],<span class="at">mtry=</span><span class="dv">3</span>)</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>outcome_rf<span class="ot">=</span><span class="fu">randomForest</span>(<span class="fu">as.factor</span>(outcome)<span class="sc">~</span>.,<span class="at">data=</span>train_set[<span class="fu">c</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>,<span class="dv">11</span>)],<span class="at">mtry=</span><span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -524,7 +524,7 @@ Var(\bar{X}) = \sum_{i,j=1}^n Cov(X_i,X_j)/n^2
 <pre><code>[1] 0.06273066</code></pre>
 </div>
 </div>
-<p>Ok, not much better than bagging, but close. What about classification?</p>
+<p>Okay, marginal gains over bagging. What about classification?</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>pred_rf_class<span class="ot">=</span><span class="fu">predict</span>(outcome_rf,test_set,<span class="at">type=</span><span class="st">"class"</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(pred_rf_class<span class="sc">!=</span>test_set<span class="sc">$</span>outcome)<span class="sc">/</span><span class="fu">length</span>(test_set<span class="sc">$</span>outcome)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -537,7 +537,7 @@ Var(\bar{X}) = \sum_{i,j=1}^n Cov(X_i,X_j)/n^2
 </section>
 <section id="variable-importance-and-oob" class="level2">
 <h2 class="anchored" data-anchor-id="variable-importance-and-oob">Variable Importance and OOB</h2>
-<p>There are two other helpful outputs from a bag or random forest model. The first is variable importance. For a regression model, the _variable importance) of each predictor is calculated as the average reduction in MSE (called “IncNodePurity” in R) whenever that variable was used in a split. For our regression random forest, you can get these using either of the following commands:</p>
+<p>There are two other helpful outputs from a bag or random forest model. The first is variable importance. For a regression model, the variable importance of each predictor is calculated as the average reduction in MSE (called “IncNodePurity” in R) whenever that variable was used in a split. For our regression random forest, you can get these using either of the following commands:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>trump_rf<span class="sc">$</span>importance</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -560,7 +560,7 @@ non.white        0.03646641</code></pre>
 </div>
 </div>
 </div>
-<p>So the top five are median.income, non.citizen, metro,non.white, and white.pov. Note that the potential surrogates for non.citizen (metro and non.white) are given some props. That is the advantage of focusing on the whole forest! Also, you can see some advantages of the forest over plain bagging by comparing relative importance of variables:</p>
+<p>It looks like the top five are median.income, non.citizen, metro,non.white, and white.pov. Note that the potential surrogates for non.citizen (metro and non.white) are given some props. That is the advantage of focusing on the whole forest! Also, you can see some advantages of the forest over plain bagging by comparing relative importance of variables:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">varImpPlot</span>(trump_bag)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
