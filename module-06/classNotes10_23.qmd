@@ -26,6 +26,22 @@ train=df[s,]
 test=df[-s,]
 ```
 
+```{r}
+library(randomForest)
+fantasy_rf=randomForest(fantasy_points_ppr~.,
+                        data=train[,-1])
+fantasy_rf
+```
+
+```{r}
+yhat=predict(fantasy_rf,test)
+sqrt(mean((test$fantasy_points_ppr-yhat)^2)) # RMSE
+```
+
+```{r}
+varImpPlot(fantasy_rf)
+```
+
 ## Classification Example
 
 ```{r}
@@ -40,4 +56,18 @@ n=nrow(df)
 s=sample(n,0.7*n)
 train=df[s,]
 test=df[-s,]
+```
+
+```{r}
+mush_rf=randomForest(factor(class)~.,data=train)
+mush_rf
+```
+
+```{r}
+yhat=predict(mush_rf,newdata=test,type="class")
+table(yhat,test$class)
+```
+
+```{r}
+varImpPlot(mush_rf)
 ```
