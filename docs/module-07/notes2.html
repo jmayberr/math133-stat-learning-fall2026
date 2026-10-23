@@ -413,8 +413,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<p>Notice that in this case, the boundary between the two classes, though blurred in many ways, is basically linear; I could draw a line which would roughly separate the two clusters. This line can be found using logistic regression.</p>
-<p>First, we fit the model which to remind you takes the following commands:</p>
+<p>Notice that in this case, the boundary between the two classes, though blurred in many ways, is basically linear; I could draw a line which would roughly separate the two clusters. This line can be found using logistic regression as in Module 3:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fake_glm <span class="ot">=</span> <span class="fu">glm</span>(</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  class <span class="sc">~</span> x1 <span class="sc">+</span> x2,</span>
@@ -445,8 +444,7 @@ AIC: 197.1
 Number of Fisher Scoring iterations: 7</code></pre>
 </div>
 </div>
-<p>Notice here that the “positive” class is B; the logistic model spits out the probability that an observation fits into this class. We classify an observation as B when its estimated probability exceeds 0.5, and as A otherwise.</p>
-<p>We can plot the decision boundary using code similar<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> to what we did in Section 3.2:</p>
+<p>Note that the “positive” class is B; the logistic model spits out the probability that an observation fits into this class. We classify an observation as B when its estimated probability exceeds 0.5, and as A otherwise. We can plot the decision boundary using code similar<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> to what we did in Section 3.2:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>plot_boundary<span class="ot">=</span><span class="cf">function</span>(model,data){</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  grid <span class="ot">=</span> <span class="fu">expand_grid</span>(</span>
@@ -595,8 +593,8 @@ Number of Fisher Scoring iterations: 7</code></pre>
 <pre><code>Accuracy: 0.6466667</code></pre>
 </div>
 </div>
-<p>That’s pretty bad!</p>
-<p>The reason is that logistic regression cannot enclose the inner disk with a straight line. This is not just a problem in how we estimated coefficients,its a limitation of the model structure.</p>
+<p>Now that’s shitty!</p>
+<p>The reason is that logistic regression cannot enclose the inner disk with a straight line. This is not just a problem in how we estimated coefficients,its a limitation of the model structure<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
 </section>
 <section id="how-do-we-fix-it" class="level2">
 <h2 class="anchored" data-anchor-id="how-do-we-fix-it">How do we fix it?</h2>
@@ -682,7 +680,13 @@ r = \sqrt{X_1^2 + X_2^2}
 <section id="where-neural-networks-come-in" class="level2">
 <h2 class="anchored" data-anchor-id="where-neural-networks-come-in">Where neural networks come in…</h2>
 <p>The issue is that with real data, you might not be able to see a clear circular structure like you can in this fake example and instead need your algorithm to find it for you. That’s where a neural network helps us out. Instead of manually constructing a squared-distance feature, we let the model learn intermediate features from the original predictors.</p>
-<p>A neural network contains a series of hidden units which try to “learn” patterns in the data before passing these patterns off to logistic regression (or a similar type of “activation function”) to use as features. In other words, it engineers its own features for the model.</p>
+<p>A neural network contains a series of layers. First, the input layer consists of the inputs (i.e., features) that we give the model. Next, a hidden layer consists of hidden units that learn patterns in the data. Each hidden unit takes a weighted sum of the inputs and passes it through a function called an activation function. For example, a logistic (sigmoid) function can serve as an activation function, although many modern neural networks use the ReLU function instead. In this way, the network engineers its own features in the hidden layer and passes these learned features to an output layer, which uses them to make the final predictions. The diagram below illustrates this architecture:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="nnet.jfif" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>Architecture of a neural network</figcaption>
+</figure>
+</div>
 <p>The <code>nnet</code> package in R contains some basic features for fitting neural networks to data. We’ll start with 8 hidden units (<code>size = 8</code>):</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nnet)</span>
@@ -822,14 +826,6 @@ stopped after 100 iterations</code></pre>
 </div>
 </div>
 </div>
-<p>Compare the resulting boundaries and test accuracies.</p>
-<p>Questions to consider:</p>
-<ol type="1">
-<li>Does increasing the number of hidden units always improve test accuracy?</li>
-<li>Which models produce the smoothest or most complicated decision boundaries?</li>
-<li>Why does a neural network need a nonlinear activation function?</li>
-<li>What is the difference between manually adding a nonlinear feature and learning intermediate features in a neural network?</li>
-</ol>
 </section>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
@@ -851,6 +847,7 @@ stopped after 100 iterations</code></pre>
 <li id="fn1"><p>I’ll try to write a supplement later.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>Exception: switched to geom_raster here for a nicer way to fill the regions. Also turning it into a function for duplicate use<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>Not gonna lie, outsourced the code for this one to chatGPT.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Hold your head up high logistic, we still love you. Everyone has their limits.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

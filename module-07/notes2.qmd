@@ -15,7 +15,7 @@ I have debated long and hard on how to present this topic. As a mathematician, I
 
 There are A LOT of predefined functions and workflows. We could just learn them and be done with it. But then you don't get any insights beyond the black box so I don't really want to start there either. 
 
-Short of outsourcing this to 3Blue1Brown (which I do highly recommend you watch), the starting place I have decided on is decision boundaries. We talked about this topic back in Module 3 with logistic regression so we'll begin with a review of what type of decision boundaries arise in such models and then discuss when they fail.  
+Short of outsourcing this to 3Blue1Brown's Deep Learning series (which I do highly recommend you watch), the starting place I have decided on is decision boundaries for classification problems. We talked about this topic back in Module 3 with logistic regression so we'll begin with a review of what type of decision boundaries arise in such models and then discuss when they fail.  
 
 ## Linear Decision Boundary
 
@@ -59,9 +59,7 @@ ggplot(fake_data, aes(x1, x2, color = class)) +
   theme_minimal()
 ```
 
-Notice that in this case, the boundary between the two classes, though blurred in many ways, is basically linear; I could draw a line which would roughly separate the two clusters. This line can be found using logistic regression. 
-
-First, we fit the model which to remind you takes the following commands: 
+Notice that in this case, the boundary between the two classes, though blurred in many ways, is basically linear; I could draw a line which would roughly separate the two clusters. This line can be found using logistic regression as in Module 3: 
 
 ```{r}
 fake_glm = glm(
@@ -73,9 +71,7 @@ fake_glm = glm(
 summary(fake_glm)
 ```
 
-Notice here that the "positive" class is B; the logistic model spits out the probability that an observation fits into this class.  We classify an observation as B when its estimated probability exceeds 0.5, and as A otherwise.
-
-We can plot the decision boundary using code similar^[Exception: switched to geom_raster here for a nicer way to fill the regions. Also turning it into a function for duplicate use] to what we did in Section 3.2: 
+Note that the "positive" class is B; the logistic model spits out the probability that an observation fits into this class.  We classify an observation as B when its estimated probability exceeds 0.5, and as A otherwise. We can plot the decision boundary using code similar^[Exception: switched to geom_raster here for a nicer way to fill the regions. Also turning it into a function for duplicate use] to what we did in Section 3.2: 
 
 ```{r}
 plot_boundary=function(model,data){
@@ -210,9 +206,9 @@ and accuracy:
 calculate_accuracy(disk_glm,test)
 ```
 
-That's pretty bad! 
+Now that's shitty! 
 
-The reason is that logistic regression cannot enclose the inner disk with a straight line. This is not just a problem in how we estimated coefficients,its a limitation of the model structure. 
+The reason is that logistic regression cannot enclose the inner disk with a straight line. This is not just a problem in how we estimated coefficients,its a limitation of the model structure^[Hold your head up high logistic, we still love you. Everyone has their limits.].  
 
 ## How do we fix it? 
 
@@ -290,12 +286,13 @@ calculate_accuracy(disk_glm_radius,disk_test)
 
 That is quite an improvement in accuracy! This model can learn a circular decision boundary because the squared-distance feature is nonlinear in the original predictors.
 
-
 ## Where neural networks come in...
 
 The issue is that with real data, you might not be able to see a clear circular structure like you can in this fake example and instead need your algorithm to find it for you. That's where a neural network helps us out. Instead of manually constructing a squared-distance feature, we let the model learn intermediate features from the original predictors.
 
-A neural network contains a series of hidden units which try to "learn" patterns in the data before passing these patterns off to logistic regression (or a similar type of "activation function") to use as features. In other words, it engineers its own features for the model. 
+A neural network contains a series of layers. First, the input layer consists of the inputs (i.e., features) that we give the model. Next, a hidden layer consists of hidden units that learn patterns in the data. Each hidden unit takes a weighted sum of the inputs and passes it through a function called an activation function. For example, a logistic (sigmoid) function can serve as an activation function, although many modern neural networks use the ReLU function instead. In this way, the network engineers its own features in the hidden layer and passes these learned features to an output layer, which uses them to make the final predictions. The diagram below illustrates this architecture:
+
+![Architecture of a neural network](nnet.jfif){fig-align="center" width="60%" fig-cap="Architecture of a neural network."}
 
 The `nnet` package in R contains some basic features for fitting neural networks to data. We'll start with 8 hidden units (`size = 8`):
 
@@ -361,7 +358,7 @@ Slow...clap.
 
 ## Experimenting with the network architecture
 
-What happens when we change the number of hidden units?
+There are a number of hyperparameters hidden underneath the hood a neural network, but one of the most transparent is `size`. Using `size = 0` would be equivalent to fitting a logistic regression model^[Although this choice is not supported by the function `nnet`.] (no hidden units). The graphs below demonstrate how the decision boundary depends on this parameter in our example:
 
 ```{r,message=FALSE}
 fit_network = function(size, data) {
@@ -391,14 +388,19 @@ plot_boundary_nn(nn_16,disk_train) +
   labs(title="Size = 16")
 ```
 
-Compare the resulting boundaries and test accuracies.
+You can see how the learning of the circular boundary shape improves with the number of hidden units in this example. However, I would be cautious about using too many hidden units in general because of the potential for overfitting. The bias-variance tradeoff still applies (larger size, higher bias)! 
 
-Questions to consider:
+## A real data example
 
-1. Does increasing the number of hidden units always improve test accuracy?
-2. Which models produce the smoothest or most complicated decision boundaries?
-3. Why does a neural network need a nonlinear activation function?
-4. What is the difference between manually adding a nonlinear feature and learning intermediate features in a neural network?
+Before we look at examples with real data, note that neural networks (like random forests, trees, and gradient boosting) can be applied to both classification and regressions problem. Since the examples above are all in the classification setting, we'll start there with our water polo dataset
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"
+womenShots=read.csv(df_url) %>%
+  select(-X.1,-X,-start.time,-end.time,-category)
+formula=Goal~Tactic+Type+Hand+Defense+distance+abs(angle)
+
+```
 
 ## Summary
 
