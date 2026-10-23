@@ -1,0 +1,43 @@
+---
+title: "Class Notes for 10-23"
+format: html
+---
+
+## Regression Example
+
+```{r}
+library(tidyverse)
+library(nflreadr)
+fantasy2026 <- load_player_stats(2026, summary_level = "reg") |>
+  dplyr::filter(position %in% c("RB","WR","TE")) |>
+  select(player_display_name,position,games,
+         carries,rushing_yards,rushing_tds,
+         receptions,targets,receiving_yards,receiving_tds,
+         fantasy_points_ppr)|>
+  as.data.frame() 
+```
+
+```{r}
+set.seed(1023)
+df=fantasy2026
+n=nrow(df)
+s=sample(n,0.7*n)
+train=df[s,]
+test=df[-s,]
+```
+
+## Classification Example
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/mushroom.csv"
+mushroom=read.csv(df_url)
+```
+
+```{r}
+set.seed(1023)
+df=mushroom
+n=nrow(df)
+s=sample(n,0.7*n)
+train=df[s,]
+test=df[-s,]
+```
