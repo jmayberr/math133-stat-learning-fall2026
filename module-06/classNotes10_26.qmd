@@ -1,0 +1,64 @@
+---
+title: "Class Note 10-26"
+format: html
+---
+
+```{r}
+head(iris)
+```
+
+```{r}
+library(tidymodels)
+# Step 1: Define Decision Tree specs
+tree_specs=decision_tree()|>
+  set_engine("rpart") |>
+  set_mode("classification")
+
+# Step 2: cv plan
+cv_plan=vfold_cv(iris,v=10)
+
+# Step 3: fit resample (10-fold CV)
+tree_model=fit_resamples(tree_specs,
+                         Species~.,
+                         cv_plan)
+
+collect_metrics(tree_model)
+```
+
+```{r}
+#Step 4: Fit model
+tree_fit=fit(tree_specs,
+             Species~.,
+             iris)
+
+library(rattle)
+fancyRpartPlot(extract_fit_engine(tree_fit))
+```
+
+```{r}
+#Step 1: Define model
+rf_specs=rand_forest(mtry=tune())|>
+  set_engine("ranger") |>
+  set_mode("classification")
+
+# Step 2: Already defined CV plan
+
+#STep 3: Define tuning grid and fit
+mtry_grid=grid_regular(
+  mtry(range=c(1,4)),
+  levels=4
+)
+
+rf_models=tune_grid(rf_specs,
+                    Species~.,
+                    cv_plan)
+autoplot(rf_models)
+```
+
+```{r}
+best_mtry=select_best(rf_models,metric="accuracy")
+rf_final=finalize_model(rf_specs,best_mtry)
+rf_fit=fit(rf_final,
+           Species~.,
+           iris)
+```
