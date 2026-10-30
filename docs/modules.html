@@ -311,7 +311,14 @@ window.Quarto = {
  <span class="menu-text">Module 7</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-module-7">    
-        <li class="dropdown-header">Notes 1: …</li>
+        <li>
+    <a class="dropdown-item" href="./module-07/notes1.html">
+ <span class="dropdown-text">Module 7.1: Gradient Boosting</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./module-07/notes2.html">
+ <span class="dropdown-text">Module 7.2: Decision Boundaries and Neural Networks</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -899,7 +906,7 @@ Class Notes 10-16
 </div>
 </div></a>
 </div>
-<div class="g-col-1" data-index="40" data-listing-file-modified-sort="1791567798262" data-listing-reading-time-sort="16" data-listing-word-count-sort="3045">
+<div class="g-col-1" data-index="40" data-listing-file-modified-sort="1793132933905" data-listing-reading-time-sort="16" data-listing-word-count-sort="3067">
 <a href="./module-05/notes1.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
 <div class="card-body post-contents">
@@ -972,7 +979,7 @@ This section requires some background in linear algebra.
 Class Notes for 10-19
 </h5>
 <div class="card-text listing-description delink">
-
+Pruning
 </div>
 </div>
 </div></a>
@@ -999,11 +1006,18 @@ Class Notes for 10-23
 </h5>
 <div class="card-text listing-description delink">
 
+
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><span class="fu">library</span>(nflreadr)</span>
+<span id="cb1-3">fantasy2026 <span class="ot">&lt;-</span> <span class="fu">load_player_stats</span>(<span class="dv">2026</span>, <span class="at">summary_level =</span> <span class="st">"reg"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-4">  dplyr<span class="sc">::</span><span class="fu">filter</span>(position <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"RB"</span>,<span class="st">"WR"</span>,<span class="st">"TE"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb1-5">  <span class="fu">select</span>(player_d…</span><span id="cb1-6"></span><span id="cb1-7"></span><span id="cb1-8"><span class="sc"></span></span><span id="cb1-9"><span class="fu"></span></span></code></pre></div></div></div><div class="cell"><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu"></span><span class="dv"></span></span><span id="cb2-2"><span class="ot"></span></span><span id="cb2-3"><span class="ot"></span><span class="fu"></span></span><span id="cb2-4"><span class="ot"></span><span class="fu"></span><span class="fl"></span><span class="sc"></span></span><span id="cb2-5"><span class="ot"></span></span><span id="cb2-6"><span class="ot"></span><span class="sc"></span></span></code></pre></div></div></div><div class="cell"><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu"></span></span><span id="cb3-2"><span class="ot"></span><span class="fu"></span><span class="sc"></span></span><span id="cb3-3"><span class="at"></span><span class="sc"></span><span class="dv"></span></span><span id="cb3-4"></span></code></pre></div></div><div class="cell-output cell-output-stdout"><pre><code></code></pre></div></div><div class="cell"><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><span class="ot"></span><span class="fu"></span></span><span id="cb5-2"><span class="fu"></span><span class="fu"></span><span class="sc"></span><span class="sc"></span><span class="sc"></span><span class="dv"></span><span class="co"></span></span></code></pre></div></div><div class="cell-output cell-output-stdout"><pre><code></code></pre></div></div><div class="cell"><div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><span class="fu"></span></span></code></pre></div></div><div class="cell-output-display"><div><figure class="figure"><p></p></figure></div></div></div>
 </div>
 </div>
 </div></a>
 </div>
-<div class="g-col-1" data-index="48" data-listing-file-modified-sort="1793035054188" data-listing-reading-time-sort="1" data-listing-word-count-sort="181">
+<div class="g-col-1" data-index="48" data-listing-file-modified-sort="1793035956366" data-listing-reading-time-sort="2" data-listing-word-count-sort="203">
 <a href="./module-06/classNotes10_26.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
 <div class="card-body post-contents">
@@ -1073,12 +1087,12 @@ The R supplement from Module 4 introduced the <code>tidymodels</code> package as
 </div>
 </div></a>
 </div>
-<div class="g-col-1" data-index="53" data-listing-file-modified-sort="1792096028897" data-listing-reading-time-sort="13" data-listing-word-count-sort="2416">
+<div class="g-col-1" data-index="53" data-listing-file-modified-sort="1793375670600" data-listing-reading-time-sort="13" data-listing-word-count-sort="2416">
 <a href="./module-07/notes1.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
 <div class="card-body post-contents">
 <h5 class="no-anchor card-title listing-title">
-Booster Seats
+Module 7.1: Booster Seats
 </h5>
 <div class="card-text listing-description delink">
 Random Forests are a powerful technique for reducing variance in tree models, but they are kind of dense (pun totally intended) because they don’t learn from their own…
@@ -1086,7 +1100,7 @@ Random Forests are a powerful technique for reducing variance in tree models, bu
 </div>
 </div></a>
 </div>
-<div class="g-col-1" data-index="54" data-listing-file-modified-sort="1792704209939" data-listing-reading-time-sort="12" data-listing-word-count-sort="2336">
+<div class="g-col-1" data-index="54" data-listing-file-modified-sort="1793142378066" data-listing-reading-time-sort="16" data-listing-word-count-sort="3056">
 <a href="./module-07/notes2.html" class="quarto-grid-link">
 <div class="quarto-grid-item card h-100 card-left">
 <div class="card-body post-contents">

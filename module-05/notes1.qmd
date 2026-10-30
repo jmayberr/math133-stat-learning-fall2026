@@ -284,7 +284,7 @@ so maybe in this example PCA driven dimension reduction is not the way to go. Th
 
 The problem with using PCA for unsupervised learning is twofold. First, there are no great rules for choosing how many PCs to look at in classifying points. A *scree plot* is one commonly used tool for this purpose which plots the standard deviations of the principal components vs component number and looks for "elbows[^9]"
 
-[^9]: The name scree plot comes from the connection to elbows.
+[^9]: The name scree plot comes from geology and refers to a collection of loose rocks lying on the slope. If you look it up some pictures, the connection will make sense. 
 
 ```{r}
 scree=data.frame(Component=1:8,Std.Dev=states_pc_full$sdev )
