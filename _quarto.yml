@@ -83,7 +83,10 @@ website:
             text: "Module 6 R Tools: Return of Tidymodels"
       - text: "Module 7"
         menu:
-          - text: "Notes 1: ..."
+          - href: module-07/notes1.qmd
+            text: "Module 7.1: Gradient Boosting"
+          - href: module-07/notes2.qmd
+            text: "Module 7.2: Decision Boundaries and Neural Networks"
       - text: "Module 8"
         menu:
           - text: "Notes 1: ..."

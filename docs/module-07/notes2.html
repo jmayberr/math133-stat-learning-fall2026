@@ -314,7 +314,14 @@ window.Quarto = {
  <span class="menu-text">Module 7</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-module-7">    
-        <li class="dropdown-header">Notes 1: …</li>
+        <li>
+    <a class="dropdown-item" href="../module-07/notes1.html">
+ <span class="dropdown-text">Module 7.1: Gradient Boosting</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-07/notes2.html">
+ <span class="dropdown-text">Module 7.2: Decision Boundaries and Neural Networks</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -364,7 +371,7 @@ window.Quarto = {
 <p>And now folks, we get down to it. The piece de resistance of 21st century statistics: neural networks.</p>
 <p>I have debated long and hard on how to present this topic. As a mathematician, I like theory and there is A LOT of linear algebra going on under the hood, but I don’t want to get caught up in those details<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. So let’s not start there.</p>
 <p>There are A LOT of predefined functions and workflows. We could just learn them and be done with it. But then you don’t get any insights beyond the black box so I don’t really want to start there either.</p>
-<p>Short of outsourcing this to 3Blue1Brown (which I do highly recommend you watch), the starting place I have decided on is decision boundaries. We talked about this topic back in Module 3 with logistic regression so we’ll begin with a review of what type of decision boundaries arise in such models and then discuss when they fail.</p>
+<p>Short of outsourcing this to 3Blue1Brown’s Deep Learning series (which I do highly recommend you watch), the starting place I have decided on is decision boundaries for classification problems. We talked about this topic back in Module 3 with logistic regression so we’ll begin with a review of what type of decision boundaries arise in such models and then discuss when they fail.</p>
 </section>
 <section id="linear-decision-boundary" class="level2">
 <h2 class="anchored" data-anchor-id="linear-decision-boundary">Linear Decision Boundary</h2>
@@ -693,65 +700,50 @@ r = \sqrt{X_1^2 + X_2^2}
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>disk_nn <span class="ot">=</span> <span class="fu">nnet</span>(</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  class <span class="sc">~</span> x1 <span class="sc">+</span> x2,</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> disk_train,</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">size =</span> <span class="dv">8</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># weights:  33
-initial  value 271.750178 
-iter  10 value 64.094507
-iter  20 value 27.946554
-iter  30 value 7.907937
-iter  40 value 1.146842
-iter  50 value 0.150448
-iter  60 value 0.030039
-iter  70 value 0.001714
-iter  80 value 0.001302
-iter  90 value 0.000581
-iter 100 value 0.000353
-final  value 0.000353 
-stopped after 100 iterations</code></pre>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">size =</span> <span class="dv">8</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace=</span><span class="cn">FALSE</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-<p>The hidden units combine the original predictors using learned weights and apply nonlinear activation functions. The output layer uses these learned features to predict the class.</p>
+<p>The <code>trace=FALSE</code> just suppresses the output showing the iterations. The hidden units combine the original predictors using learned weights and apply nonlinear activation functions. The output layer uses these learned features to predict the class.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plot_boundary_nn<span class="ot">=</span><span class="cf">function</span>(model,data){</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  grid <span class="ot">=</span> <span class="fu">expand_grid</span>(</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">x1 =</span> <span class="fu">seq</span>(<span class="fu">min</span>(data<span class="sc">$</span>x1) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="fu">max</span>(data<span class="sc">$</span>x1) <span class="sc">+</span> <span class="fl">0.5</span>,</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">length.out =</span> <span class="dv">250</span>),</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">x2 =</span> <span class="fu">seq</span>(<span class="fu">min</span>(data<span class="sc">$</span>x2) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="fu">max</span>(data<span class="sc">$</span>x2) <span class="sc">+</span> <span class="fl">0.5</span>,</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">length.out =</span> <span class="dv">250</span>)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  grid<span class="sc">$</span>pred_class <span class="ot">=</span> <span class="fu">predict</span>(model, grid, <span class="at">type =</span> <span class="st">"class"</span>)</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  grid <span class="ot">=</span> grid <span class="sc">|&gt;</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">pred_class =</span> <span class="fu">factor</span>(pred_class, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>)))</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>(</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> grid,</span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(x1, x2, <span class="at">fill =</span> pred_class),</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="fl">0.2</span></span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(</span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> data,</span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(x1, x2, <span class="at">color =</span> class),</span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="fl">0.7</span></span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> class_colors) <span class="sc">+</span></span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> class_colors) <span class="sc">+</span></span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> <span class="st">"X1"</span>,</span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="st">"X2"</span>,</span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">"Observed class"</span>,</span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> <span class="st">"Predicted class"</span></span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
-<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span>
-<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_boundary_nn</span>(</span>
-<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>  disk_nn, </span>
-<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>  disk_train</span>
-<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>plot_boundary_nn<span class="ot">=</span><span class="cf">function</span>(model,data){</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  grid <span class="ot">=</span> <span class="fu">expand_grid</span>(</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">x1 =</span> <span class="fu">seq</span>(<span class="fu">min</span>(data<span class="sc">$</span>x1) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="fu">max</span>(data<span class="sc">$</span>x1) <span class="sc">+</span> <span class="fl">0.5</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">length.out =</span> <span class="dv">250</span>),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">x2 =</span> <span class="fu">seq</span>(<span class="fu">min</span>(data<span class="sc">$</span>x2) <span class="sc">-</span> <span class="fl">0.5</span>, <span class="fu">max</span>(data<span class="sc">$</span>x2) <span class="sc">+</span> <span class="fl">0.5</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">length.out =</span> <span class="dv">250</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  grid<span class="sc">$</span>pred_class <span class="ot">=</span> <span class="fu">predict</span>(model, grid, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  grid <span class="ot">=</span> grid <span class="sc">|&gt;</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">pred_class =</span> <span class="fu">factor</span>(pred_class, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>)))</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>(</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> grid,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(x1, x2, <span class="at">fill =</span> pred_class),</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="fl">0.2</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> data,</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(x1, x2, <span class="at">color =</span> class),</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="fl">0.7</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> class_colors) <span class="sc">+</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> class_colors) <span class="sc">+</span></span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> <span class="st">"X1"</span>,</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="st">"X2"</span>,</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">"Observed class"</span>,</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> <span class="st">"Predicted class"</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_boundary_nn</span>(</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>  disk_nn, </span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>  disk_train</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -762,9 +754,9 @@ stopped after 100 iterations</code></pre>
 </div>
 <p>Unlike logistic regression on the original predictors, the neural network learned the nonlinear decision boundary all by its own self. It even gets close to 100% accuracy.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>disk_test<span class="sc">$</span>class</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span> <span class="fu">predict</span>(disk_nn,disk_test,<span class="at">type=</span><span class="st">"class"</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Accuracy:"</span>,<span class="fu">sum</span>(yhat<span class="sc">==</span>y)<span class="sc">/</span><span class="fu">nrow</span>(disk_test))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>disk_test<span class="sc">$</span>class</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span> <span class="fu">predict</span>(disk_nn,disk_test,<span class="at">type=</span><span class="st">"class"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Accuracy:"</span>,<span class="fu">sum</span>(yhat<span class="sc">==</span>y)<span class="sc">/</span><span class="fu">nrow</span>(disk_test))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Accuracy: 0.9933333</code></pre>
 </div>
@@ -773,24 +765,24 @@ stopped after 100 iterations</code></pre>
 </section>
 <section id="experimenting-with-the-network-architecture" class="level2">
 <h2 class="anchored" data-anchor-id="experimenting-with-the-network-architecture">Experimenting with the network architecture</h2>
-<p>What happens when we change the number of hidden units?</p>
+<p>There are a number of hyperparameters hidden underneath the hood a neural network, but one of the most transparent is <code>size</code>. Using <code>size = 0</code> would be equivalent to fitting a logistic regression model<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> (no hidden units). The graphs below demonstrate how the decision boundary depends on this parameter in our example:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fit_network <span class="ot">=</span> <span class="cf">function</span>(size, data) {</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nnet</span>(</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    class <span class="sc">~</span> x1 <span class="sc">+</span> x2,</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> data,</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> size,</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">trace=</span><span class="cn">FALSE</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>nn_2 <span class="ot">=</span> <span class="fu">fit_network</span>(<span class="dv">2</span>, disk_train)</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>nn_4 <span class="ot">=</span> <span class="fu">fit_network</span>(<span class="dv">4</span>, disk_train)</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>nn_8 <span class="ot">=</span> <span class="fu">fit_network</span>(<span class="dv">8</span>, disk_train)</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>nn_16 <span class="ot">=</span> <span class="fu">fit_network</span>(<span class="dv">16</span>, disk_train)</span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_boundary_nn</span>(nn_2,disk_train) <span class="sc">+</span></span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Size = 2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fit_network <span class="ot">=</span> <span class="cf">function</span>(size, data) {</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nnet</span>(</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    class <span class="sc">~</span> x1 <span class="sc">+</span> x2,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> data,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> size,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">trace=</span><span class="cn">FALSE</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>nn_2 <span class="ot">=</span> <span class="fu">fit_network</span>(<span class="dv">2</span>, disk_train)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>nn_4 <span class="ot">=</span> <span class="fu">fit_network</span>(<span class="dv">4</span>, disk_train)</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>nn_8 <span class="ot">=</span> <span class="fu">fit_network</span>(<span class="dv">8</span>, disk_train)</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>nn_16 <span class="ot">=</span> <span class="fu">fit_network</span>(<span class="dv">16</span>, disk_train)</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_boundary_nn</span>(nn_2,disk_train) <span class="sc">+</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Size = 2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -798,8 +790,8 @@ stopped after 100 iterations</code></pre>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_boundary_nn</span>(nn_4,disk_train) <span class="sc">+</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Size = 4"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_boundary_nn</span>(nn_4,disk_train) <span class="sc">+</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Size = 4"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -807,8 +799,8 @@ stopped after 100 iterations</code></pre>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_boundary_nn</span>(nn_8,disk_train) <span class="sc">+</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Size = 8"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_boundary_nn</span>(nn_8,disk_train) <span class="sc">+</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Size = 8"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -816,8 +808,8 @@ stopped after 100 iterations</code></pre>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_boundary_nn</span>(nn_16,disk_train) <span class="sc">+</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Size = 16"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_boundary_nn</span>(nn_16,disk_train) <span class="sc">+</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Size = 16"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -826,16 +818,184 @@ stopped after 100 iterations</code></pre>
 </div>
 </div>
 </div>
+<p>You can see how the learning of the circular boundary shape improves with the number of hidden units in this example. However, I would be cautious about using too many hidden units in general because of the potential for overfitting. The bias-variance tradeoff still applies (larger size, higher bias)!</p>
 </section>
-<section id="summary" class="level2">
-<h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p>We have seen three approaches to classification:</p>
-<ul>
-<li><strong>Logistic regression:</strong> learns a linear decision boundary from the original predictors.</li>
-<li><strong>Feature engineering:</strong> allows logistic regression to learn nonlinear boundaries when we provide a useful transformation.</li>
-<li><strong>Neural networks:</strong> learn intermediate features through hidden layers and nonlinear activation functions.</li>
-</ul>
-<p>The central idea is that hidden layers give a neural network the ability to learn useful representations of the predictors, rather than requiring us to specify every nonlinear feature in advance.</p>
+<section id="a-real-data-example" class="level2">
+<h2 class="anchored" data-anchor-id="a-real-data-example">A real data example</h2>
+<p>Neural networks (like random forests, trees, and gradient boosting) can be applied to both classification and regressions problem, but since the examples above are all in the classification setting, we’ll start there with our water polo dataset:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>shots<span class="ot">=</span><span class="fu">read.csv</span>(df_url) <span class="sc">%&gt;%</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>X<span class="fl">.1</span>,<span class="sc">-</span>X,<span class="sc">-</span>start.time,<span class="sc">-</span>end.time,<span class="sc">-</span>category)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>formula<span class="ot">=</span>Goal<span class="sc">~</span>Tactic<span class="sc">+</span>Type<span class="sc">+</span>Hand<span class="sc">+</span>Defense<span class="sc">+</span>distance<span class="sc">+</span><span class="fu">abs</span>(angle)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(shots)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 1,607
+Columns: 20
+$ Nth.instance   &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, …
+$ X..descriptors &lt;int&gt; 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,…
+$ Offensive.Team &lt;chr&gt; "Michigan", "Pacific", "Michigan", "Michigan", "Pacific…
+$ Position       &lt;int&gt; 32, 61, 23, 32, 23, 63, 16, 41, 32, 13, 51, 33, 51, 31,…
+$ Location       &lt;chr&gt; "Location 5", "Location 4", "Location 4", "Location 5",…
+$ Tactic         &lt;chr&gt; "Penalty", "6 on 5", "Perimeter", "Perimeter", "Direct"…
+$ Type           &lt;chr&gt; "Skip", "Normal", "Normal", "Normal", "Normal", "Lob", …
+$ Hand           &lt;chr&gt; "Right", "Right", "Right", "Right", "Right", "Right", "…
+$ Result         &lt;chr&gt; "Save", "Goal", "New Clock", "Save", "Save", "Goal", "S…
+$ Defense        &lt;chr&gt; "Other", "Field Blocker", "Field Blocker", "Pressured",…
+$ Save.Diff      &lt;int&gt; 5, 4, 3, 2, 2, 4, 2, 2, 5, 3, 4, 1, 4, 5, 2, 3, 1, 1, 2…
+$ Shot.Diff      &lt;int&gt; 1, 2, 4, 4, 4, 3, 4, 4, 3, 3, 3, 4, 2, 3, 4, 4, 3, 4, 4…
+$ Athlete        &lt;int&gt; 3, 3, 4, 10, 10, 12, 12, 10, 10, 7, 10, 11, 18, 5, 12, …
+$ x              &lt;int&gt; 0, 1, 2, 0, 2, -1, 2, -2, 0, 2, -2, -1, -2, 1, 2, 2, 2,…
+$ y              &lt;dbl&gt; 5.5, 2.5, 5.5, 5.5, 5.5, 2.5, 3.5, 5.5, 5.5, 2.5, 2.5, …
+$ xj             &lt;dbl&gt; 0.1319498, 0.9863985, 2.4198350, 0.2169767, 1.7998050, …
+$ yj             &lt;dbl&gt; 5.311604, 2.948751, 5.535069, 5.748631, 5.055553, 2.588…
+$ distance       &lt;dbl&gt; 5.500000, 2.692582, 5.852350, 5.500000, 5.852350, 2.692…
+$ angle          &lt;dbl&gt; 0.0000000, 0.3805064, 0.3487710, 0.0000000, 0.3487710, …
+$ Goal           &lt;chr&gt; "Not Goal", "Goal", "Not Goal", "Not Goal", "Not Goal",…</code></pre>
+</div>
+</div>
+<p>First, let’s fit a basic model that just uses the x and y coordinates of shots so we can create some visuals of the decision boundary akin to what we did above. We’ll use 8 hidden units</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>shot_nn8<span class="ot">=</span>  <span class="fu">nnet</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">factor</span>(Goal) <span class="sc">~</span> <span class="fu">abs</span>(xj) <span class="sc">+</span> yj,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> shots,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">8</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">trace=</span><span class="cn">FALSE</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Here is what the decision boundary looks like:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">=</span> <span class="fu">expand_grid</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">xj =</span> <span class="fu">seq</span>(<span class="fu">min</span>(shots<span class="sc">$</span>xj)<span class="sc">-</span><span class="fl">0.5</span>, <span class="fu">max</span>(shots<span class="sc">$</span>xj) <span class="sc">+</span> <span class="fl">0.5</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">by=</span><span class="fl">0.01</span>),</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">yj =</span> <span class="fu">seq</span>(<span class="fu">min</span>(shots<span class="sc">$</span>yj), <span class="fu">max</span>(shots<span class="sc">$</span>yj) <span class="sc">+</span> <span class="fl">0.5</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">by=</span><span class="fl">0.01</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>pred_class <span class="ot">=</span> <span class="fu">predict</span>(shot_nn8, grid, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">=</span> grid <span class="sc">|&gt;</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">pred_class =</span> <span class="fu">factor</span>(pred_class, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Goal"</span>, <span class="st">"Not Goal"</span>)))</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_raster</span>(</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> grid,</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(xj, yj, <span class="at">fill =</span> pred_class),</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="fl">0.2</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> shots,</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(xj, yj, <span class="at">color =</span> Goal),</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="fl">0.7</span></span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#E35205"</span>,<span class="st">"#004080"</span>)) <span class="sc">+</span></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#E35205"</span>,<span class="st">"#004080"</span>)) <span class="sc">+</span></span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> <span class="st">"xj"</span>,</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="st">"xj"</span>,</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">"Observed class"</span>,</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> <span class="st">"Predicted class"</span></span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes2_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If you compare this with the logistic decision boundary in Section 3.2, this one looks much more interesting because it picks up some non-linearities! Just out of curiosity, we can try a higher number of hidden units</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>shot_nn16<span class="ot">=</span>  <span class="fu">nnet</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">factor</span>(Goal) <span class="sc">~</span> <span class="fu">abs</span>(xj) <span class="sc">+</span> yj,</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> shots,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">16</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">trace=</span><span class="cn">FALSE</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">=</span> <span class="fu">expand_grid</span>(</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">xj =</span> <span class="fu">seq</span>(<span class="fu">min</span>(shots<span class="sc">$</span>xj)<span class="sc">-</span><span class="fl">0.5</span>, <span class="fu">max</span>(shots<span class="sc">$</span>xj) <span class="sc">+</span> <span class="fl">0.5</span>,</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">by=</span><span class="fl">0.01</span>),</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">yj =</span> <span class="fu">seq</span>(<span class="fu">min</span>(shots<span class="sc">$</span>yj), <span class="fu">max</span>(shots<span class="sc">$</span>yj) <span class="sc">+</span> <span class="fl">0.5</span>,</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>             <span class="at">by=</span><span class="fl">0.01</span>)</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>grid<span class="sc">$</span>pred_class <span class="ot">=</span> <span class="fu">predict</span>(shot_nn16, grid, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>grid <span class="ot">=</span> grid <span class="sc">|&gt;</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">pred_class =</span> <span class="fu">factor</span>(pred_class, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Goal"</span>, <span class="st">"Not Goal"</span>)))</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_raster</span>(</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> grid,</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(xj, yj, <span class="at">fill =</span> pred_class),</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="fl">0.2</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(</span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> shots,</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(xj, yj, <span class="at">color =</span> Goal),</span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha =</span> <span class="fl">0.7</span></span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#E35205"</span>,<span class="st">"#004080"</span>)) <span class="sc">+</span></span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#E35205"</span>,<span class="st">"#004080"</span>)) <span class="sc">+</span></span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(</span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>      <span class="at">x =</span> <span class="st">"xj"</span>,</span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="st">"xj"</span>,</span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">"Observed class"</span>,</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> <span class="st">"Predicted class"</span></span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">+</span></span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>()  </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes2_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>It picks up some more potential hot spots on the edges. To compare accuracy on the training set:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(shots)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>pred8<span class="ot">=</span><span class="fu">predict</span>(shot_nn8, shots, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>pred16<span class="ot">=</span><span class="fu">predict</span>(shot_nn16, shots, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>acc8<span class="ot">=</span><span class="fu">sum</span>(pred8<span class="sc">==</span>shots<span class="sc">$</span>Goal)<span class="sc">/</span>n</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>acc16<span class="ot">=</span><span class="fu">sum</span>(pred16<span class="sc">==</span>shots<span class="sc">$</span>Goal)<span class="sc">/</span>n</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Accuracy with size = 8:"</span>,acc8,<span class="st">"</span><span class="sc">\n</span><span class="st">Accuracy with size = 16:"</span>, acc16)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Accuracy with size = 8: 0.6446795 
+Accuracy with size = 16: 0.6465464</code></pre>
+</div>
+</div>
+<p>Not too much improvement and actually only a 1% improvement over the null model. Let’s add some more variables and try again.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>shot_nn16_full<span class="ot">=</span><span class="fu">nnet</span>(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">factor</span>(Goal)<span class="sc">~</span><span class="fu">abs</span>(xj)<span class="sc">+</span>yj<span class="sc">+</span>Hand<span class="sc">+</span>Tactic<span class="sc">+</span>Type<span class="sc">+</span>Defense,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data=</span>shots,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">size=</span><span class="dv">16</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trace=</span><span class="cn">FALSE</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now let’s look at the accuracy</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>pred16_full<span class="ot">=</span><span class="fu">predict</span>(shot_nn16_full, shots, <span class="at">type =</span> <span class="st">"class"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(pred16_full<span class="sc">==</span>shots<span class="sc">$</span>Goal)<span class="sc">/</span>n</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8039826</code></pre>
+</div>
+</div>
+<p>Now we’re talking<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>! Score one for neural networks.</p>
+</section>
+<section id="practice" class="level2">
+<h2 class="anchored" data-anchor-id="practice">Practice</h2>
+<p>Load our favorite <code>penguins</code> dataset from the <code>palmerpenguins</code> package (see Module 6.2 for example) for use in these exercises. We’ll be looking at model for predicting <code>species</code> in terms of the other variables.</p>
+<ol type="1">
+<li>Fit a neural network model using 8 hidden units.</li>
+<li>Calculate the predictions of your neural network from 1 and create a confusion matrix of the results. Notice anything strange going on?</li>
+<li>Now scale the numeric variables in the penguins dataset using the following commands:</li>
+</ol>
+<p><code>penguins_scaled = penguins |&gt;   select(species, bill_length_mm, bill_depth_mm,          flipper_length_mm, body_mass_g) |&gt;   drop_na() |&gt;   mutate(across(where(is.numeric), ~ as.numeric(scale(.x))))</code></p>
+<p>Refit the neural network to the scaled data and recalculate predictions. How does it look now?</p>
 
 
 </section>
@@ -848,6 +1008,8 @@ stopped after 100 iterations</code></pre>
 <li id="fn2"><p>Exception: switched to geom_raster here for a nicer way to fill the regions. Also turning it into a function for duplicate use<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>Not gonna lie, outsourced the code for this one to chatGPT.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>Hold your head up high logistic, we still love you. Everyone has their limits.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>Although this choice is not supported by the function <code>nnet</code>.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Although we really should do this with a test set. Sue me. No, sorry I don’t mean that. Please don’t sue me. You won’t get much. I’m just a math professor.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

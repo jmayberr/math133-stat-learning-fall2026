@@ -1,0 +1,17 @@
+{
+  "hash": "ac2656a95746157726c103e43d784341",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Class Notes for 10-23\"\nformat: html\n---\n\n## Regression Example\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\nlibrary(nflreadr)\nfantasy2026 <- load_player_stats(2026, summary_level = \"reg\") |>\n  dplyr::filter(position %in% c(\"RB\",\"WR\",\"TE\")) |>\n  select(player_display_name,position,games,\n         carries,rushing_yards,rushing_tds,\n         receptions,targets,receiving_yards,receiving_tds,\n         fantasy_points_ppr)|>\n  as.data.frame() \n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nset.seed(1023)\ndf=fantasy2026\nn=nrow(df)\ns=sample(n,0.7*n)\ntrain=df[s,]\ntest=df[-s,]\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(randomForest)\nfantasy_rf=randomForest(fantasy_points_ppr~.,\n                        data=train[,-1])\nfantasy_rf\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n\nCall:\n randomForest(formula = fantasy_points_ppr ~ ., data = train[,      -1]) \n               Type of random forest: regression\n                     Number of trees: 500\nNo. of variables tried at each split: 3\n\n          Mean of squared residuals: 46.63051\n                    % Var explained: 96.18\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nyhat=predict(fantasy_rf,test)\nsqrt(mean((test$fantasy_points_ppr-yhat)^2)) # RMSE\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 6.997014\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nvarImpPlot(fantasy_rf)\n```\n\n::: {.cell-output-display}\n![](classNotes10_23_files/figure-html/unnamed-chunk-5-1.png){width=672}\n:::\n:::\n\n\n## Classification Example\n\n\n::: {.cell}\n\n```{.r .cell-code}\ndf_url=\"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/mushroom.csv\"\nmushroom=read.csv(df_url)\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nset.seed(1023)\ndf=mushroom\nn=nrow(df)\ns=sample(n,0.7*n)\ntrain=df[s,]\ntest=df[-s,]\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmush_rf=randomForest(factor(class)~.,data=train)\nmush_rf\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n\nCall:\n randomForest(formula = factor(class) ~ ., data = train) \n               Type of random forest: classification\n                     Number of trees: 500\nNo. of variables tried at each split: 4\n\n        OOB estimate of  error rate: 0%\nConfusion matrix:\n     e    p class.error\ne 2961    0           0\np    0 2725           0\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nyhat=predict(mush_rf,newdata=test,type=\"class\")\ntable(yhat,test$class)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n    \nyhat    e    p\n   e 1247    0\n   p    0 1191\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nvarImpPlot(mush_rf)\n```\n\n::: {.cell-output-display}\n![](classNotes10_23_files/figure-html/unnamed-chunk-10-1.png){width=672}\n:::\n:::\n\n",
+    "supporting": [
+      "classNotes10_23_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

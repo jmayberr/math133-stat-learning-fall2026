@@ -285,7 +285,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Module 7</span>
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-module-7">    
-        <li class="dropdown-header">Notes 1: …</li>
+        <li>
+    <a class="dropdown-item" href="../module-07/notes1.html">
+ <span class="dropdown-text">Module 7.1: Gradient Boosting</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-07/notes2.html">
+ <span class="dropdown-text">Module 7.2: Decision Boundaries and Neural Networks</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -362,9 +369,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code># A tibble: 3 × 6
   .metric     .estimator   mean     n std_err .config        
   &lt;chr&gt;       &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;          
-1 accuracy    multiclass 0.94      10 0.0156  pre0_mod0_post0
-2 brier_class multiclass 0.0514    10 0.0122  pre0_mod0_post0
-3 roc_auc     hand_till  0.968     10 0.00945 pre0_mod0_post0</code></pre>
+1 accuracy    multiclass 0.947     10  0.0166 pre0_mod0_post0
+2 brier_class multiclass 0.0510    10  0.0148 pre0_mod0_post0
+3 roc_auc     hand_till  0.968     10  0.0129 pre0_mod0_post0</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -399,8 +406,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>rf_models<span class="ot">=</span><span class="fu">tune_grid</span>(rf_specs,</span>
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>                    Species<span class="sc">~</span>.,</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                    cv_plan)</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(rf_models)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                    cv_plan,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>                    <span class="at">grid =</span> mtry_grid)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(rf_models)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">

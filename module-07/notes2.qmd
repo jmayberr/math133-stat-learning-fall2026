@@ -301,11 +301,12 @@ library(nnet)
 disk_nn = nnet(
   class ~ x1 + x2,
   data = disk_train,
-  size = 8
+  size = 8,
+  trace=FALSE
 )
 ```
 
-The hidden units combine the original predictors using learned weights and apply nonlinear activation functions. The output layer uses these learned features to predict the class.
+The `trace=FALSE` just suppresses the output showing the iterations. The hidden units combine the original predictors using learned weights and apply nonlinear activation functions. The output layer uses these learned features to predict the class.
 ```{r}
 plot_boundary_nn=function(model,data){
   grid = expand_grid(
@@ -392,24 +393,154 @@ You can see how the learning of the circular boundary shape improves with the nu
 
 ## A real data example
 
-Before we look at examples with real data, note that neural networks (like random forests, trees, and gradient boosting) can be applied to both classification and regressions problem. Since the examples above are all in the classification setting, we'll start there with our water polo dataset
+Neural networks (like random forests, trees, and gradient boosting) can be applied to both classification and regressions problem, but since the examples above are all in the classification setting, we'll start there with our water polo dataset:
 
 ```{r}
 df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"
-womenShots=read.csv(df_url) %>%
+shots=read.csv(df_url) %>%
   select(-X.1,-X,-start.time,-end.time,-category)
 formula=Goal~Tactic+Type+Hand+Defense+distance+abs(angle)
-
+glimpse(shots)
 ```
 
-## Summary
+First, let's fit a basic model that just uses the x and y coordinates of shots so we can create some visuals of the decision boundary akin to what we did above. We'll use 8 hidden units
 
-We have seen three approaches to classification:
+```{r}
+shot_nn8=  nnet(
+    factor(Goal) ~ abs(xj) + yj,
+    data = shots,
+    size = 8,
+    trace=FALSE
+  )
+```
 
-- **Logistic regression:** learns a linear decision boundary from the original predictors.
-- **Feature engineering:** allows logistic regression to learn nonlinear boundaries when we provide a useful transformation.
-- **Neural networks:** learn intermediate features through hidden layers and nonlinear activation functions.
+Here is what the decision boundary looks like: 
 
-The central idea is that hidden layers give a neural network the ability to learn useful representations of the predictors, rather than requiring us to specify every nonlinear feature in advance.
+```{r}
+grid = expand_grid(
+      xj = seq(min(shots$xj)-0.5, max(shots$xj) + 0.5,
+             by=0.01),
+      yj = seq(min(shots$yj), max(shots$yj) + 0.5,
+             by=0.01)
+    )
+
+grid$pred_class = predict(shot_nn8, grid, type = "class")
+grid = grid |>
+    mutate(pred_class = factor(pred_class, levels = c("Goal", "Not Goal")))
+
+ggplot() + 
+  geom_raster(
+      data = grid,
+      aes(xj, yj, fill = pred_class),
+      alpha = 0.2
+    ) +
+    geom_point(
+      data = shots,
+      aes(xj, yj, color = Goal),
+      alpha = 0.7
+    ) +
+    scale_fill_manual(values = c("#E35205","#004080")) +
+    scale_color_manual(values = c("#E35205","#004080")) +
+    coord_equal() +
+    labs(
+      x = "xj",
+      y = "xj",
+      color = "Observed class",
+      fill = "Predicted class"
+    ) +
+    theme_minimal()
+```
+
+If you compare this with the logistic decision boundary in Section 3.2, this one looks much more interesting because it picks up some non-linearities! Just out of curiosity, we can try a higher number of hidden units
+
+```{r}
+shot_nn16=  nnet(
+    factor(Goal) ~ abs(xj) + yj,
+    data = shots,
+    size = 16,
+    trace=FALSE
+  )
+  
+grid = expand_grid(
+      xj = seq(min(shots$xj)-0.5, max(shots$xj) + 0.5,
+             by=0.01),
+      yj = seq(min(shots$yj), max(shots$yj) + 0.5,
+             by=0.01)
+    )
+
+grid$pred_class = predict(shot_nn16, grid, type = "class")
+grid = grid |>
+    mutate(pred_class = factor(pred_class, levels = c("Goal", "Not Goal")))
+
+ggplot() + 
+  geom_raster(
+      data = grid,
+      aes(xj, yj, fill = pred_class),
+      alpha = 0.2
+    ) +
+    geom_point(
+      data = shots,
+      aes(xj, yj, color = Goal),
+      alpha = 0.7
+    ) +
+    scale_fill_manual(values = c("#E35205","#004080")) +
+    scale_color_manual(values = c("#E35205","#004080")) +
+    coord_equal() +
+    labs(
+      x = "xj",
+      y = "xj",
+      color = "Observed class",
+      fill = "Predicted class"
+    ) +
+    theme_minimal()  
+  
+```
+
+It picks up some more potential hot spots on the edges. To compare accuracy on the training set:
+
+```{r}
+n=nrow(shots)
+pred8=predict(shot_nn8, shots, type = "class")
+pred16=predict(shot_nn16, shots, type = "class")
+acc8=sum(pred8==shots$Goal)/n
+acc16=sum(pred16==shots$Goal)/n
+cat("Accuracy with size = 8:",acc8,"\nAccuracy with size = 16:", acc16)
+```
+Not too much improvement and actually only a 1% improvement over the null model. Let's add some more variables and try again. 
+
+```{r}
+shot_nn16_full=nnet(
+  factor(Goal)~abs(xj)+yj+Hand+Tactic+Type+Defense,
+  data=shots,
+  size=16,
+  trace=FALSE
+)
+```
+
+Now let's look at the accuracy
+
+```{r}
+pred16_full=predict(shot_nn16_full, shots, type = "class")
+sum(pred16_full==shots$Goal)/n
+```
+
+Now we're talking^[Although we really should do this with a test set. Sue me. No, sorry I don't mean that. Please don't sue me. You won't get much. I'm just a math professor.]! Score one for neural networks. 
+
+## Practice
+
+Load our favorite `penguins` dataset from the `palmerpenguins` package (see Module 6.2 for example) for use in these exercises. We'll be looking at model for predicting `species` in terms of the other variables. 
+
+1. Fit a neural network model using 8 hidden units. 
+2. Calculate the predictions of your neural network from 1 and create a confusion matrix of the results. Notice anything strange going on?
+3. Now scale the numeric variables in the penguins dataset using the following commands:
+
+`penguins_scaled = penguins |>
+  select(species, bill_length_mm, bill_depth_mm,
+         flipper_length_mm, body_mass_g) |>
+  drop_na() |>
+  mutate(across(where(is.numeric), ~ as.numeric(scale(.x))))`
+
+Refit the neural network to the scaled data and recalculate predictions. How does it look now? 
+
 
 

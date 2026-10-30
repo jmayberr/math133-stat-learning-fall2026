@@ -51,7 +51,8 @@ mtry_grid=grid_regular(
 
 rf_models=tune_grid(rf_specs,
                     Species~.,
-                    cv_plan)
+                    cv_plan,
+                    grid = mtry_grid)
 autoplot(rf_models)
 ```
 
