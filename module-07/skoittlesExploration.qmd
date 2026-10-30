@@ -1,0 +1,76 @@
+---
+title: "M&Ms Analysis"
+format: html
+---
+
+Load in Data:
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/MandMs.csv"
+skittles=read.csv(df_url)
+head(skittles)
+```
+
+```{r}
+totals=colSums(skittles[,2:6])
+barplot(totals)
+```
+
+Expected Totals
+
+```{r}
+n=sum(totals)
+expected=rep(n/5,5)
+expected
+totals
+```
+
+Model Evaluation
+
+```{r}
+rmse_observed=sqrt(mean((totals-expected)^2))
+rmse_observed
+```
+
+Simulating machines
+
+```{r}
+colors=c("red","orange","yellow","green","purple")
+s=sample(colors,n,replace=TRUE)
+table(s)
+rmse_machine=sqrt(mean((table(s)-expected)^2))
+rmse_machine
+```
+
+```{r}
+rmse=function(s){
+  sqrt(mean((table(s)-expected)^2))
+}
+
+rmse_machines=replicate(10000,
+                        rmse(sample(colors,n,replace=TRUE))
+                        )
+
+```
+
+```{r}
+hist(rmse_machines)
+abline(v=rmse_observed,col="darkred")
+```
+
+```{r}
+sum(rmse_machines>=rmse_observed)/10000 # p-value
+```
+
+$\chi^2$ Goodness of Fit Test
+
+Uses theoretical reference distribution: Chi-square with $k-1$ degrees of freedom where $k$ = number of categories (5 for skittles).
+
+```{r}
+chi=sum((totals-expected)^2/expected)
+chi
+```
+
+```{r}
+1-pchisq(chi,4) #Prob that a chi-square with 4 df > chi
+```
