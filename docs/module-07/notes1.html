@@ -514,7 +514,7 @@ f^t = f^{t-1} - \frac{\partial L}{\partial f} = f^{t-1}  + 2 \gamma \sum r_i^{t-
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[s,]</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Here’s gbm applied to the trump vote regression tree. There are a lot of parameters here which I’ll explain in a minute</p>
+<p>Here’s gbm applied to the trump vote regression tree. There are a lot of parameters here which I’ll explain in a minute (you can leave them off if you just want to use the defaults).</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gbm)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>trump_gbm<span class="ot">=</span><span class="fu">gbm</span>(trump.vote<span class="sc">~</span>.,</span>
@@ -522,7 +522,7 @@ f^t = f^{t-1} - \frac{\partial L}{\partial f} = f^{t-1}  + 2 \gamma \sum r_i^{t-
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">distribution=</span><span class="st">"gaussian"</span>,</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">interaction.depth=</span><span class="dv">1</span>,</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">shrinkage=</span><span class="fl">0.01</span>,</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">n.trees=</span><span class="dv">500</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">n.trees=</span><span class="dv">100</span>,</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">cv.folds=</span><span class="dv">10</span>,</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">bag.fraction =</span> <span class="fl">0.8</span>,</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>                <span class="at">n.minobsinnode =</span> <span class="dv">5</span> )</span>
@@ -536,14 +536,14 @@ f^t = f^{t-1} - \frac{\partial L}{\partial f} = f^{t-1}  + 2 \gamma \sum r_i^{t-
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                        var    rel.inf
-median.income median.income 51.0890236
-metro                 metro 34.0996391
-non.citizen     non.citizen  7.7473098
-income.ineq     income.ineq  2.7283589
-high.school     high.school  1.7318827
-non.white         non.white  1.4691487
-white.pov         white.pov  0.6533253
-unemployed       unemployed  0.4813118</code></pre>
+median.income median.income 57.2739845
+metro                 metro 33.0909820
+non.citizen     non.citizen  9.1439237
+high.school     high.school  0.4911098
+unemployed       unemployed  0.0000000
+white.pov         white.pov  0.0000000
+income.ineq     income.ineq  0.0000000
+non.white         non.white  0.0000000</code></pre>
 </div>
 </div>
 <p>First, let’s talk about the output. The summary describes the relative influence of each variable in the boosted model. This is the same thing as variable importance in random forests and we can see that the top five here are similar.</p>
@@ -552,7 +552,7 @@ unemployed       unemployed  0.4813118</code></pre>
 <li>distribution = “gaussian” specifies regression; use “bernoulli” for binary classification or “multinomial” for more than two categories.</li>
 <li>interaction.depth = 1 says all the trees can have a max of one split (stumps)</li>
 <li>shrinkage = 0.01 specifies the learning rate</li>
-<li>n.trees = 500 specifies the total number of trees to fit</li>
+<li>n.trees = 100 specifies the total number of trees to fit</li>
 <li>cv.folds = 5 gives the number of cross-validation folds to use in model validation</li>
 <li>bag.fraction = 0.8 states the overall fraction of observations to use in each tree</li>
 <li>n.minobsinnode = 5 gives the minimum observations allowed per node (stopping criteria)</li>
@@ -569,30 +569,30 @@ unemployed       unemployed  0.4813118</code></pre>
 </div>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 478</code></pre>
+<pre><code>[1] 100</code></pre>
 </div>
 </div>
-<p>Here, the black curve shows the cv-error vs number of trees fit (iteration) while the green curve shows the OOB error vs number of trees. It looks like cv is decreasing across the range of iterations attempted while the OOB starts to level off sooner. We’ll investigate the optimal hyperparameter choices using tidymodels in the next section.</p>
+<p>Here, the black curve shows the cv-error vs number of trees fit (iteration) while the green curve shows the OOB error vs number of trees. It looks both are decreasing across the range of iterations attempted so we can use the full 100 trees in our predictions without fear of overfitting. We’ll further investigate the optimal hyperparameter choices using tidymodels in the next section.</p>
 <p>We can also check the prediction error on the test set. It looks comparable to the random forest models:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pred<span class="ot">=</span><span class="fu">predict</span>(trump_gbm,test)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pred<span class="ot">=</span><span class="fu">predict</span>(trump_gbm,test,<span class="at">n.trees=</span><span class="dv">100</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RMSE="</span>,<span class="fu">sqrt</span>(<span class="fu">mean</span>((pred<span class="sc">-</span>test<span class="sc">$</span>trump.vote)<span class="sc">^</span><span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>RMSE= 0.07608506</code></pre>
+<pre><code>RMSE= 0.07177607</code></pre>
 </div>
 </div>
 </section>
 <section id="training-with-tidymodels" class="level2">
 <h2 class="anchored" data-anchor-id="training-with-tidymodels">Training with Tidymodels</h2>
-<p>To explore the impact of number of trees and other parameters, we’ll use <code>tidymodels</code>. We will tune based on trees, tree_depth, and learn_rate, letting tidymodels pick 20 random combinations to try. Not that we are using the slightly better engine of <code>xgboost</code> for model fitting.</p>
+<p>To explore the impact of number of trees and other parameters, we’ll use <code>tidymodels</code>. We will tune based on number of trees and learning rate, letting tidymodels pick 10 random combinations to try. Not that we are using the slightly better engine of <code>xgboost</code> for model fitting.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(xgboost)</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Models specs</span></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>gbm_spec<span class="ot">=</span><span class="fu">boost_tree</span>(</span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">trees=</span><span class="fu">tune</span>(),</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">tree_depth=</span><span class="fu">tune</span>(),</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_rate=</span><span class="fu">tune</span>(),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">learn_rate=</span><span class="fu">tune</span>(),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">tree_depth=</span><span class="dv">1</span>,</span>
 <span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_n=</span><span class="dv">5</span>,</span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">sample_size=</span><span class="fl">0.8</span>) <span class="sc">|&gt;</span></span>
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"xgboost"</span>) <span class="sc">|&gt;</span></span>
@@ -602,22 +602,23 @@ unemployed       unemployed  0.4813118</code></pre>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>cv_plan <span class="ot">=</span><span class="fu">vfold_cv</span>(train[,<span class="dv">2</span><span class="sc">:</span><span class="dv">10</span>],<span class="at">v=</span><span class="dv">5</span>)</span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Tune Model</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>gbm_tune<span class="ot">=</span><span class="fu">tune_grid</span>(</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  gbm_spec,</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  trump.vote<span class="sc">~</span>.,</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  cv_plan,</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">grid=</span><span class="dv">20</span></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1102</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>gbm_tune<span class="ot">=</span><span class="fu">tune_grid</span>(</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  gbm_spec,</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  trump.vote<span class="sc">~</span>.,</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  cv_plan,</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">grid=</span><span class="dv">10</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The “best” model appeared to use less trees, more depth, and a slower learning rate compared with our earlier model:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>best_params<span class="ot">=</span><span class="fu">select_best</span>(gbm_tune,<span class="at">metric=</span><span class="st">"rmse"</span>)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(best_params)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 4
-  trees tree_depth learn_rate .config         
-  &lt;int&gt;      &lt;int&gt;      &lt;dbl&gt; &lt;chr&gt;           
-1   106          3     0.0280 pre0_mod02_post0</code></pre>
+<pre><code># A tibble: 1 × 3
+  trees learn_rate .config         
+  &lt;int&gt;      &lt;dbl&gt; &lt;chr&gt;           
+1  1777    0.00359 pre0_mod09_post0</code></pre>
 </div>
 </div>
 <p>Now we fit the final model:</p>
@@ -632,18 +633,17 @@ unemployed       unemployed  0.4813118</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>gbm_pred<span class="ot">=</span><span class="fu">predict</span>(gbm_fit,test)<span class="sc">$</span>.pred</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RMSE is"</span>,<span class="fu">sqrt</span>(<span class="fu">mean</span>((test<span class="sc">$</span>trump.vote<span class="sc">-</span>gbm_pred)<span class="sc">^</span><span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>RMSE is 0.08220717</code></pre>
+<pre><code>RMSE is 0.0762747</code></pre>
 </div>
 </div>
-<p>Hmm, that was actually worse. Score one against tidymodels (or maybe xgboost?) in this scenario I guess.</p>
-<p>Note that if you actually want to specify the values for tuning parameters, you can use the grid_regular function but it take learn_rate on a log-scale. The following code would take <code>trees</code> values of 100,200,…1000, <code>tree_depth</code> of 1,2,3,4 and <code>learn_rates</code> of 0.001,0.01, and 0.1:</p>
+<p>Hmm, that was actually a little worse. Score one against tidymodels (or maybe xgboost?) in this scenario I guess.</p>
+<p>Note that if you actually want to specify the values for tuning parameters, you can use the grid_regular function but it take learn_rate on a log-scale. The following code would take <code>trees</code> values of 100,200,…1000 and <code>learn_rates</code> of 0.001,0.01, and 0.1:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>tune_grid <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>tune_grid <span class="ot">=</span> <span class="fu">grid_regular</span>(</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">trees</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">1000</span>)),</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tree_depth</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>)),</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">learn_rate</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="sc">-</span><span class="dv">1</span>)),  <span class="co"># log10 scale</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">4</span>, <span class="dv">3</span>)</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">learn_rate</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="sc">-</span><span class="dv">1</span>)),  <span class="co"># log10 scale</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">3</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="practice" class="level2">
