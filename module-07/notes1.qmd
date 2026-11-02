@@ -1,5 +1,8 @@
 ---
 title: "Module 7.1: Booster Seats"
+execute:
+  freeze: false
+  cache: false
 ---
 
 ## Introduction
@@ -156,7 +159,7 @@ test=election2016[-s,]
 
 ```
 
-Here's gbm applied to the trump vote regression tree. There are a lot of parameters here which I'll explain in a minute
+Here's gbm applied to the trump vote regression tree. There are a lot of parameters here which I'll explain in a minute (you can leave them off if you just want to use the defaults). 
 
 ```{r}
 library(gbm)
@@ -165,7 +168,7 @@ trump_gbm=gbm(trump.vote~.,
                 distribution="gaussian",
                 interaction.depth=1,
                 shrinkage=0.01,
-                n.trees=500,
+                n.trees=100,
                 cv.folds=10,
                 bag.fraction = 0.8,
                 n.minobsinnode = 5 )
@@ -180,7 +183,7 @@ Second, let's talk about the inputs.
 - distribution = "gaussian" specifies regression; use "bernoulli" for binary classification or "multinomial" for more than two categories.
 - interaction.depth = 1 says all the trees can have a max of one split (stumps)
 - shrinkage = 0.01 specifies the learning rate
-- n.trees = 500 specifies the total number of trees to fit
+- n.trees = 100 specifies the total number of trees to fit
 - cv.folds = 5 gives the number of cross-validation folds to use in model validation
 - bag.fraction = 0.8 states the overall fraction of observations to use in each tree
 - n.minobsinnode = 5 gives the minimum observations allowed per node (stopping criteria)
@@ -193,18 +196,18 @@ Third, how do we determine if our model fits the data? Well, first we can check 
 gbm.perf(trump_gbm, method = "cv")
 ```
 
-Here, the black curve shows the cv-error vs number of trees fit (iteration) while the green curve shows the OOB error vs number of trees. It looks like cv is decreasing across the range of iterations attempted while the OOB starts to level off sooner. We'll investigate the optimal hyperparameter choices using tidymodels in the next section.
+Here, the black curve shows the cv-error vs number of trees fit (iteration) while the green curve shows the OOB error vs number of trees. It looks both are decreasing across the range of iterations attempted so we can use the full 100 trees in our predictions without fear of overfitting. We'll further investigate the optimal hyperparameter choices using tidymodels in the next section.
 
 We can also check the prediction error on the test set. It looks comparable to the random forest models:
 
 ```{r}
-pred=predict(trump_gbm,test)
+pred=predict(trump_gbm,test,n.trees=100)
 cat("RMSE=",sqrt(mean((pred-test$trump.vote)^2)))
 ```
 
 ## Training with Tidymodels
 
-To explore the impact of number of trees and other parameters, we'll use `tidymodels`. We will tune based on trees, tree_depth, and learn_rate, letting tidymodels pick 20 random combinations to try. Not that we are using the slightly better engine of `xgboost` for model fitting.
+To explore the impact of number of trees and other parameters, we'll use `tidymodels`. We will tune based on number of trees and learning rate, letting tidymodels pick 10 random combinations to try. Not that we are using the slightly better engine of `xgboost` for model fitting.
 
 ```{r}
 library(tidymodels)
@@ -212,8 +215,8 @@ library(xgboost)
 # Models specs
 gbm_spec=boost_tree(
   trees=tune(),
-  tree_depth=tune(),
   learn_rate=tune(),
+  tree_depth=1,
   min_n=5,
   sample_size=0.8) |>
   set_engine("xgboost") |>
@@ -227,11 +230,11 @@ gbm_tune=tune_grid(
   gbm_spec,
   trump.vote~.,
   cv_plan,
-  grid=20
+  grid=10
 )
 ```
 
-The "best" model appeared to use less trees, more depth, and a slower learning rate compared with our earlier model:
+The "best" model appeared to use more trees and a slower learning rate compared with our earlier model:
 
 ```{r}
 best_params=select_best(gbm_tune,metric="rmse")
@@ -254,16 +257,15 @@ gbm_pred=predict(gbm_fit,test)$.pred
 cat("RMSE is",sqrt(mean((test$trump.vote-gbm_pred)^2)))
 ```
 
-Hmm, that was actually worse. Score one against tidymodels (or maybe xgboost?) in this scenario I guess. 
+Hmm, that was actually a little worse. Score one against tidymodels (or maybe xgboost?) in this scenario I guess. 
 
-Note that if you actually want to specify the values for tuning parameters, you can use the grid_regular function but it take learn_rate on a log-scale. The following code would take `trees` values of 100,200,...1000, `tree_depth` of 1,2,3,4 and `learn_rates` of 0.001,0.01, and 0.1:
+Note that if you actually want to specify the values for tuning parameters, you can use the grid_regular function but it take learn_rate on a log-scale. The following code would take `trees` values of 100,200,...1000 and `learn_rates` of 0.001,0.01, and 0.1:
 
 ```{r}
-tune_grid <- grid_regular(
+tune_grid = grid_regular(
   trees(range = c(100, 1000)),
-  tree_depth(range = c(1, 4)),
   learn_rate(range = c(-3, -1)),  # log10 scale
-  levels = c(10, 4, 3)
+  levels = c(10, 3)
 )
 ```
 
