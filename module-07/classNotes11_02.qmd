@@ -1,0 +1,22 @@
+---
+title: "Class Notes 11-02"
+format: html
+---
+
+```{r}
+library(gbm)
+species_gbm=gbm(Species~.,
+            data=iris,
+            distribution="multinomial")
+```
+
+```{r}
+best_iter = gbm.perf(species_gbm)
+print(best_iter)
+```
+
+```{r}
+preds=predict(species_gbm,iris,n.trees=25,type="response")[,,1]
+yhat=colnames(preds)[max.col(preds)]
+table(iris$Species,yhat)
+```

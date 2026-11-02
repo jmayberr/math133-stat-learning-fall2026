@@ -510,9 +510,9 @@ f^t = f^{t-1} - \frac{\partial L}{\partial f} = f^{t-1}  + 2 \gamma \sum r_i^{t-
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>trainSamp<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">50</span>,<span class="dv">30</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[trainSamp,]</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>trainSamp,]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">50</span>,<span class="dv">30</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[s,]</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Here’s gbm applied to the trump vote regression tree. There are a lot of parameters here which I’ll explain in a minute</p>
 <div class="cell">
