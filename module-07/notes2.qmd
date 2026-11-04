@@ -290,7 +290,7 @@ That is quite an improvement in accuracy! This model can learn a circular decisi
 
 The issue is that with real data, you might not be able to see a clear circular structure like you can in this fake example and instead need your algorithm to find it for you. That's where a neural network helps us out. Instead of manually constructing a squared-distance feature, we let the model learn intermediate features from the original predictors.
 
-A neural network contains a series of layers. First, the input layer consists of the inputs (i.e., features) that we give the model. Next, a hidden layer consists of hidden units that learn patterns in the data. Each hidden unit takes a weighted sum of the inputs and passes it through a function called an activation function. For example, a logistic (sigmoid) function can serve as an activation function, although many modern neural networks use the ReLU function instead. In this way, the network engineers its own features in the hidden layer and passes these learned features to an output layer, which uses them to make the final predictions. The diagram below illustrates this architecture:
+A neural network contains a series of layers^[The type of neural network we describe here is a type of feedforward neural network called a multiplayer perceptron. And yes, I do think they should name a Transfomer that.] First, the input layer consists of the inputs (i.e., features) that we give the model. Next, a hidden layer consists of hidden units that learn patterns in the data. Each hidden unit takes a weighted sum of the inputs and passes it through a function called an activation function. For example, a logistic (sigmoid) function can serve as an activation function, although many modern neural networks use the ReLU function instead. In this way, the network engineers its own features in the hidden layer and passes these learned features to an output layer, which uses them to make the final predictions. The diagram below illustrates this architecture:
 
 ![Architecture of a neural network](nnet.jfif){fig-align="center" width="60%" fig-cap="Architecture of a neural network."}
 
@@ -526,6 +526,8 @@ sum(pred16_full==shots$Goal)/n
 
 Now we're talking^[Although we really should do this with a test set. Sue me. No, sorry I don't mean that. Please don't sue me. You won't get much. I'm just a math professor.]! Score one for neural networks. 
 
+The fit can get even better with variable scaling as illustrated in the practice problems below. 
+
 ## Practice
 
 Load our favorite `penguins` dataset from the `palmerpenguins` package (see Module 6.2 for example) for use in these exercises. We'll be looking at model for predicting `species` in terms of the other variables. 
@@ -535,8 +537,6 @@ Load our favorite `penguins` dataset from the `palmerpenguins` package (see Modu
 3. Now scale the numeric variables in the penguins dataset using the following commands:
 
 `penguins_scaled = penguins |>
-  select(species, bill_length_mm, bill_depth_mm,
-         flipper_length_mm, body_mass_g) |>
   drop_na() |>
   mutate(across(where(is.numeric), ~ as.numeric(scale(.x))))`
 
