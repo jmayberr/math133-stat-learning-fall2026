@@ -1,0 +1,178 @@
+---
+title: "Module 7.3: Check out these apples!"
+---
+
+## Introduction 
+
+In the last module we introduce neural networks and saw how the decision boundary or predictions depend on the number of hidden units. We did not get into how the neural network is fit or what it is actually doing. For that, you'll have to read the supplement. 
+
+Instead, I want to close out our brief tour of deeper learning models by discussing image detecion and compression, two important applications which pull us deeper into the realm of neural networks^[At least it doesn't force us to go deeper into our own neural networks. Scary.].
+
+## The MNIST Dataset
+
+For our applications, we'll be looking the Modified National Standards and Technology (MNIST) dataset which contains greyscale intensities for 60,000 28x28 pixel images of handwritten digits. You can load this by downloading the `mnist_train.rds` file from github and loading it into R using the `readRDS` function^[The dataset is large enough where storing and loading it as a csv take too much time. An RDS file is more compact.].
+
+```{r}
+mnist_df = readRDS("Datasets/mnist_train.rds")
+```
+
+Each row contains the [0,1] greyscale values for the image written as a $28 \times 28 = 784$ list of numbers as well as the actual digit classification (0,1,2,etc.) for the image. You can view one of them by "unravelling" the image values as follows:
+
+```{r}
+img1 = matrix(
+  as.numeric(mnist_df[1, 1:784]),
+  nrow=28,
+  ncol=28
+)
+
+
+image(
+    t(img1[28:1, ]),
+    col = gray.colors(256),
+    axes = FALSE,
+    useRaster = TRUE,
+    main = paste(
+      "Actual:", mnist_df$digit[1]
+    )
+  )
+
+
+```
+
+You have to reverse the order of the rows because it is stored with the first row representing the top of the image but the `image` function treats the first row as the bottom. The 
+
+Our first task will be too build a simple neural network which can predict the digits from the pixels using `nnet`. We'll select a sample of just 1000 images for our training set and 500 for test just to make the fit form faster. Please do feel free to try the larger version if you're bored
+
+```{r}
+set.seed(1123)
+n=nrow(mnist_df)
+N=1000
+indices = sample(n,N+500)
+
+train = mnist_df[indices[1:N], ]
+test = mnist_df[indices[(N+1):(N+500)], ]
+```
+
+
+```{r}
+library(nnet)
+digit_nnet=nnet(digit~.,
+                data=train,
+                size=10,
+                MaxNWts=8000,
+                trace=FALSE)
+```
+
+We didn't use the `MaxNWts` input before but need it here because the default is to not fit a network with more than 1000 weights. With 784 inputs, 10 hidden units, and 10 possible outputs (0-9), we have 
+$$
+(784+1)\times 10 = 7850
+$$
+weights going from the inputs to the hidden layer (the "+1" for the bias) and 
+$$
+(10+1)\times10 = 110
+$$
+going from hidden to output; see supplement for further details about weights. 
+
+Now let's look at the predictions on the test set
+
+```{r}
+yhat=predict(mnist_nnet,newdata=test,type="class")
+sum(test$digit==yhat)/500
+```
+
+Considering how shitty the handwriting is on some of these, that's not bad. For instance, let's look at a few of the incorrect ones.
+
+```{r}
+# Find incorrectly classified observations
+incorrect = which(preds != test$digit)
+
+# Select the first 12
+incorrect_12 = incorrect[1:12]
+
+# Set up plotting grid
+par(mfrow = c(3, 4), mar = c(0.5, 0.5, 2, 0.5))
+
+for (i in incorrect_12) {
+
+  img = matrix(
+    as.numeric(test[i, 1:784]),
+    nrow = 28,
+    ncol = 28
+  )
+
+  image(
+    t(img[28:1, ]),
+    col = gray.colors(256),
+    axes = FALSE,
+    useRaster = TRUE,
+    main = paste(
+      "Actual:", test$digit[i],
+      "\nPredicted:", preds[i]
+    )
+  )
+}
+
+par(mfrow = c(1, 1))
+```
+
+Some of those ARE pretty bad but I feel like we could do better. For that, we need to to be able to fine tune our network and go a little bit deeper into its architecture.  
+## Autoencoders
+
+Another application of neural networks is in image compression. For this, we actually feed the images as both input and output. This forces the hidden units to play the role of a "compression bottleneck", changing teh size of the stored information about an image from the number of grayscale inputs down to the number of hidden units. A neural network used in this way is called an autoencoder.  
+
+
+```{r}
+library(nnet)
+
+autoencoder = nnet(
+  x = as.matrix(train[, 1:784]),
+  y = as.matrix(train[, 1:784]),
+  size = 8,
+  linout = TRUE,
+  MaxNWts = 15000,
+  trace = FALSE
+)
+```
+
+Predictions:
+
+```{r}
+reconstructed = predict(
+  autoencoder,
+  newdata = as.matrix(test[, 1:784])
+)
+```
+
+Comparing with original
+
+```{r}
+par(mfrow = c(1, 2), mar = c(1, 1, 2, 1))
+
+i = 3
+
+original = matrix(
+  as.numeric(test[i, 1:784]),
+  nrow = 28
+)
+
+reconstruction = matrix(
+  reconstructed[i, ],
+  nrow = 28
+)
+
+image(
+  t(original[28:1, ]),
+  col = gray.colors(256),
+  axes = FALSE,
+  main = "Original"
+)
+
+image(
+  t(reconstruction[28:1, ]),
+  col = gray.colors(256),
+  axes = FALSE,
+  main = "Reconstruction"
+)
+
+par(mfrow = c(1, 1))
+```

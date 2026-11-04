@@ -687,7 +687,7 @@ r = \sqrt{X_1^2 + X_2^2}
 <section id="where-neural-networks-come-in" class="level2">
 <h2 class="anchored" data-anchor-id="where-neural-networks-come-in">Where neural networks come in…</h2>
 <p>The issue is that with real data, you might not be able to see a clear circular structure like you can in this fake example and instead need your algorithm to find it for you. That’s where a neural network helps us out. Instead of manually constructing a squared-distance feature, we let the model learn intermediate features from the original predictors.</p>
-<p>A neural network contains a series of layers. First, the input layer consists of the inputs (i.e., features) that we give the model. Next, a hidden layer consists of hidden units that learn patterns in the data. Each hidden unit takes a weighted sum of the inputs and passes it through a function called an activation function. For example, a logistic (sigmoid) function can serve as an activation function, although many modern neural networks use the ReLU function instead. In this way, the network engineers its own features in the hidden layer and passes these learned features to an output layer, which uses them to make the final predictions. The diagram below illustrates this architecture:</p>
+<p>A neural network contains a series of layers<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> First, the input layer consists of the inputs (i.e., features) that we give the model. Next, a hidden layer consists of hidden units that learn patterns in the data. Each hidden unit takes a weighted sum of the inputs and passes it through a function called an activation function. For example, a logistic (sigmoid) function can serve as an activation function, although many modern neural networks use the ReLU function instead. In this way, the network engineers its own features in the hidden layer and passes these learned features to an output layer, which uses them to make the final predictions. The diagram below illustrates this architecture:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="nnet.jfif" class="img-fluid figure-img" style="width:60.0%"></p>
@@ -765,7 +765,7 @@ r = \sqrt{X_1^2 + X_2^2}
 </section>
 <section id="experimenting-with-the-network-architecture" class="level2">
 <h2 class="anchored" data-anchor-id="experimenting-with-the-network-architecture">Experimenting with the network architecture</h2>
-<p>There are a number of hyperparameters hidden underneath the hood a neural network, but one of the most transparent is <code>size</code>. Using <code>size = 0</code> would be equivalent to fitting a logistic regression model<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> (no hidden units). The graphs below demonstrate how the decision boundary depends on this parameter in our example:</p>
+<p>There are a number of hyperparameters hidden underneath the hood a neural network, but one of the most transparent is <code>size</code>. Using <code>size = 0</code> would be equivalent to fitting a logistic regression model<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> (no hidden units). The graphs below demonstrate how the decision boundary depends on this parameter in our example:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fit_network <span class="ot">=</span> <span class="cf">function</span>(size, data) {</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nnet</span>(</span>
@@ -984,7 +984,8 @@ Accuracy with size = 16: 0.6465464</code></pre>
 <pre><code>[1] 0.8039826</code></pre>
 </div>
 </div>
-<p>Now we’re talking<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>! Score one for neural networks.</p>
+<p>Now we’re talking<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>! Score one for neural networks.</p>
+<p>The fit can get even better with variable scaling as illustrated in the practice problems below.</p>
 </section>
 <section id="practice" class="level2">
 <h2 class="anchored" data-anchor-id="practice">Practice</h2>
@@ -994,7 +995,7 @@ Accuracy with size = 16: 0.6465464</code></pre>
 <li>Calculate the predictions of your neural network from 1 and create a confusion matrix of the results. Notice anything strange going on?</li>
 <li>Now scale the numeric variables in the penguins dataset using the following commands:</li>
 </ol>
-<p><code>penguins_scaled = penguins |&gt;   select(species, bill_length_mm, bill_depth_mm,          flipper_length_mm, body_mass_g) |&gt;   drop_na() |&gt;   mutate(across(where(is.numeric), ~ as.numeric(scale(.x))))</code></p>
+<p><code>penguins_scaled = penguins |&gt;   drop_na() |&gt;   mutate(across(where(is.numeric), ~ as.numeric(scale(.x))))</code></p>
 <p>Refit the neural network to the scaled data and recalculate predictions. How does it look now?</p>
 
 
@@ -1008,8 +1009,9 @@ Accuracy with size = 16: 0.6465464</code></pre>
 <li id="fn2"><p>Exception: switched to geom_raster here for a nicer way to fill the regions. Also turning it into a function for duplicate use<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>Not gonna lie, outsourced the code for this one to chatGPT.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p>Hold your head up high logistic, we still love you. Everyone has their limits.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p>Although this choice is not supported by the function <code>nnet</code>.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>Although we really should do this with a test set. Sue me. No, sorry I don’t mean that. Please don’t sue me. You won’t get much. I’m just a math professor.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>The type of neural network we describe here is a type of feedforward neural network called a multiplayer perceptron. And yes, I do think they should name a Transfomer that.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>Although this choice is not supported by the function <code>nnet</code>.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Although we really should do this with a test set. Sue me. No, sorry I don’t mean that. Please don’t sue me. You won’t get much. I’m just a math professor.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
