@@ -87,6 +87,10 @@ website:
             text: "Module 7.1: Gradient Boosting"
           - href: module-07/notes2.qmd
             text: "Module 7.2: Decision Boundaries and Neural Networks"
+          - href: module-07/notes3.qmd
+            text: "Module 7.2: Image Recognition and Compression"
+          - href: module-07/supplement.qmd
+            text: "Module 7 Theory Supplement: Neural Concepts"
       - text: "Module 8"
         menu:
           - text: "Notes 1: ..."

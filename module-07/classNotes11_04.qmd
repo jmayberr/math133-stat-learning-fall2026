@@ -1,0 +1,58 @@
+---
+title: "Class Notes for 11-04"
+format: html
+---
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv"
+shots=read.csv(df_url) %>%
+  select(-X.1,-X,-start.time,-end.time,-category)
+formula=factor(Goal)~abs(xj)+yj+Hand+Tactic+Type+Defense
+```
+
+Fit nnet
+
+```{r}
+library(nnet)
+shot_nnet=nnet(formula,
+               data=shots,
+               size=8,
+               trace=FALSE)
+```
+
+```{r}
+yhat=predict(shot_nnet,shots,type="class")
+table(shots$Goal,yhat) #Confusion matrix
+sum(yhat==shots$Goal)/nrow(shots) #accuracy
+```
+
+PLotting decision boundary example:
+
+```{r}
+grid=expand.grid(
+  xj=seq(min(shots$xj)-0.5,max(shots$xj)+0.5,by=0.01),
+  yj=seq(min(shots$yj)-0.5,max(shots$yj)+0.5,by=0.01),
+  Hand="Right",
+  Tactic="Perimeter",
+  Type="Normal",
+  Defense="Contested"
+)
+
+grid=grid |>
+  mutate(yhat=predict(shot_nnet,newdata=grid,type="class"))
+```
+
+```{r}
+ggplot()+
+  geom_raster(
+    data=grid,
+    aes(x=xj,y=yj,fill=yhat),
+    alpha=0.2
+  )+
+  geom_point(
+    data=dplyr::filter(shots,Hand=="Right",Type=="Normal",
+                       Tactic=="Perimeter",
+                       Defense=="Contested"),
+    aes(x=xj,y=yj,color=Goal)
+  )
+```
