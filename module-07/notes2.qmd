@@ -526,7 +526,62 @@ sum(pred16_full==shots$Goal)/n
 
 Now we're talking^[Although we really should do this with a test set. Sue me. No, sorry I don't mean that. Please don't sue me. You won't get much. I'm just a math professor.]! Score one for neural networks. 
 
-The fit can get even better with variable scaling as illustrated in the practice problems below. 
+The fit can get even better with variable scaling as illustrated in the example and practice problems below. 
+
+## Regression Example
+
+Neural networks can be applied to regression problems as well. To illustrate, we'll throw `nnet` at our favorite old election dataset
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016=read.csv(df_url)
+s=sample(50,30)
+train=election2016[s,]
+test=election2016[-s,]
+```
+
+The one change we need to make is set `linout=TRUE` to specify a numeric response^[Technically, the `linout` is telling it to use the identify function for the output function as opposed to a logistic or softmax; see the supplement for details.]. We'll only use four hidden units because the size of our training set is so small. 
+
+```{r}
+trump_nn=nnet(trump.vote~.,
+              data=train[,2:10],
+              size=4,
+              linout=TRUE,
+              trace=FALSE)
+```
+
+Let's see how well the predictions do on our test set based on RMSE
+
+```{r}
+yhat=predict(trump_nn,newdata=test)
+sqrt(mean((yhat-test$trump.vote)^2))
+```
+
+Interestingly, this is worse than many simpler models we considered and doesn't see to get better if we increase the number of hidden units. 
+
+One reason for that is variable scaling. Neural networks are sensitive to such things just like shrinkage. If we instead scale the variables first,
+
+```{r}
+
+election_scaled=election2016 |>
+  mutate(across(median.income:non.white,~ as.numeric(scale(.x))))
+s=sample(50,30)
+train=election2016[s,]
+test=election2016[-s,]
+```
+
+The predictions improve a little. 
+
+```{r}
+nn_test=nnet(trump.vote~.,
+              data=train[,2:10],
+              size=4,
+              linout=TRUE,
+              trace=FALSE)
+yhat=predict(nn_test,newdata=test)
+sqrt(mean((yhat-test$trump.vote)^2))
+```
+The difference is even more drastic in the practice problems below. 
 
 ## Practice
 
