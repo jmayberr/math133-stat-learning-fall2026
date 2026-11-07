@@ -117,7 +117,17 @@ par(mfrow = c(1, 1))
 
 Some of those ARE pretty bad but I feel like we could do better. One thing we can do is increase the size of our training data. I tried the running the same code above with 10,000 training examples and did get closer to 90% accuracy. But for additional power, we need to be able to fine tune our network architecture and that requires introducing the `torch` package.
 
-## Light `em up
+## Building the fire
+
+Let's start with a warm up example on the familiar election dataset, using outcome (red/blue) as the response^[We could also use the shots data but the issue there is the qualitative predictors. `torch` doesn't allow you to throw them in directly. You have to create the model matrix separately and that's an extra layer of complexity we don't need right now.].  First, we'll load it up and define training/testing sets
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016=read.csv(df_url)
+s=sample(50,30)
+train=election2016[s,]
+test=election2016[-s,]
+```
 
 Hopefully by this point you have caved and decided to watch at least the a few videos of 3blue1brown's series and/or read the theoretical supplement because its about to get real hot if not. In particularly, you'll need to have at least a vague notion of the following terms to understand what's going on here:
 
@@ -125,7 +135,129 @@ Hopefully by this point you have caved and decided to watch at least the a few v
 * cost functions
 * back-propagation
 
-The `torch` package is a much more comprehensive and modern toolbox for fitting neural networks to data. It is capable of fitting multilayer feedforward networks with as many hidden units as we like. It starts with a definition of a model. Here we will use two hidden layers, each with 128 hidden units^[AI says computers like it when you choose hidden units in powers of 2. You are speaking their love language.] and ReLu activation functions^[`nnet` uses sigmoid but ReLu is faster and better.]
+The `torch` package is a much more comprehensive and modern toolbox for fitting neural networks to data. It is capable of fitting multilayer feedforward networks with as many hidden units as we like. It starts with a definition of our model architecture. We'll start with a two-unit single hidden layer network and ReLu activation function^[`nnet` uses sigmoid but ReLu is faster and better.]. 
+
+```{r}
+library(torch)
+outcome_nn=nn_sequential(
+  #Define input to hidden layer dimensions
+  nn_linear(8,2),
+  nn_relu(),
+  
+  # Hidden layer to output (two nodes for binary response)
+  nn_linear(2,2)
+  
+)
+```
+
+Now the annoying part. We have to redefine all of our training and testing sets as "tensors^[In math, tensors are multilinear maps. In computer/data science, they are just multidimensional array. Think matrices except you can have more than two indices.].".
+
+```{r}
+# Convert pixel values to tensors
+x_train = torch_tensor(
+  as.matrix(train[, 2:9]),
+  dtype = torch_float()
+)
+
+x_test = torch_tensor(
+  as.matrix(test[, 2:9]),
+  dtype = torch_float()
+)
+
+# Convert outcome to 1/2 factor - default for torch
+outcome_levels = levels(factor(election2016$outcome))
+y_train = torch_tensor(
+  as.integer(factor(train$outcome,
+                    levels=outcome_levels)),
+  dtype = torch_long()
+)
+
+y_test = torch_tensor(
+  as.integer(factor(train$outcome,
+                    levels =outcome_levels)),
+  dtype = torch_long()
+)
+```
+
+This code should be pretty self-explanatory except maybe the conversion of outcome to a factor and then integer. That's tedious but its just the format needed to make to work with torch. 
+
+Now we need a couple additional definitions. First, the type of loss/cost function we will be minimizing. Using squared errors doesn't work very well for classification problems so here we use cross entropy^[More on this in the supplement. Maybe. It hasn't been fully written yet.]. 
+
+Second, the optimizer part tells `torch` what algorithm to use for minimizing the loss via backpropagation. In this case, we set this equal to "Adam's" algorithm^[Hopefully not as depressing as Adam's Song. Ok fine, Adam isn't a person here. Its an acronym for ADAptive Moment estimation]. In contrast, `nnet` uses a different optimizer called BFGS^[Acronym for Bad Fucking GeniuS. or the initials of the researchers who came up with it, I'll let you decide.]. 
+
+```{r}
+model = outcome_nn
+
+loss_fn = nn_cross_entropy_loss()
+
+optimizer = optim_adam(
+  model$parameters,
+  lr = 0.001
+)
+```
+
+Then we get to the training step where we apply gradient descent to the loss function. The algorithm starts off by randomizing the network weights and then calculates the loss function and gradient for our training data. It proceeds by applying one step of gradient descent to adjust weights, and then starts the whole process again. Each iteration is called an epoch.
+
+The code below runs through 100 epochs and plots the resulting loss function so we can check convergence. 
+
+```{r}
+epochs = 100
+
+loss_history = data.frame(
+  epoch = 1:epochs,
+  loss = NA
+)
+
+for (epoch in 1:epochs) {
+  # Reset gradient from previous epoch
+  optimizer$zero_grad()
+    
+  # Compute current model output
+  output = model(x_train) 
+    
+  #Compute current model loss 
+  loss = loss_fn(output, y_train) 
+    
+  # Compute current loss gradient via backpropagation
+  loss$backward()
+
+  # Perform one step of gradient descent
+  optimizer$step()
+
+  # Store loss
+  loss_history$loss[epoch] = loss$item()
+}
+
+loss_history |>
+  ggplot(aes(x=epoch,y=loss))+
+  geom_point(shape=1,size=1)+
+  geom_line()
+```
+
+Observe how the loss starts to level off as we approach 100. That's good! If it doesn't we should try more epochs. 
+
+Finally we get to the good part: prediction. The only hard part about this is that we need to do it in three steps
+
+1. Calculate the predicted output of the model (which will be in terms of log-odds of getting a 1 or 2 as output)
+2. Extract the column which leads to the largest value
+3. Convert back to red/blue classifications
+
+The following shows a confusion matrix of the results: 
+
+```{r}
+test_output=model(x_test)
+
+pred_levels=as.array(test_output$argmax(dim=2))
+
+yhat = outcome_levels[pred_levels]
+table(test$outcome,yhat)
+```
+
+Haha, not so good; we always predicted red! Well, this was just warmup anyways. Now to the main event. 
+
+## Light `em up
+
+For our digit prediction model, we will use a more complicated architecture consisting of two hidden layers, each with 128 hidden units^[AI says computers like it when you choose hidden units in powers of 2. You are speaking their love language.] and ReLu activation functions: 
 
 
 ```{r}
@@ -145,7 +277,7 @@ digit_nn=nn_sequential(
 
 ```
 
-Now the annoying part. We have to redefine all of our training and testing sets as "tensors^[In math, tensors are multilinear maps. In computer/data science, they are just multidimensional array. Think matrices except you can have more than two indices.].".
+Now the annoying part again...
 
 ```{r}
 # Convert pixel values to tensors
@@ -171,9 +303,9 @@ y_test = torch_tensor(
 )
 ```
 
-Hopefully that is pretty self-explanatory except maybe the "+1" stuff at the end. That is just because `torch` expects class labels starting at 1 instead of 0. 
+The "+1" stuff at the end is again a formatting issue; `torch` expects class labels starting at 1 instead of 0 and our digits are labeled 0-9
 
-Now we need a couple additional definitions. First, the type of loss/cost function we will be minimizing. Using squared errors doesn't work so well for classification problems so here we use cross entropy^[More on this in the supplement. Maybe. It hasn't been fully written yet.]. Second, the optimizer part tells `torch` what algorithm to use for minimizing the loss via backpropagation. In this case, we set this equal to "Adam's" algorithm^[Hopefully not as depressing as Adam's Song. Ok fine, Adam isn't a person here. Its an acronym for ADAptive Moment estimation]. In contrast, `nnet` uses a different optimizer called BFGS^[Acronym for Bad Fucking GeniuS. or the initials of the researchers who came up with it, I'll let you decide.]. 
+Next the model and loss (same as before):
 
 ```{r}
 model = digit_nn
@@ -186,14 +318,11 @@ optimizer = optim_adam(
 )
 ```
 
+And then training. Now you might be wondering what's up with the whole epoch and batch-size thing^[Which should be the name of a sitcom about two outcast aliens from different civilizations who become friends and triumph over the evil ruling Syndicate against all odds.] below. Mini-batch gradient descent is a training method in which we split the data into smaller chunks called batches. After randomizing the initial weights, we use the first batch to calculate the loss function and perform a step of gradient descent to update the weights. We use the update weights to calculate the loss and perform another gradient descent step using the second batch and so on until we have gone through the entire training set. 
 
+Smaller batch sizes make things more computationally manageable for larger dataset and let us update weights more frequently. This additional variability in gradient estimates can lead to a more thorough exploration of parameter spaces, potentially improving generalization. We didn't need it in our warm-up example and you usually don't if you have less than 1000 observations, but we'll use it here in case you want to try upping the training set size. 
 
-
-Now we train the model. You might be wondering what's up with the whole epoch and batch-size thing^[Which should be the name of a sitcom about two outcast aliens from different civilizations who become friends and triumph over the evil ruling Syndicate against all odds.]. Mini-batch gradient descent is a training method in which we split the data into smaller chunks called batches. After randomizing the initial weights, we use the first batch to calculate the loss function and perform a step of gradient descent to update the weights. We use the update weights to calculate the loss and perform another gradient descent step using the second batch and so on until we have gone through the entire training set. 
-
-Smaller batch sizes make things more computationally manageable for larger dataset and let us update weights more frequently. This additional variability in gradient estimates can lead to a more thorough exploration of parameter spaces, potentially improving generalitzation. 
-
-After the algorithm uses all batches, an epoch ends Then we reshuffle the observations into batches all over again and start the second epoch using the weights from the end of the previous epoch as its starting values. 
+After the algorithm uses all batches, an epoch ends. Then we reshuffle the observations into batches all over again and start the second epoch using the weights from the end of the previous epoch as its starting values. 
 
 The code below performs these training steps. You can basically copy and paste it for reuse in other examples provided you change the model and training/testing data appropriately.
 
@@ -211,7 +340,8 @@ for (epoch in 1:epochs) {
   
   for (i in seq(1, length(order), by = batch_size)) {
     
-    idx = order[i:min(i + batch_size - 1, length(order))]
+    # Indices for current batch
+    idx = order[i:min(i + batch_size - 1,  length(order))]
     
     # Clears gradients from previous batch
     optimizer$zero_grad()
