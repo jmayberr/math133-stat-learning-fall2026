@@ -262,11 +262,28 @@ Hmm, that was actually a little worse. Score one against tidymodels (or maybe xg
 Note that if you actually want to specify the values for tuning parameters, you can use the grid_regular function but it take learn_rate on a log-scale. The following code would take `trees` values of 100,200,...1000 and `learn_rates` of 0.001,0.01, and 0.1:
 
 ```{r}
-tune_grid = grid_regular(
+parameter_grid = grid_regular(
   trees(range = c(100, 1000)),
   learn_rate(range = c(-3, -1)),  # log10 scale
   levels = c(10, 3)
 )
+```
+
+Then you set `grid = parameter_grid` when fitting. 
+
+Also note that you can get a variable importance plot using the `xgboost` and `ggplot2` packagesas follows: 
+
+
+```{r}
+library(xgboost)
+imp = xgb.importance(
+  model = extract_fit_engine(gbm_fit))
+
+ggplot(imp, 
+       aes(x = reorder(Feature, Gain), y = Gain)) +
+  geom_col() +
+  coord_flip() +
+  labs(x = NULL, y = "Importance (Gain)")
 ```
 
 ## Practice
