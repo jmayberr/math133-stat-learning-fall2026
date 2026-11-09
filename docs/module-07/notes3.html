@@ -516,19 +516,19 @@ window.Quarto = {
 </div>
 <p>Now the annoying part. We have to redefine all of our training and testing sets as “tensors<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>.”.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert pixel values to tensors</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>x_train <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(train[, <span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>x_test <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(test[, <span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert outcome to 1/2 factor - default for torch</span></span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>outcome_levels <span class="ot">=</span> <span class="fu">levels</span>(<span class="fu">factor</span>(election2016<span class="sc">$</span>outcome))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>x_train <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(train[, <span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>x_test <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(test[, <span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert outcome to 1/2 factor - default for torch</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>outcome_levels <span class="ot">=</span> <span class="fu">levels</span>(<span class="fu">factor</span>(election2016<span class="sc">$</span>outcome))</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>y_train <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
 <span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.integer</span>(<span class="fu">factor</span>(train<span class="sc">$</span>outcome,</span>
 <span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>                    <span class="at">levels=</span>outcome_levels)),</span>
@@ -613,9 +613,9 @@ window.Quarto = {
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(test<span class="sc">$</span>outcome,yhat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      yhat
-       Red
-  Blue   8
-  Red   12</code></pre>
+       Blue
+  Blue    8
+  Red    12</code></pre>
 </div>
 </div>
 <p>Haha, not so good; we always predicted red! Well, this was just warmup anyways. Now to the main event.</p>
@@ -729,36 +729,36 @@ window.Quarto = {
 <span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Epoch: 1 Average loss: 2.1414 
-Epoch: 2 Average loss: 1.4773 
-Epoch: 3 Average loss: 0.8533 
-Epoch: 4 Average loss: 0.5636 
-Epoch: 5 Average loss: 0.4441 
-Epoch: 6 Average loss: 0.3502 
-Epoch: 7 Average loss: 0.2975 
-Epoch: 8 Average loss: 0.2526 
-Epoch: 9 Average loss: 0.2095 
-Epoch: 10 Average loss: 0.1922 
-Epoch: 11 Average loss: 0.1661 
-Epoch: 12 Average loss: 0.1341 
-Epoch: 13 Average loss: 0.1191 
-Epoch: 14 Average loss: 0.1033 
-Epoch: 15 Average loss: 0.0856 
-Epoch: 16 Average loss: 0.0717 
-Epoch: 17 Average loss: 0.0658 
-Epoch: 18 Average loss: 0.0601 
-Epoch: 19 Average loss: 0.0478 
-Epoch: 20 Average loss: 0.0411 
-Epoch: 21 Average loss: 0.0353 
-Epoch: 22 Average loss: 0.0302 
-Epoch: 23 Average loss: 0.0268 
-Epoch: 24 Average loss: 0.0245 
-Epoch: 25 Average loss: 0.0222 
-Epoch: 26 Average loss: 0.0189 
-Epoch: 27 Average loss: 0.0167 
-Epoch: 28 Average loss: 0.0148 
-Epoch: 29 Average loss: 0.0138 
-Epoch: 30 Average loss: 0.0125 </code></pre>
+<pre><code>Epoch: 1 Average loss: 2.1069 
+Epoch: 2 Average loss: 1.4161 
+Epoch: 3 Average loss: 0.8212 
+Epoch: 4 Average loss: 0.5555 
+Epoch: 5 Average loss: 0.4366 
+Epoch: 6 Average loss: 0.3514 
+Epoch: 7 Average loss: 0.2937 
+Epoch: 8 Average loss: 0.2516 
+Epoch: 9 Average loss: 0.212 
+Epoch: 10 Average loss: 0.1925 
+Epoch: 11 Average loss: 0.1736 
+Epoch: 12 Average loss: 0.1388 
+Epoch: 13 Average loss: 0.1217 
+Epoch: 14 Average loss: 0.108 
+Epoch: 15 Average loss: 0.0915 
+Epoch: 16 Average loss: 0.0769 
+Epoch: 17 Average loss: 0.0706 
+Epoch: 18 Average loss: 0.0649 
+Epoch: 19 Average loss: 0.0541 
+Epoch: 20 Average loss: 0.0465 
+Epoch: 21 Average loss: 0.0416 
+Epoch: 22 Average loss: 0.0351 
+Epoch: 23 Average loss: 0.0321 
+Epoch: 24 Average loss: 0.0296 
+Epoch: 25 Average loss: 0.0278 
+Epoch: 26 Average loss: 0.0235 
+Epoch: 27 Average loss: 0.0199 
+Epoch: 28 Average loss: 0.018 
+Epoch: 29 Average loss: 0.0172 
+Epoch: 30 Average loss: 0.0153 </code></pre>
 </div>
 </div>
 <p>The next code chunk does the fun part: prediction.</p>
@@ -774,7 +774,7 @@ Epoch: 30 Average loss: 0.0125 </code></pre>
 <span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate test accuracy </span></span>
 <span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(predicted_digits <span class="sc">==</span> actual_digits)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.854</code></pre>
+<pre><code>[1] 0.876</code></pre>
 </div>
 </div>
 <p>We can see we did start to get some improvements with our sample of size 1000. With a larger sample size of 10000, I was able to get 95-96% accuracy and it was much faster than using <code>nnet</code> too. Consider that shit torched.</p>
@@ -874,36 +874,36 @@ Epoch: 30 Average loss: 0.0125 </code></pre>
 <span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Epoch: 1 Average loss: 0.08237 
-Epoch: 2 Average loss: 0.04516 
-Epoch: 3 Average loss: 0.03305 
-Epoch: 4 Average loss: 0.0277 
-Epoch: 5 Average loss: 0.02391 
-Epoch: 6 Average loss: 0.02126 
-Epoch: 7 Average loss: 0.01951 
-Epoch: 8 Average loss: 0.01817 
-Epoch: 9 Average loss: 0.01714 
-Epoch: 10 Average loss: 0.01619 
-Epoch: 11 Average loss: 0.0154 
-Epoch: 12 Average loss: 0.01477 
-Epoch: 13 Average loss: 0.01417 
-Epoch: 14 Average loss: 0.01372 
-Epoch: 15 Average loss: 0.01332 
-Epoch: 16 Average loss: 0.0129 
-Epoch: 17 Average loss: 0.0126 
-Epoch: 18 Average loss: 0.01228 
-Epoch: 19 Average loss: 0.01201 
-Epoch: 20 Average loss: 0.01177 
-Epoch: 21 Average loss: 0.01153 
-Epoch: 22 Average loss: 0.01133 
-Epoch: 23 Average loss: 0.01114 
-Epoch: 24 Average loss: 0.01099 
-Epoch: 25 Average loss: 0.01083 
-Epoch: 26 Average loss: 0.01069 
-Epoch: 27 Average loss: 0.01053 
-Epoch: 28 Average loss: 0.01039 
-Epoch: 29 Average loss: 0.01028 
-Epoch: 30 Average loss: 0.01014 </code></pre>
+<pre><code>Epoch: 1 Average loss: 0.08061 
+Epoch: 2 Average loss: 0.04291 
+Epoch: 3 Average loss: 0.0338 
+Epoch: 4 Average loss: 0.02887 
+Epoch: 5 Average loss: 0.0256 
+Epoch: 6 Average loss: 0.02326 
+Epoch: 7 Average loss: 0.02145 
+Epoch: 8 Average loss: 0.0201 
+Epoch: 9 Average loss: 0.01913 
+Epoch: 10 Average loss: 0.01826 
+Epoch: 11 Average loss: 0.0176 
+Epoch: 12 Average loss: 0.01703 
+Epoch: 13 Average loss: 0.01653 
+Epoch: 14 Average loss: 0.01618 
+Epoch: 15 Average loss: 0.0158 
+Epoch: 16 Average loss: 0.0155 
+Epoch: 17 Average loss: 0.01519 
+Epoch: 18 Average loss: 0.01494 
+Epoch: 19 Average loss: 0.01474 
+Epoch: 20 Average loss: 0.01452 
+Epoch: 21 Average loss: 0.01433 
+Epoch: 22 Average loss: 0.01418 
+Epoch: 23 Average loss: 0.014 
+Epoch: 24 Average loss: 0.01388 
+Epoch: 25 Average loss: 0.01371 
+Epoch: 26 Average loss: 0.01356 
+Epoch: 27 Average loss: 0.01341 
+Epoch: 28 Average loss: 0.01334 
+Epoch: 29 Average loss: 0.01323 
+Epoch: 30 Average loss: 0.01309 </code></pre>
 </div>
 </div>
 <p>Now we’ll calculate the predictions on the test set.</p>

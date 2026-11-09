@@ -3,3 +3,8 @@
 
 **/*.quarto_ipynb
 .quarto/
+
+.RData
+.RDataTmp*
+.Rhistory
+.Rproj.user/

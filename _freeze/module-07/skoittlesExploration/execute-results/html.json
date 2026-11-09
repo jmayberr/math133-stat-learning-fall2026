@@ -1,0 +1,17 @@
+{
+  "hash": "9db671b71befd5a7d7486c20f2f4c6b2",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Skittles Analysis\"\nformat: html\n---\n\nLoad in Data:\n\n\n::: {.cell}\n\n```{.r .cell-code}\ndf_url=\"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/skittles.csv\"\nskittles=read.csv(df_url)\nhead(skittles)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n  Student Red Orange Yellow Green Purple\n1       1   2      1      5     5      1\n2       2   0      2      6     1      5\n3       3   0      3      4     3      4\n4       4   2      5      4     1      3\n5       5   0      4      6     3      3\n6       6   4      5      3     3      3\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\ntotals=colSums(skittles[,2:6])\nbarplot(totals)\n```\n\n::: {.cell-output-display}\n![](skoittlesExploration_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n:::\n\n\nExpected Totals\n\n\n::: {.cell}\n\n```{.r .cell-code}\nn=sum(totals)\nexpected=rep(n/5,5)\nexpected\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 26.8 26.8 26.8 26.8 26.8\n```\n\n\n:::\n\n```{.r .cell-code}\ntotals\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n   Red Orange Yellow  Green Purple \n    11     31     39     25     28 \n```\n\n\n:::\n:::\n\n\nModel Evaluation\n\n\n::: {.cell}\n\n```{.r .cell-code}\nrmse_observed=sqrt(mean((totals-expected)^2))\nrmse_observed\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 9.173876\n```\n\n\n:::\n:::\n\n\nSimulating machines\n\n\n::: {.cell}\n\n```{.r .cell-code}\ncolors=c(\"red\",\"orange\",\"yellow\",\"green\",\"purple\")\ns=sample(colors,n,replace=TRUE)\ntable(s)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\ns\n green orange purple    red yellow \n    33     30     30     18     23 \n```\n\n\n:::\n\n```{.r .cell-code}\nrmse_machine=sqrt(mean((table(s)-expected)^2))\nrmse_machine\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 5.491812\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nrmse=function(s){\n  sqrt(mean((table(s)-expected)^2))\n}\n\nrmse_machines=replicate(10000,\n                        rmse(sample(colors,n,replace=TRUE))\n                        )\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nhist(rmse_machines)\nabline(v=rmse_observed,col=\"darkred\")\n```\n\n::: {.cell-output-display}\n![](skoittlesExploration_files/figure-html/unnamed-chunk-7-1.png){width=672}\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsum(rmse_machines>=rmse_observed)/10000 # p-value\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 0.0044\n```\n\n\n:::\n:::\n\n\n$\\chi^2$ Goodness of Fit Test\n\nUses theoretical reference distribution: Chi-square with $k-1$ degrees of freedom where $k$ = number of categories (5 for skittles).\n\n\n::: {.cell}\n\n```{.r .cell-code}\nchi=sum((totals-expected)^2/expected)\nchi\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 15.70149\n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\n1-pchisq(chi,4) #Prob that a chi-square with 4 df > chi\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 0.003447022\n```\n\n\n:::\n:::\n\n",
+    "supporting": [
+      "skoittlesExploration_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

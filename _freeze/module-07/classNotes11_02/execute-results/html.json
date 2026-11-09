@@ -1,0 +1,17 @@
+{
+  "hash": "3405bf1b084b7bb5aadeccada21da2ea",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Class Notes 11-02\"\nformat: html\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(gbm)\nspecies_gbm=gbm(Species~.,\n            data=iris,\n            distribution=\"multinomial\")\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nbest_iter = gbm.perf(species_gbm)\n```\n\n::: {.cell-output-display}\n![](classNotes11_02_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n\n```{.r .cell-code}\nprint(best_iter)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 22\nattr(,\"smoother\")\nCall:\nloess(formula = object$oobag.improve ~ x, enp.target = min(max(4, \n    length(x)/10), 50))\n\nNumber of Observations: 100 \nEquivalent Number of Parameters: 8.32 \nResidual Standard Error: 0.006493 \n```\n\n\n:::\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\npreds=predict(species_gbm,iris,n.trees=25,type=\"response\")[,,1]\nyhat=colnames(preds)[max.col(preds)]\ntable(iris$Species,yhat)\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n            yhat\n             setosa versicolor virginica\n  setosa         50          0         0\n  versicolor      0         47         3\n  virginica       0          2        48\n```\n\n\n:::\n:::\n\n",
+    "supporting": [
+      "classNotes11_02_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "hash": "031adab61471f3a0e67eba9fc2889d00",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Class Notes for 11-04\"\nformat: html\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\ndf_url=\"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/womenShots.csv\"\nshots=read.csv(df_url) %>%\n  select(-X.1,-X,-start.time,-end.time,-category)\nformula=factor(Goal)~abs(xj)+yj+Hand+Tactic+Type+Defense\n```\n:::\n\n\nFit nnet\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(nnet)\nshot_nnet=nnet(formula,\n               data=shots,\n               size=8,\n               trace=FALSE)\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nyhat=predict(shot_nnet,shots,type=\"class\")\ntable(shots$Goal,yhat) #Confusion matrix\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n          yhat\n           Goal Not Goal\n  Goal      316      277\n  Not Goal   97      917\n```\n\n\n:::\n\n```{.r .cell-code}\nsum(yhat==shots$Goal)/nrow(shots) #accuracy\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 0.7672682\n```\n\n\n:::\n:::\n\n\nPLotting decision boundary example:\n\n\n::: {.cell}\n\n```{.r .cell-code}\ngrid=expand.grid(\n  xj=seq(min(shots$xj)-0.5,max(shots$xj)+0.5,by=0.01),\n  yj=seq(min(shots$yj)-0.5,max(shots$yj)+0.5,by=0.01),\n  Hand=\"Right\",\n  Tactic=\"Perimeter\",\n  Type=\"Normal\",\n  Defense=\"Contested\"\n)\n\ngrid=grid |>\n  mutate(yhat=predict(shot_nnet,newdata=grid,type=\"class\"))\n```\n:::\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nggplot()+\n  geom_raster(\n    data=grid,\n    aes(x=xj,y=yj,fill=yhat),\n    alpha=0.2\n  )+\n  geom_point(\n    data=dplyr::filter(shots,Hand==\"Right\",Type==\"Normal\",\n                       Tactic==\"Perimeter\",\n                       Defense==\"Contested\"),\n    aes(x=xj,y=yj,color=Goal)\n  )\n```\n\n::: {.cell-output-display}\n![](classNotes11_04_files/figure-html/unnamed-chunk-5-1.png){width=672}\n:::\n:::\n\n",
+    "supporting": [
+      "classNotes11_04_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

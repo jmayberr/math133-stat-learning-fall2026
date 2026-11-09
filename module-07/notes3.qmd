@@ -153,7 +153,6 @@ outcome_nn=nn_sequential(
 Now the annoying part. We have to redefine all of our training and testing sets as "tensors^[In math, tensors are multilinear maps. In computer/data science, they are just multidimensional array. Think matrices except you can have more than two indices.].".
 
 ```{r}
-# Convert pixel values to tensors
 x_train = torch_tensor(
   as.matrix(train[, 2:9]),
   dtype = torch_float()
@@ -166,6 +165,7 @@ x_test = torch_tensor(
 
 # Convert outcome to 1/2 factor - default for torch
 outcome_levels = levels(factor(election2016$outcome))
+
 y_train = torch_tensor(
   as.integer(factor(train$outcome,
                     levels=outcome_levels)),

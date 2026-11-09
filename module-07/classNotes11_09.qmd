@@ -37,7 +37,7 @@ y_train = torch_tensor(
 )
 
 y_test = torch_tensor(
-  as.integer(factor(train$outcome,
+  as.integer(factor(test$outcome,
                     levels =outcome_levels)),
   dtype = torch_long()
 )
@@ -46,7 +46,6 @@ y_test = torch_tensor(
 Define neural network architecture:
 
 ```{r}
-library(torch)
 outcome_nn=nn_sequential(
   #Define input to hidden layer dimensions
   nn_linear(8,2),
@@ -63,18 +62,20 @@ Define model, loss function and optimizer:
 ```{r}
 model = outcome_nn
 
+# Cross Entropy for classification - use mean squared for regression
 loss_fn = nn_cross_entropy_loss()
 
 optimizer = optim_adam(
   model$parameters,
-  lr = 0.001
+  lr = 0.01
 )
 ```
 
 Run optimization:
 
 ```{r}
-epochs = 100
+library(tidyverse)
+epochs = 50
 
 loss_history = data.frame(
   epoch = 1:epochs,
@@ -110,10 +111,15 @@ loss_history |>
 Calculate predicted values:
 
 ```{r}
+# Calculate raw model output
 test_output=model(x_test)
 
+# Calucates class with largest raw output
 pred_levels=as.array(test_output$argmax(dim=2))
 
+# Converts the class numbers to class values (1 = blue,2 = red)
 yhat = outcome_levels[pred_levels]
+
+# COnfusion matrix
 table(test$outcome,yhat)
 ```
