@@ -277,9 +277,16 @@ digit_nn=nn_sequential(
 
 ```
 
-Now the annoying part again...
+Now the annoying part again. Note that we have to redefine our train/test set first because of the warmup example. 
 
 ```{r}
+n=nrow(mnist_df)
+N=1000
+indices = sample(n,N+500)
+
+train = mnist_df[indices[1:N], ]
+test = mnist_df[indices[(N+1):(N+500)], ]
+
 # Convert pixel values to tensors
 x_train = torch_tensor(
   as.matrix(train[, 1:784]),

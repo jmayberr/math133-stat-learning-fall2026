@@ -324,7 +324,7 @@ window.Quarto = {
   </li>  
         <li>
     <a class="dropdown-item" href="../module-07/notes3.html">
- <span class="dropdown-text">Module 7.2: Image Recognition and Compression</span></a>
+ <span class="dropdown-text">Module 7.3: Image Recognition and Compression</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../module-07/supplement.html">
@@ -485,159 +485,296 @@ window.Quarto = {
 </div>
 <p>Some of those ARE pretty bad but I feel like we could do better. One thing we can do is increase the size of our training data. I tried the running the same code above with 10,000 training examples and did get closer to 90% accuracy. But for additional power, we need to be able to fine tune our network architecture and that requires introducing the <code>torch</code> package.</p>
 </section>
-<section id="light-em-up" class="level2">
-<h2 class="anchored" data-anchor-id="light-em-up">Light `em up</h2>
+<section id="building-the-fire" class="level2">
+<h2 class="anchored" data-anchor-id="building-the-fire">Building the fire</h2>
+<p>Let’s start with a warm up example on the familiar election dataset, using outcome (red/blue) as the response<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. First, we’ll load it up and define training/testing sets</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>election2016<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>s<span class="ot">=</span><span class="fu">sample</span>(<span class="dv">50</span>,<span class="dv">30</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>election2016[s,]</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>election2016[<span class="sc">-</span>s,]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <p>Hopefully by this point you have caved and decided to watch at least the a few videos of 3blue1brown’s series and/or read the theoretical supplement because its about to get real hot if not. In particularly, you’ll need to have at least a vague notion of the following terms to understand what’s going on here:</p>
 <ul>
 <li>activation funtions</li>
 <li>cost functions</li>
 <li>back-propagation</li>
 </ul>
-<p>The <code>torch</code> package is a much more comprehensive and modern toolbox for fitting neural networks to data. It is capable of fitting multilayer feedforward networks with as many hidden units as we like. It starts with a definition of a model. Here we will use two hidden layers, each with 128 hidden units<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> and ReLu activation functions<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></p>
+<p>The <code>torch</code> package is a much more comprehensive and modern toolbox for fitting neural networks to data. It is capable of fitting multilayer feedforward networks with as many hidden units as we like. It starts with a definition of our model architecture. We’ll start with a two-unit single hidden layer network and ReLu activation function<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(torch)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>digit_nn<span class="ot">=</span><span class="fu">nn_sequential</span>(</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Input to first hidden</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">784</span>,<span class="dv">128</span>),</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_relu</span>(),</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># First to second hidden</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">128</span>,<span class="dv">64</span>),</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_relu</span>(),</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Second hidden to output</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">64</span>,<span class="dv">10</span>)</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(torch)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>outcome_nn<span class="ot">=</span><span class="fu">nn_sequential</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Define input to hidden layer dimensions</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">8</span>,<span class="dv">2</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_relu</span>(),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Hidden layer to output (two nodes for binary response)</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">2</span>,<span class="dv">2</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now the annoying part. We have to redefine all of our training and testing sets as “tensors<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>.”.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert pixel values to tensors</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>x_train <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(train[, <span class="dv">1</span><span class="sc">:</span><span class="dv">784</span>]),</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>x_test <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(test[, <span class="dv">1</span><span class="sc">:</span><span class="dv">784</span>]),</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert digit labels to integers 1 through 10</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>y_train <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.integer</span>(<span class="fu">as.character</span>(train<span class="sc">$</span>digit)) <span class="sc">+</span> <span class="dv">1</span>,</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_long</span>()</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>y_test <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.integer</span>(<span class="fu">as.character</span>(test<span class="sc">$</span>digit)) <span class="sc">+</span> <span class="dv">1</span>,</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_long</span>()</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert pixel values to tensors</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>x_train <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(train[, <span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>x_test <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(test[, <span class="dv">2</span><span class="sc">:</span><span class="dv">9</span>]),</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert outcome to 1/2 factor - default for torch</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>outcome_levels <span class="ot">=</span> <span class="fu">levels</span>(<span class="fu">factor</span>(election2016<span class="sc">$</span>outcome))</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>y_train <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.integer</span>(<span class="fu">factor</span>(train<span class="sc">$</span>outcome,</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>                    <span class="at">levels=</span>outcome_levels)),</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_long</span>()</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>y_test <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.integer</span>(<span class="fu">factor</span>(train<span class="sc">$</span>outcome,</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>                    <span class="at">levels =</span>outcome_levels)),</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_long</span>()</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Hopefully that is pretty self-explanatory except maybe the “+1” stuff at the end. That is just because <code>torch</code> expects class labels starting at 1 instead of 0.</p>
-<p>Now we need a couple additional definitions. First, the type of loss/cost function we will be minimizing. Using squared errors doesn’t work so well for classification problems so here we use cross entropy<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. Second, the optimizer part tells <code>torch</code> what algorithm to use for minimizing the loss via backpropagation. In this case, we set this equal to “Adam’s” algorithm<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>. In contrast, <code>nnet</code> uses a different optimizer called BFGS<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>.</p>
+<p>This code should be pretty self-explanatory except maybe the conversion of outcome to a factor and then integer. That’s tedious but its just the format needed to make to work with torch.</p>
+<p>Now we need a couple additional definitions. First, the type of loss/cost function we will be minimizing. Using squared errors doesn’t work very well for classification problems so here we use cross entropy<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</p>
+<p>Second, the optimizer part tells <code>torch</code> what algorithm to use for minimizing the loss via backpropagation. In this case, we set this equal to “Adam’s” algorithm<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>. In contrast, <code>nnet</code> uses a different optimizer called BFGS<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">=</span> digit_nn</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="ot">=</span> <span class="fu">nn_cross_entropy_loss</span>()</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">optim_adam</span>(</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  model<span class="sc">$</span>parameters,</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">lr =</span> <span class="fl">0.001</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">=</span> outcome_nn</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="ot">=</span> <span class="fu">nn_cross_entropy_loss</span>()</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">optim_adam</span>(</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  model<span class="sc">$</span>parameters,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">lr =</span> <span class="fl">0.001</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Now we train the model. You might be wondering what’s up with the whole epoch and batch-size thing<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>. Mini-batch gradient descent is a training method in which we split the data into smaller chunks called batches. After randomizing the initial weights, we use the first batch to calculate the loss function and perform a step of gradient descent to update the weights. We use the update weights to calculate the loss and perform another gradient descent step using the second batch and so on until we have gone through the entire training set.</p>
-<p>Smaller batch sizes make things more computationally manageable for larger dataset and let us update weights more frequently. This additional variability in gradient estimates can lead to a more thorough exploration of parameter spaces, potentially improving generalitzation.</p>
-<p>After the algorithm uses all batches, an epoch ends Then we reshuffle the observations into batches all over again and start the second epoch using the weights from the end of the previous epoch as its starting values.</p>
+<p>Then we get to the training step where we apply gradient descent to the loss function. The algorithm starts off by randomizing the network weights and then calculates the loss function and gradient for our training data. It proceeds by applying one step of gradient descent to adjust weights, and then starts the whole process again. Each iteration is called an epoch.</p>
+<p>The code below runs through 100 epochs and plots the resulting loss function so we can check convergence.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>epochs <span class="ot">=</span> <span class="dv">100</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>loss_history <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">epoch =</span> <span class="dv">1</span><span class="sc">:</span>epochs,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">loss =</span> <span class="cn">NA</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>epochs) {</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Reset gradient from previous epoch</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  optimizer<span class="sc">$</span><span class="fu">zero_grad</span>()</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Compute current model output</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  output <span class="ot">=</span> <span class="fu">model</span>(x_train) </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Compute current model loss </span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  loss <span class="ot">=</span> <span class="fu">loss_fn</span>(output, y_train) </span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Compute current loss gradient via backpropagation</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  loss<span class="sc">$</span><span class="fu">backward</span>()</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Perform one step of gradient descent</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  optimizer<span class="sc">$</span><span class="fu">step</span>()</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Store loss</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  loss_history<span class="sc">$</span>loss[epoch] <span class="ot">=</span> loss<span class="sc">$</span><span class="fu">item</span>()</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>loss_history <span class="sc">|&gt;</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>epoch,<span class="at">y=</span>loss))<span class="sc">+</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>,<span class="at">size=</span><span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Observe how the loss starts to level off as we approach 100. That’s good! If it doesn’t we should try more epochs.</p>
+<p>Finally we get to the good part: prediction. The only hard part about this is that we need to do it in three steps</p>
+<ol type="1">
+<li>Calculate the predicted output of the model (which will be in terms of log-odds of getting a 1 or 2 as output)</li>
+<li>Extract the column which leads to the largest value</li>
+<li>Convert back to red/blue classifications</li>
+</ol>
+<p>The following shows a confusion matrix of the results:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>test_output<span class="ot">=</span><span class="fu">model</span>(x_test)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>pred_levels<span class="ot">=</span><span class="fu">as.array</span>(test_output<span class="sc">$</span><span class="fu">argmax</span>(<span class="at">dim=</span><span class="dv">2</span>))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>yhat <span class="ot">=</span> outcome_levels[pred_levels]</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(test<span class="sc">$</span>outcome,yhat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      yhat
+       Red
+  Blue   8
+  Red   12</code></pre>
+</div>
+</div>
+<p>Haha, not so good; we always predicted red! Well, this was just warmup anyways. Now to the main event.</p>
+</section>
+<section id="light-em-up" class="level2">
+<h2 class="anchored" data-anchor-id="light-em-up">Light `em up</h2>
+<p>For our digit prediction model, we will use a more complicated architecture consisting of two hidden layers, each with 128 hidden units<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a> and ReLu activation functions:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(torch)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>digit_nn<span class="ot">=</span><span class="fu">nn_sequential</span>(</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Input to first hidden</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">784</span>,<span class="dv">128</span>),</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_relu</span>(),</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># First to second hidden</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">128</span>,<span class="dv">64</span>),</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_relu</span>(),</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Second hidden to output</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">64</span>,<span class="dv">10</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now the annoying part again. Note that we have to redefine our train/test set first because of the warmup example.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(mnist_df)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>N<span class="ot">=</span><span class="dv">1000</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>indices <span class="ot">=</span> <span class="fu">sample</span>(n,N<span class="sc">+</span><span class="dv">500</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>train <span class="ot">=</span> mnist_df[indices[<span class="dv">1</span><span class="sc">:</span>N], ]</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>test <span class="ot">=</span> mnist_df[indices[(N<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(N<span class="sc">+</span><span class="dv">500</span>)], ]</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert pixel values to tensors</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>x_train <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(train[, <span class="dv">1</span><span class="sc">:</span><span class="dv">784</span>]),</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>x_test <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(test[, <span class="dv">1</span><span class="sc">:</span><span class="dv">784</span>]),</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert digit labels to integers 1 through 10</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>y_train <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.integer</span>(<span class="fu">as.character</span>(train<span class="sc">$</span>digit)) <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_long</span>()</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>y_test <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.integer</span>(<span class="fu">as.character</span>(test<span class="sc">$</span>digit)) <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_long</span>()</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The “+1” stuff at the end is again a formatting issue; <code>torch</code> expects class labels starting at 1 instead of 0 and our digits are labeled 0-9</p>
+<p>Next the model and loss (same as before):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">=</span> digit_nn</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="ot">=</span> <span class="fu">nn_cross_entropy_loss</span>()</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">optim_adam</span>(</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  model<span class="sc">$</span>parameters,</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">lr =</span> <span class="fl">0.001</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>And then training. Now you might be wondering what’s up with the whole epoch and batch-size thing<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a> below. Mini-batch gradient descent is a training method in which we split the data into smaller chunks called batches. After randomizing the initial weights, we use the first batch to calculate the loss function and perform a step of gradient descent to update the weights. We use the update weights to calculate the loss and perform another gradient descent step using the second batch and so on until we have gone through the entire training set.</p>
+<p>Smaller batch sizes make things more computationally manageable for larger dataset and let us update weights more frequently. This additional variability in gradient estimates can lead to a more thorough exploration of parameter spaces, potentially improving generalization. We didn’t need it in our warm-up example and you usually don’t if you have less than 1000 observations, but we’ll use it here in case you want to try upping the training set size.</p>
+<p>After the algorithm uses all batches, an epoch ends. Then we reshuffle the observations into batches all over again and start the second epoch using the weights from the end of the previous epoch as its starting values.</p>
 <p>The code below performs these training steps. You can basically copy and paste it for reuse in other examples provided you change the model and training/testing data appropriately.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>epochs <span class="ot">=</span> <span class="dv">30</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>batch_size <span class="ot">=</span> <span class="dv">64</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>epochs) {</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Reset loss for current epoch</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  total_loss <span class="ot">=</span> <span class="dv">0</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Shuffle observations for current epoch</span></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  order <span class="ot">=</span> <span class="fu">sample.int</span>(<span class="fu">nrow</span>(train))</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="fu">length</span>(order), <span class="at">by =</span> batch_size)) {</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    idx <span class="ot">=</span> order[i<span class="sc">:</span><span class="fu">min</span>(i <span class="sc">+</span> batch_size <span class="sc">-</span> <span class="dv">1</span>, <span class="fu">length</span>(order))]</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Clears gradients from previous batch</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="sc">$</span><span class="fu">zero_grad</span>()</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate model output for current batch</span></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    output <span class="ot">=</span> <span class="fu">model</span>(x_train[idx, ]) </span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate loss function for current model    </span></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    loss <span class="ot">=</span> <span class="fu">loss_fn</span>(output, y_train[idx]) </span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate gradient of loss via backpropagation</span></span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    loss<span class="sc">$</span><span class="fu">backward</span>()</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Update weights</span></span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="sc">$</span><span class="fu">step</span>()</span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Update loss function </span></span>
-<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>    total_loss <span class="ot">=</span> total_loss <span class="sc">+</span> loss<span class="sc">$</span><span class="fu">item</span>()</span>
-<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Print shit to see convergence</span></span>
-<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(</span>
-<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Epoch:"</span>, epoch,</span>
-<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Average loss:"</span>, <span class="fu">round</span>(total_loss <span class="sc">/</span> <span class="fu">ceiling</span>(<span class="fu">length</span>(order) <span class="sc">/</span> batch_size), <span class="dv">4</span>),</span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span><span class="sc">\n</span><span class="st">"</span></span>
-<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>epochs <span class="ot">=</span> <span class="dv">30</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>batch_size <span class="ot">=</span> <span class="dv">64</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>epochs) {</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Reset loss for current epoch</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  total_loss <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Shuffle observations for current epoch</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  order <span class="ot">=</span> <span class="fu">sample.int</span>(<span class="fu">nrow</span>(train))</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="fu">length</span>(order), <span class="at">by =</span> batch_size)) {</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Indices for current batch</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    idx <span class="ot">=</span> order[i<span class="sc">:</span><span class="fu">min</span>(i <span class="sc">+</span> batch_size <span class="sc">-</span> <span class="dv">1</span>,  <span class="fu">length</span>(order))]</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Clears gradients from previous batch</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="sc">$</span><span class="fu">zero_grad</span>()</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate model output for current batch</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    output <span class="ot">=</span> <span class="fu">model</span>(x_train[idx, ]) </span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate loss function for current model    </span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    loss <span class="ot">=</span> <span class="fu">loss_fn</span>(output, y_train[idx]) </span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate gradient of loss via backpropagation</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>    loss<span class="sc">$</span><span class="fu">backward</span>()</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Update weights</span></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="sc">$</span><span class="fu">step</span>()</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Update loss function </span></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>    total_loss <span class="ot">=</span> total_loss <span class="sc">+</span> loss<span class="sc">$</span><span class="fu">item</span>()</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Print shit to see convergence</span></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(</span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Epoch:"</span>, epoch,</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Average loss:"</span>, <span class="fu">round</span>(total_loss <span class="sc">/</span> <span class="fu">ceiling</span>(<span class="fu">length</span>(order) <span class="sc">/</span> batch_size), <span class="dv">4</span>),</span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span><span class="sc">\n</span><span class="st">"</span></span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Epoch: 1 Average loss: 2.1377 
-Epoch: 2 Average loss: 1.4997 
-Epoch: 3 Average loss: 0.8813 
-Epoch: 4 Average loss: 0.5562 
-Epoch: 5 Average loss: 0.4049 
-Epoch: 6 Average loss: 0.3097 
-Epoch: 7 Average loss: 0.2461 
-Epoch: 8 Average loss: 0.2053 
-Epoch: 9 Average loss: 0.1676 
-Epoch: 10 Average loss: 0.1408 
-Epoch: 11 Average loss: 0.1113 
-Epoch: 12 Average loss: 0.0949 
-Epoch: 13 Average loss: 0.0795 
-Epoch: 14 Average loss: 0.0655 
-Epoch: 15 Average loss: 0.0575 
-Epoch: 16 Average loss: 0.0473 
-Epoch: 17 Average loss: 0.0397 
-Epoch: 18 Average loss: 0.0355 
-Epoch: 19 Average loss: 0.0311 
-Epoch: 20 Average loss: 0.0266 
-Epoch: 21 Average loss: 0.0234 
-Epoch: 22 Average loss: 0.0208 
-Epoch: 23 Average loss: 0.0188 
-Epoch: 24 Average loss: 0.0162 
-Epoch: 25 Average loss: 0.0148 
-Epoch: 26 Average loss: 0.0137 
-Epoch: 27 Average loss: 0.0118 
-Epoch: 28 Average loss: 0.0111 
-Epoch: 29 Average loss: 0.0099 
-Epoch: 30 Average loss: 0.0088 </code></pre>
+<pre><code>Epoch: 1 Average loss: 2.1414 
+Epoch: 2 Average loss: 1.4773 
+Epoch: 3 Average loss: 0.8533 
+Epoch: 4 Average loss: 0.5636 
+Epoch: 5 Average loss: 0.4441 
+Epoch: 6 Average loss: 0.3502 
+Epoch: 7 Average loss: 0.2975 
+Epoch: 8 Average loss: 0.2526 
+Epoch: 9 Average loss: 0.2095 
+Epoch: 10 Average loss: 0.1922 
+Epoch: 11 Average loss: 0.1661 
+Epoch: 12 Average loss: 0.1341 
+Epoch: 13 Average loss: 0.1191 
+Epoch: 14 Average loss: 0.1033 
+Epoch: 15 Average loss: 0.0856 
+Epoch: 16 Average loss: 0.0717 
+Epoch: 17 Average loss: 0.0658 
+Epoch: 18 Average loss: 0.0601 
+Epoch: 19 Average loss: 0.0478 
+Epoch: 20 Average loss: 0.0411 
+Epoch: 21 Average loss: 0.0353 
+Epoch: 22 Average loss: 0.0302 
+Epoch: 23 Average loss: 0.0268 
+Epoch: 24 Average loss: 0.0245 
+Epoch: 25 Average loss: 0.0222 
+Epoch: 26 Average loss: 0.0189 
+Epoch: 27 Average loss: 0.0167 
+Epoch: 28 Average loss: 0.0148 
+Epoch: 29 Average loss: 0.0138 
+Epoch: 30 Average loss: 0.0125 </code></pre>
 </div>
 </div>
 <p>The next code chunk does the fun part: prediction.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate predictions - basically like using predict with classes</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>test_output <span class="ot">=</span> <span class="fu">model</span>(x_test)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">=</span> test_output<span class="sc">$</span><span class="fu">argmax</span>(<span class="at">dim =</span> <span class="dv">2</span>)</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert predictions from 1-10 back to 0-9.</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>predicted_digits <span class="ot">=</span> <span class="fu">as.integer</span>(<span class="fu">as_array</span>(predictions)) <span class="sc">-</span> <span class="dv">1</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>actual_digits <span class="ot">=</span> <span class="fu">as.integer</span>(<span class="fu">as.character</span>(test<span class="sc">$</span>digit))</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate test accuracy </span></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(predicted_digits <span class="sc">==</span> actual_digits)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate predictions - basically like using predict with classes</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>test_output <span class="ot">=</span> <span class="fu">model</span>(x_test)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>predictions <span class="ot">=</span> test_output<span class="sc">$</span><span class="fu">argmax</span>(<span class="at">dim =</span> <span class="dv">2</span>)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert predictions from 1-10 back to 0-9.</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>predicted_digits <span class="ot">=</span> <span class="fu">as.integer</span>(<span class="fu">as_array</span>(predictions)) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>actual_digits <span class="ot">=</span> <span class="fu">as.integer</span>(<span class="fu">as.character</span>(test<span class="sc">$</span>digit))</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate test accuracy </span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(predicted_digits <span class="sc">==</span> actual_digits)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.882</code></pre>
+<pre><code>[1] 0.854</code></pre>
 </div>
 </div>
 <p>We can see we did start to get some improvements with our sample of size 1000. With a larger sample size of 10000, I was able to get 95-96% accuracy and it was much faster than using <code>nnet</code> too. Consider that shit torched.</p>
@@ -649,176 +786,176 @@ Epoch: 30 Average loss: 0.0088 </code></pre>
 <p>To train a neural network for this type of task, we feed the images as both input and output. We funnel the input through a series of hidden layers. The middle one acts as a “bottleneck” with a smal number of units (32 in the example below). The encoder part compresses the original 784 pixels into a representation of only 32 numbers (from the bottleneck) and the decoder part uses these 32 numbers to reconstruct the original image. A neural network built through this procedure is called an <em>autoencoder</em>.</p>
 <p>To define an autoencoder for the digit data, we’ll start by defining our model</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>autoencoder<span class="ot">=</span><span class="fu">nn_sequential</span>(</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># First encoder layer</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">784</span>,<span class="dv">128</span>),</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_relu</span>(),</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Bottleneck</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">128</span>,<span class="dv">32</span>),</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_relu</span>(),</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># First Decoder layer</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">32</span>,<span class="dv">128</span>),</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_relu</span>(),</span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Output</span></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">128</span>,<span class="dv">784</span>),</span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_sigmoid</span>()</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>autoencoder<span class="ot">=</span><span class="fu">nn_sequential</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># First encoder layer</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">784</span>,<span class="dv">128</span>),</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_relu</span>(),</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Bottleneck</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">128</span>,<span class="dv">32</span>),</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_relu</span>(),</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># First Decoder layer</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">32</span>,<span class="dv">128</span>),</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_relu</span>(),</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Output</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_linear</span>(<span class="dv">128</span>,<span class="dv">784</span>),</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nn_sigmoid</span>()</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>This time we will use the mean squared loss since the output (grayscale<a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a> value) is numeric:</p>
+<p>This time we will use the mean squared loss since the output (grayscale<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a> value) is numeric:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">=</span> autoencoder</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="ot">=</span> <span class="fu">nn_mse_loss</span>()</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">optim_adam</span>(</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  model<span class="sc">$</span>parameters,</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">lr =</span> <span class="fl">0.001</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">=</span> autoencoder</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>loss_fn <span class="ot">=</span> <span class="fu">nn_mse_loss</span>()</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>optimizer <span class="ot">=</span> <span class="fu">optim_adam</span>(</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  model<span class="sc">$</span>parameters,</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">lr =</span> <span class="fl">0.001</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Now let’s redefine our training and testing sets because we are going to need more than 1000 observations to train all the weights.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(mnist_df)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>N<span class="ot">=</span><span class="dv">10000</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>indices <span class="ot">=</span> <span class="fu">sample</span>(n,N<span class="sc">+</span><span class="dv">500</span>)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>train <span class="ot">=</span> mnist_df[indices[<span class="dv">1</span><span class="sc">:</span>N], ]</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>test <span class="ot">=</span> mnist_df[indices[(N<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(N<span class="sc">+</span><span class="dv">500</span>)], ]</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>x_train <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(train[, <span class="dv">1</span><span class="sc">:</span><span class="dv">784</span>]),</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>x_test <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(test[, <span class="dv">1</span><span class="sc">:</span><span class="dv">784</span>]),</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>n<span class="ot">=</span><span class="fu">nrow</span>(mnist_df)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>N<span class="ot">=</span><span class="dv">10000</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>indices <span class="ot">=</span> <span class="fu">sample</span>(n,N<span class="sc">+</span><span class="dv">500</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>train <span class="ot">=</span> mnist_df[indices[<span class="dv">1</span><span class="sc">:</span>N], ]</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>test <span class="ot">=</span> mnist_df[indices[(N<span class="sc">+</span><span class="dv">1</span>)<span class="sc">:</span>(N<span class="sc">+</span><span class="dv">500</span>)], ]</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>x_train <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(train[, <span class="dv">1</span><span class="sc">:</span><span class="dv">784</span>]),</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>x_test <span class="ot">=</span> <span class="fu">torch_tensor</span>(</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.matrix</span>(test[, <span class="dv">1</span><span class="sc">:</span><span class="dv">784</span>]),</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">dtype =</span> <span class="fu">torch_float</span>()</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Then we’ll do the training step. The only difference from our previous code is that we use <code>x_train</code> when calculating the loss instead of a separate <code>y_train</code> for digits. In other words, we are training the autoencoder to recognize the inputs themselves.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span><span class="fu">train</span>()</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>epochs <span class="ot">=</span> <span class="dv">30</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>batch_size <span class="ot">=</span> <span class="dv">64</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>epoch_loss <span class="ot">=</span> <span class="fu">numeric</span>(epochs)</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>epochs) {</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  total_loss <span class="ot">=</span> <span class="dv">0</span></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  order <span class="ot">=</span> <span class="fu">sample.int</span>(<span class="fu">nrow</span>(train))</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="fu">length</span>(order), <span class="at">by =</span> batch_size)) {</span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    idx <span class="ot">=</span> order[i<span class="sc">:</span><span class="fu">min</span>(i <span class="sc">+</span> batch_size <span class="sc">-</span> <span class="dv">1</span>, <span class="fu">length</span>(order))]</span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="sc">$</span><span class="fu">zero_grad</span>()</span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    output <span class="ot">=</span> <span class="fu">model</span>(x_train[idx, ])</span>
-<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    loss <span class="ot">=</span> <span class="fu">loss_fn</span>(output, x_train[idx, ])</span>
-<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    loss<span class="sc">$</span><span class="fu">backward</span>()</span>
-<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="sc">$</span><span class="fu">step</span>()</span>
-<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>    total_loss <span class="ot">=</span> total_loss <span class="sc">+</span> loss<span class="sc">$</span><span class="fu">item</span>()</span>
-<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>  epoch_loss[epoch] <span class="ot">=</span> total_loss <span class="sc">/</span> <span class="fu">ceiling</span>(<span class="fu">length</span>(order) <span class="sc">/</span> batch_size)</span>
-<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(</span>
-<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Epoch:"</span>, epoch,</span>
-<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Average loss:"</span>, <span class="fu">round</span>(epoch_loss[epoch], <span class="dv">5</span>),</span>
-<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span><span class="sc">\n</span><span class="st">"</span></span>
-<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span><span class="fu">train</span>()</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>epochs <span class="ot">=</span> <span class="dv">30</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>batch_size <span class="ot">=</span> <span class="dv">64</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>epoch_loss <span class="ot">=</span> <span class="fu">numeric</span>(epochs)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>epochs) {</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>  total_loss <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>  order <span class="ot">=</span> <span class="fu">sample.int</span>(<span class="fu">nrow</span>(train))</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="fu">length</span>(order), <span class="at">by =</span> batch_size)) {</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    idx <span class="ot">=</span> order[i<span class="sc">:</span><span class="fu">min</span>(i <span class="sc">+</span> batch_size <span class="sc">-</span> <span class="dv">1</span>, <span class="fu">length</span>(order))]</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="sc">$</span><span class="fu">zero_grad</span>()</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>    output <span class="ot">=</span> <span class="fu">model</span>(x_train[idx, ])</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>    loss <span class="ot">=</span> <span class="fu">loss_fn</span>(output, x_train[idx, ])</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>    loss<span class="sc">$</span><span class="fu">backward</span>()</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="sc">$</span><span class="fu">step</span>()</span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>    total_loss <span class="ot">=</span> total_loss <span class="sc">+</span> loss<span class="sc">$</span><span class="fu">item</span>()</span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>  epoch_loss[epoch] <span class="ot">=</span> total_loss <span class="sc">/</span> <span class="fu">ceiling</span>(<span class="fu">length</span>(order) <span class="sc">/</span> batch_size)</span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cat</span>(</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Epoch:"</span>, epoch,</span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Average loss:"</span>, <span class="fu">round</span>(epoch_loss[epoch], <span class="dv">5</span>),</span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">"</span><span class="sc">\n</span><span class="st">"</span></span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Epoch: 1 Average loss: 0.07933 
-Epoch: 2 Average loss: 0.04246 
-Epoch: 3 Average loss: 0.03295 
-Epoch: 4 Average loss: 0.02762 
-Epoch: 5 Average loss: 0.02435 
-Epoch: 6 Average loss: 0.02209 
-Epoch: 7 Average loss: 0.02038 
-Epoch: 8 Average loss: 0.01882 
-Epoch: 9 Average loss: 0.01747 
-Epoch: 10 Average loss: 0.0164 
-Epoch: 11 Average loss: 0.01562 
-Epoch: 12 Average loss: 0.01503 
-Epoch: 13 Average loss: 0.01446 
-Epoch: 14 Average loss: 0.01401 
-Epoch: 15 Average loss: 0.0136 
-Epoch: 16 Average loss: 0.01324 
-Epoch: 17 Average loss: 0.01295 
-Epoch: 18 Average loss: 0.01272 
-Epoch: 19 Average loss: 0.01245 
-Epoch: 20 Average loss: 0.01225 
-Epoch: 21 Average loss: 0.01199 
-Epoch: 22 Average loss: 0.01183 
-Epoch: 23 Average loss: 0.01163 
-Epoch: 24 Average loss: 0.0115 
-Epoch: 25 Average loss: 0.01136 
-Epoch: 26 Average loss: 0.01123 
-Epoch: 27 Average loss: 0.01107 
-Epoch: 28 Average loss: 0.01098 
-Epoch: 29 Average loss: 0.01084 
-Epoch: 30 Average loss: 0.01077 </code></pre>
+<pre><code>Epoch: 1 Average loss: 0.08237 
+Epoch: 2 Average loss: 0.04516 
+Epoch: 3 Average loss: 0.03305 
+Epoch: 4 Average loss: 0.0277 
+Epoch: 5 Average loss: 0.02391 
+Epoch: 6 Average loss: 0.02126 
+Epoch: 7 Average loss: 0.01951 
+Epoch: 8 Average loss: 0.01817 
+Epoch: 9 Average loss: 0.01714 
+Epoch: 10 Average loss: 0.01619 
+Epoch: 11 Average loss: 0.0154 
+Epoch: 12 Average loss: 0.01477 
+Epoch: 13 Average loss: 0.01417 
+Epoch: 14 Average loss: 0.01372 
+Epoch: 15 Average loss: 0.01332 
+Epoch: 16 Average loss: 0.0129 
+Epoch: 17 Average loss: 0.0126 
+Epoch: 18 Average loss: 0.01228 
+Epoch: 19 Average loss: 0.01201 
+Epoch: 20 Average loss: 0.01177 
+Epoch: 21 Average loss: 0.01153 
+Epoch: 22 Average loss: 0.01133 
+Epoch: 23 Average loss: 0.01114 
+Epoch: 24 Average loss: 0.01099 
+Epoch: 25 Average loss: 0.01083 
+Epoch: 26 Average loss: 0.01069 
+Epoch: 27 Average loss: 0.01053 
+Epoch: 28 Average loss: 0.01039 
+Epoch: 29 Average loss: 0.01028 
+Epoch: 30 Average loss: 0.01014 </code></pre>
 </div>
 </div>
 <p>Now we’ll calculate the predictions on the test set.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span><span class="fu">eval</span>()</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>reconstructed <span class="ot">=</span> <span class="fu">model</span>(x_test)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>reconstructed <span class="ot">=</span> <span class="fu">as_array</span>(reconstructed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>model<span class="sc">$</span><span class="fu">eval</span>()</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>reconstructed <span class="ot">=</span> <span class="fu">model</span>(x_test)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>reconstructed <span class="ot">=</span> <span class="fu">as_array</span>(reconstructed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>And then compare the first four</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="dv">2</span>, <span class="fl">0.5</span>))</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) {</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  original <span class="ot">=</span> <span class="fu">matrix</span>(</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.numeric</span>(x_test[i, ]),</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> <span class="dv">28</span>,</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> <span class="dv">28</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  predicted <span class="ot">=</span> <span class="fu">matrix</span>(</span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    reconstructed[i, ],</span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> <span class="dv">28</span>,</span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> <span class="dv">28</span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">image</span>(</span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">t</span>(original[<span class="dv">28</span><span class="sc">:</span><span class="dv">1</span>, ]),</span>
-<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="fu">gray.colors</span>(<span class="dv">256</span>),</span>
-<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">axes =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">useRaster =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"Original"</span></span>
-<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">image</span>(</span>
-<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">t</span>(predicted[<span class="dv">28</span><span class="sc">:</span><span class="dv">1</span>, ]),</span>
-<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="fu">gray.colors</span>(<span class="dv">256</span>),</span>
-<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">axes =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">useRaster =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"Reconstructed"</span></span>
-<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>), <span class="at">mar =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="dv">2</span>, <span class="fl">0.5</span>))</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>) {</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  original <span class="ot">=</span> <span class="fu">matrix</span>(</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.numeric</span>(x_test[i, ]),</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> <span class="dv">28</span>,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> <span class="dv">28</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  predicted <span class="ot">=</span> <span class="fu">matrix</span>(</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    reconstructed[i, ],</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> <span class="dv">28</span>,</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> <span class="dv">28</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">image</span>(</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">t</span>(original[<span class="dv">28</span><span class="sc">:</span><span class="dv">1</span>, ]),</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="fu">gray.colors</span>(<span class="dv">256</span>),</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">axes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">useRaster =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"Original"</span></span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">image</span>(</span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">t</span>(predicted[<span class="dv">28</span><span class="sc">:</span><span class="dv">1</span>, ]),</span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="fu">gray.colors</span>(<span class="dv">256</span>),</span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">axes =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">useRaster =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"Reconstructed"</span></span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes3_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes3_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>They’re a little blurry but recognizable. You can choose to explore better options in the practice problems below.</p>
 </section>
@@ -839,14 +976,15 @@ Epoch: 30 Average loss: 0.01077 </code></pre>
 <ol>
 <li id="fn1"><p>At least it doesn’t force us to go deeper into our own neural networks. Scary.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>The dataset is large enough where storing and loading it as a csv takes too much time. An RDS file is more compact.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>AI says computers like it when you choose hidden units in powers of 2. You are speaking their love language.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>We could also use the shots data but the issue there is the qualitative predictors. <code>torch</code> doesn’t allow you to throw them in directly. You have to create the model matrix separately and that’s an extra layer of complexity we don’t need right now.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn4"><p><code>nnet</code> uses sigmoid but ReLu is faster and better.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>In math, tensors are multilinear maps. In computer/data science, they are just multidimensional array. Think matrices except you can have more than two indices.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn6"><p>More on this in the supplement. Maybe. It hasn’t been fully written yet.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn7"><p>Hopefully not as depressing as Adam’s Song. Ok fine, Adam isn’t a person here. Its an acronym for ADAptive Moment estimation<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn8"><p>Acronym for Bad Fucking GeniuS. or the initials of the researchers who came up with it, I’ll let you decide.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn9"><p>Which should be the name of a sitcom about two outcast aliens from different civilizations who become friends and triumph over the evil ruling Syndicate against all odds.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn10"><p>You’ll notice I used both American and British spellings of gray/grey in these notes. Just trying to be unbiased. Except when it comes to writing words like center or meter. We all know spelling them centre or metre is just wrong. And I’m not adding an extra “u” in color. But daemon? That’s cool. I just dont’ really have a good reason to throw the word demon into my notes that often.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>AI says computers like it when you choose hidden units in powers of 2. You are speaking their love language.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>Which should be the name of a sitcom about two outcast aliens from different civilizations who become friends and triumph over the evil ruling Syndicate against all odds.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>You’ll notice I used both American and British spellings of gray/grey in these notes. Just trying to be unbiased. Except when it comes to writing words like center or meter. We all know spelling them centre or metre is just wrong. And I’m not adding an extra “u” in color. But daemon? That’s cool. I just dont’ really have a good reason to throw the word demon into my notes that often.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

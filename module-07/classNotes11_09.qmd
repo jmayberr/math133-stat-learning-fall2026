@@ -1,0 +1,119 @@
+---
+title: "Class Notes 11-09"
+format: html
+---
+
+Load Data:
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/election2016.csv"
+election2016=read.csv(df_url)
+s=sample(50,30)
+train=election2016[s,]
+test=election2016[-s,]
+```
+
+Convert train/test set to torch objects
+
+```{r}
+library(torch)
+x_train = torch_tensor(
+  as.matrix(train[, 2:9]),
+  dtype = torch_float()
+)
+
+x_test = torch_tensor(
+  as.matrix(test[, 2:9]),
+  dtype = torch_float()
+)
+
+# Convert outcome to 1/2 factor - default for torch
+outcome_levels = levels(factor(election2016$outcome))
+
+y_train = torch_tensor(
+  as.integer(factor(train$outcome,
+                    levels=outcome_levels)),
+  dtype = torch_long()
+)
+
+y_test = torch_tensor(
+  as.integer(factor(train$outcome,
+                    levels =outcome_levels)),
+  dtype = torch_long()
+)
+```
+
+Define neural network architecture:
+
+```{r}
+library(torch)
+outcome_nn=nn_sequential(
+  #Define input to hidden layer dimensions
+  nn_linear(8,2),
+  nn_relu(),
+  
+  # Hidden layer to output (two nodes for binary response)
+  nn_linear(2,2)
+  
+)
+```
+
+Define model, loss function and optimizer:
+
+```{r}
+model = outcome_nn
+
+loss_fn = nn_cross_entropy_loss()
+
+optimizer = optim_adam(
+  model$parameters,
+  lr = 0.001
+)
+```
+
+Run optimization:
+
+```{r}
+epochs = 100
+
+loss_history = data.frame(
+  epoch = 1:epochs,
+  loss = NA
+)
+
+for (epoch in 1:epochs) {
+  # Reset gradient from previous epoch
+  optimizer$zero_grad()
+    
+  # Compute current model output
+  output = model(x_train) 
+    
+  #Compute current model loss 
+  loss = loss_fn(output, y_train) 
+    
+  # Compute current loss gradient via backpropagation
+  loss$backward()
+
+  # Perform one step of gradient descent
+  optimizer$step()
+
+  # Store loss
+  loss_history$loss[epoch] = loss$item()
+}
+
+loss_history |>
+  ggplot(aes(x=epoch,y=loss))+
+  geom_point(shape=1,size=1)+
+  geom_line()
+```
+
+Calculate predicted values:
+
+```{r}
+test_output=model(x_test)
+
+pred_levels=as.array(test_output$argmax(dim=2))
+
+yhat = outcome_levels[pred_levels]
+table(test$outcome,yhat)
+```
