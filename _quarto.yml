@@ -93,4 +93,5 @@ website:
             text: "Module 7 Theory Supplement: Neural Concepts"
       - text: "Module 8"
         menu:
-          - text: "Notes 1: ..."
+          - href: module-08/notes1.qmd
+            text: "Module 8.1: Intro to Time Series"
