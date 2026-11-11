@@ -1,0 +1,140 @@
+---
+title: "Class Notes 11-11"
+format: html
+---
+
+Load Data:
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/fantasy2025.csv"
+fantasy2025=read.csv(df_url) |>
+  drop_na()
+n=nrow(fantasy2025)
+s=sample(n,0.7*n)
+train=fantasy2025[s,]
+test=fantasy2025[-s,]
+```
+
+Convert train/test set to torch objects
+
+```{r}
+library(torch)
+x_train = torch_tensor(
+  as.matrix(train[,16:29]),
+  dtype = torch_float()
+)
+
+x_test = torch_tensor(
+  as.matrix(test[, 16:29]),
+  dtype = torch_float()
+)
+
+
+y_train = torch_tensor(
+  as.matrix(train$fantasy_points_ppr),
+  dtype = torch_float()
+)
+
+y_test = torch_tensor(
+  as.matrix(test$fantasy_points_ppr),
+  dtype = torch_float()
+)
+```
+
+Define neural network architecture:
+
+```{r}
+points_nn=nn_sequential(
+  #Define input to hidden layer dimensions
+  nn_linear(14,32),
+  nn_relu(),
+  nn_linear(32,16),
+  nn_relu(),
+  
+  # Hidden layer to output
+  nn_linear(16,1)
+  
+)
+```
+
+Define model, loss function and optimizer:
+
+```{r}
+model = points_nn
+
+# Use mean squared for regression
+loss_fn = nn_mse_loss()
+
+optimizer = optim_adam(
+  model$parameters,
+  lr = 0.01
+)
+```
+
+Run optimization:
+
+```{r}
+library(tidyverse)
+epochs = 1000
+
+loss_history = data.frame(
+  epoch = 1:epochs,
+  loss = NA
+)
+
+for (epoch in 1:epochs) {
+  # Reset gradient from previous epoch
+  optimizer$zero_grad()
+    
+  # Compute current model output
+  output = model(x_train) 
+    
+  #Compute current model loss 
+  loss = loss_fn(output, y_train) 
+    
+  # Compute current loss gradient via backpropagation
+  loss$backward()
+
+  # Perform one step of gradient descent
+  optimizer$step()
+
+  # Store loss
+  loss_history$loss[epoch] = loss$item()
+}
+
+loss_history |>
+  ggplot(aes(x=epoch,y=loss))+
+  geom_point(shape=1,size=1)+
+  geom_line()
+```
+
+Calculate predicted values:
+
+```{r}
+# Calculate raw model output
+yhat=as_array(model(x_test))
+y=test$fantasy_points_ppr
+
+#rmse
+sqrt(mean((y-yhat)^2))
+
+#R2
+ybar=mean(test$fantasy_points_ppr)
+SST=sum((y-ybar)^2)
+SSE=sum((y-yhat)^2)
+1-SSE/SST
+
+```
+```{r}
+train2=train[,c(7,16:29)]
+points_lm=lm(fantasy_points_ppr~.,data=train2)
+
+yhat=predict(points_lm,newdata=test)
+y=test$fantasy_points_ppr
+
+sqrt(mean((y-yhat)^2))
+ybar=mean(test$fantasy_points_ppr)
+SST=sum((y-ybar)^2)
+SSE=sum((y-yhat)^2)
+1-SSE/SST
+```
