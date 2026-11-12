@@ -6,6 +6,7 @@ library(conflicted)
 
 conflicts_prefer(
   dplyr::filter,
+  dplyr::lag, 
   plotly::layout,
   palmerpenguins::penguins
 )

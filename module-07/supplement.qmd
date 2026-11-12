@@ -144,3 +144,7 @@ predict(species_nn, newdata = iris[1, 1:4], type = "raw")
 ```
 
 They match!
+
+## Cost Functions, Gradient Descent, and Backpropagation
+
+Explanations to come in a future version...
