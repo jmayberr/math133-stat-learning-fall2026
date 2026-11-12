@@ -236,6 +236,52 @@ mean(tuition$Public.Diff,na.rm=TRUE)
 
 so from that perspective, maybe you can feel good about this data as a Pacific student?
 
+## A note on training and testing time series
+
+Unlike in other machine learning scenarios, it is common to use the early parts of a time series as training data and then the tail end as the testing data. For example, in our tuition model above, we could take the training data as everything before 2010 and then use the remaining years as a test set to compare with our predictions:
+
+```{r}
+train=tuition |>
+  dplyr::filter(Year < 2010)
+test = tuition |>
+  dplyr::filter(Year >=2010)
+```
+
+We then compute the mean and sd for the training data:
+
+```{r}
+cbar=mean(train$Private.Diff,na.rm=TRUE)
+c_sd=sd(train$Private.Diff,na.rm=TRUE)
+cat("Mean=",cbar,"\nStd Dev =", c_sd)
+```
+
+Then we will recalculate predictions:
+
+```{r}
+y2009=train$Private.nonprofit.four.year[39]
+expected=y2009+(1:9)*cbar
+proj_rw=data.frame(Year=2010:2018,
+                   Actual=test$Private.nonprofit.four.year,
+                   Low=expected-2*c_sd*sqrt(1:9),
+                   Intermediate=expected,
+                   High=expected+2*c_sd*sqrt(1:9)
+                   ) |> 
+    pivot_longer(
+      cols = Actual:High,
+      names_to = "type",
+      values_to = "value")
+proj_rw |>
+  ggplot(aes(x=Year,y=value,color=type))+
+  geom_point(shape=1)+
+  geom_line()+
+  scale_y_continuous(labels=scales::percent)+ylab("Percent Change")+
+  scale_color_manual(values=cb_palette[c(1,4,7,6)])
+
+
+```
+
+Not too bad!
+
 ## How do you know if a random walk model works for your data?
 
 The idea of reducing a random walk to a sequence of iid random variables by taking differences is an example of filtering, a key concept in time series analysis. While a random walk exhibits "unstable" behavior (its mean and variance change over time) the first differences (i.e., change scores) often have a constant mean and variance, making them easier to analyze and more suitable for forecasting. 

@@ -446,34 +446,53 @@ R_k = cov(Y_t,Y_{t-k})
 </div>
 </div>
 <p>This plot shows that the sample correlation between <span class="math inline">\(y_t\)</span> and <span class="math inline">\(y_{t-k}\)</span> is close to 0 for all values of <span class="math inline">\(k \geq 1\)</span> as it should be for a sequence of iid random variables. The blue lines show 95% confidence intervals for where you would expect the autocorrelation values to lie if the time series consists of white noise and in our case, we can see that all the autocorrelations do indeed lie within this band. This lends further credence to our use of a random walk model for tuition.</p>
-<p>In contrast, lets look at another example taken from the book “Regression Modeling with Actuarial and Financial Applications”. The INFBOND variable shows some kind of bond index issued by the treasury department whose meaning I don’t understand. In the code below, the lubridate package converts the date measurements from a factor to an object of type “date”. Here is the control chart for the values of the bond over time.</p>
+<p>In contrast, lets look at a time series of US unemployment going back to 1980<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. These can be loaded from the publicly available FRED (Federal Reserve Bank) database as follows:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="fu">url</span>(<span class="st">'https://instruction.bus.wisc.edu/jfrees/jfreesbooks/Regression%20Modeling/BookWebDec2010/CSVData/InflationBond.csv'</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>inflationBond<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>inflationBond<span class="sc">$</span>date<span class="ot">=</span><span class="fu">dmy</span>(inflationBond<span class="sc">$</span>date)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>cbar<span class="ot">=</span><span class="fu">mean</span>(inflationBond<span class="sc">$</span>INFBOND)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>c_sd<span class="ot">=</span><span class="fu">sd</span>(inflationBond<span class="sc">$</span>INFBOND)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(inflationBond,<span class="fu">aes</span>(<span class="at">x=</span>date,<span class="at">y=</span>INFBOND))<span class="sc">+</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span><span class="fu">geom_line</span>()<span class="sc">+</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar)<span class="sc">+</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar<span class="dv">-3</span><span class="sc">*</span>c_sd,<span class="at">linetype =</span> <span class="st">"dashed"</span>)<span class="sc">+</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar<span class="sc">+</span><span class="dv">3</span><span class="sc">*</span>c_sd,<span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="notes2_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>url <span class="ot">=</span> <span class="st">"https://fred.stlouisfed.org/graph/fredgraph.csv?id=UNRATE"</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>unemployment <span class="ot">=</span> <span class="fu">read_csv</span>(url) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">observation_date =</span> <span class="fu">as.Date</span>(observation_date)) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(observation_date<span class="sc">&gt;=</span><span class="st">"1980-01-01"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(unemployment)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  observation_date UNRATE
+  &lt;date&gt;            &lt;dbl&gt;
+1 1980-01-01          6.3
+2 1980-02-01          6.3
+3 1980-03-01          6.3
+4 1980-04-01          6.9
+5 1980-05-01          7.5
+6 1980-06-01          7.6</code></pre>
 </div>
 </div>
-</div>
-<p>The series itself seems to pass the control chart test for stationarity in this case so let’s look at its acf</p>
+<p>Here is the control chart for the values of the unemployment over this time</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>rhoIB<span class="ot">=</span><span class="fu">acf</span>(inflationBond<span class="sc">$</span>INFBOND)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cbar<span class="ot">=</span><span class="fu">mean</span>(unemployment<span class="sc">$</span>UNRATE)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>c_sd<span class="ot">=</span><span class="fu">sd</span>(unemployment<span class="sc">$</span>UNRATE)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>unemployment <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>observation_date,<span class="at">y=</span>UNRATE))<span class="sc">+</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span><span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar)<span class="sc">+</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar<span class="dv">-3</span><span class="sc">*</span>c_sd,<span class="at">linetype =</span> <span class="st">"dashed"</span>)<span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar<span class="sc">+</span><span class="dv">3</span><span class="sc">*</span>c_sd,<span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="notes2_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Well COVID kind of fucked up stationary (amongst other things). But it otherwise looks pretty good. Let’s proceed to check out the acf:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>rho_ur<span class="ot">=</span><span class="fu">acf</span>(unemployment<span class="sc">$</span>UNRATE)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes2_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -485,44 +504,11 @@ R_k = cov(Y_t,Y_{t-k})
 <p>An autoregressive model of order 1 (referred to as an AR(1) model) is a generalization of both iid sequences and random walks in which we assume that <span class="math display">\[
 Y_t = \beta_0 + \beta_1 Y_{t-1} + \varepsilon_t
 \]</span> for some constants <span class="math inline">\(\beta_0,\beta_1\)</span> where <span class="math inline">\(\varepsilon_t\)</span> is a white noise process with mean 0 and variance <span class="math inline">\(\sigma^2\)</span>. Thus if <span class="math inline">\(\beta_1 = 1\)</span>, AR(1) is a random walk while if <span class="math inline">\(\beta_1 = 0\)</span>, then AR(1) is a sequence of iid random variables. Note that in order for the above process to make sense when <span class="math inline">\(t=1\)</span>, one must assume something about an initial distribution of possible values <span class="math inline">\(y_0\)</span> (although this is more of a theoretical issue as you usually just start ticking at <span class="math inline">\(t=2\)</span> in practice).</p>
-<p>A couple properties of AR(1) models worth working out for those with some Math 131 background:</p>
-<ol type="1">
-<li>An AR(1) model is stationary<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> for <span class="math inline">\(|\beta_1| &lt; 1\)</span> with mean <span class="math display">\[
-\mu = E(Y_t) = \beta_0/(1-\beta_1)
-\]</span> and autocorrelation <span class="math display">\[
-\rho_k = \beta_1^k
-\]</span></li>
-<li>The coefficients <span class="math inline">\(\beta_0,\beta_1\)</span> can be estimated in a manner similar to OLS, but (assuming stationarity) the answers are easy to guess. Since <span class="math display">\[
-Cov(Y_t,Y_{t-1}) = \beta_1 Var(Y_{t-1})
-\]</span> we can solve for <span class="math inline">\(\beta_1\)</span> to get <span class="math display">\[
-\beta_1  =  Cov(Y_t,Y_{t-1})/Var(Y_{t-1}) = Corr(Y_t,Y_{t-1}).
-\]</span> Therefore, <span class="math inline">\(\hat{\beta}_1 \approx \rho_1\)</span>. Meanwhile, <span class="math display">\[
-\beta_0 = (1-\beta_1) E(Y_t)
-\]</span> so <span class="math inline">\(\hat{\beta_0} \approx (1-\hat{\beta}_1)\bar{y}\)</span>. We can verify these observations using lm to directly fit a model of <span class="math inline">\(y_t ~ y_{t-1}\)</span>:</li>
-</ol>
+<p>One way to check whether an AR(1) model is appropriate is to compare the autocorrelation function with <span class="math inline">\(\rho_1^k\)</span>, the <span class="math inline">\(k\)</span>th power of the one-step autocorrelation<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. Here is what this looks like for the unemployment data:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>rho1<span class="ot">=</span>rhoIB<span class="sc">$</span>acf[<span class="dv">2</span>]</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ybar<span class="ot">=</span><span class="fu">mean</span>(inflationBond<span class="sc">$</span>INFBOND)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>T<span class="ot">=</span><span class="fu">length</span>(inflationBond<span class="sc">$</span>INFBOND)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>x<span class="ot">=</span>inflationBond<span class="sc">$</span>INFBOND[<span class="dv">1</span><span class="sc">:</span>(T<span class="dv">-1</span>)]</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>y<span class="ot">=</span>inflationBond<span class="sc">$</span>INFBOND[<span class="dv">2</span><span class="sc">:</span>T]</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>infbond_lm<span class="ot">=</span><span class="fu">lm</span>(y<span class="sc">~</span>x)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Coefficients from lm:"</span>, <span class="fu">coef</span>(infbond_lm))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Coefficients from lm: 0.4084928 0.8138396</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">Coefficients from theory:"</span>,<span class="fu">c</span>((<span class="dv">1</span><span class="sc">-</span>rho1)<span class="sc">*</span>ybar,rho1))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-Coefficients from theory: 0.4178938 0.8138477</code></pre>
-</div>
-</div>
-<p>Combining the above observations, one way to check whether an AR(1) model is appropriate is to compare the autocorrelation function with <span class="math inline">\(\beta_1^k \approx \rho_1^k\)</span>. Here is what this looks like for the inflationBond data:</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>rhoIB<span class="ot">=</span><span class="fu">acf</span>(inflationBond<span class="sc">$</span>INFBOND)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(rho1<span class="sc">^</span>x,<span class="at">add=</span><span class="cn">TRUE</span>,<span class="at">col=</span><span class="st">"#e35209"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>rho_ur<span class="ot">=</span><span class="fu">acf</span>(unemployment<span class="sc">$</span>UNRATE)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>rho1<span class="ot">=</span>rho_ur<span class="sc">$</span>acf[<span class="dv">2</span>]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(rho1<span class="sc">^</span>x,<span class="at">add=</span><span class="cn">TRUE</span>,<span class="at">col=</span><span class="st">"#e35209"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -531,39 +517,43 @@ Coefficients from theory: 0.4178938 0.8138477</code></pre>
 </div>
 </div>
 </div>
-<p>The observations above can also be used to obtain forecasts for future values using the heuristic <span class="math display">\[
+<p>That looks pretty good! Gaining more confidence in an AR(1) here.</p>
+<p>We can also be apply standard formulas for AR(1) process to obtain forecasts for future values using the heuristic <span class="math display">\[
 \hat{y} \pm 2*SE
-\]</span> where <span class="math inline">\(SE\)</span> means the standard deviation of the prediction error (i.e.&nbsp;<span class="math inline">\(SD(y-\hat{y})\)</span>). With an AR model, this is usually done using the “chain rule of forecasting<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>”, a fancy way of saying that given a current value of <span class="math inline">\(y_t\)</span>, we predict <span class="math display">\[
+\]</span> where <span class="math inline">\(SE\)</span> means the standard deviation of the prediction error (i.e.&nbsp;<span class="math inline">\(SD(y-\hat{y})\)</span>). With an AR model, this is usually done using the “chain rule of forecasting<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>”, a fancy way of saying that given a current value of <span class="math inline">\(y_t\)</span>, we predict <span class="math display">\[
 \hat{y}_{t+1} = \hat{\beta}_0 + \hat{\beta}_1 y_t  
 \]</span> and then use the result to predict <span class="math display">\[
 \hat{y}_{t+2} = \hat{\beta}_0 + \hat{\beta}_1 \hat{y}_{t+1}   
-\]</span> and so on. If you want an algebra challenge, you can show that for an AR(1) process, the chain rule results in the <span class="math inline">\(n\)</span>-step forecast formula: <span class="math display">\[
-\hat{y}_{t+n} = \beta_0 \sum_{j=0}^{n-1}  \beta_1^j + \beta_1^k y_t.
-\]</span></p>
-<p>To get the SE, we start by estimating the one-step prediction error variance by <span class="math display">\[
-SE_1 = Var(Y_{t+1} - \hat{Y}_t) = Var(\varepsilon_t) = \sigma^2
-\]</span> By an iterative procedure and some algebra, we can generalize this to obtain an <span class="math inline">\(n\)</span>-step error variance <span class="math display">\[
-SE_n=Var(Y_{t+n} - \hat{Y}_{t+n}) = \sigma^2 \sum_{j=0}^{n-1} \beta_1^{2j}
-\]</span> where the second equality here requires some not so fun algebra to work out. The white noise variance <span class="math inline">\(\sigma^2\)</span> can be estimated using the sample residual variance from the fitted AR(1) model. In the case where <span class="math inline">\(\beta_1=1\)</span> (random walk), the formula for <span class="math inline">\(SE_n\)</span> simplifies to $ $ as before, but in other scenarios, this formula is probably too complicated for me to convince you its worth programming by hand.</p>
-<p>The “ar” function in R allows for easier computation and calculation of predictions. Here is what the 10-year forecast for inflation bonds looks like based on an AR(1) model.</p>
+\]</span> and so on. If you want an algebra challenge, you can work out a formula for this by hand<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. There is also a not-too-bad but not worth memorizing formula for the <span class="math inline">\(n\)</span>-step error variance<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. As usual, <code>predict</code> will do all this for you after you fit a model with the <code>ar</code> function.</p>
+<p>Let’s see how all this looks for the unemployment data. We’ll train an AR(1) model using everything up until 2025 and then see how the predictions compare up to October, 2026.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>infBond_ar<span class="ot">=</span><span class="fu">ar</span>(inflationBond<span class="sc">$</span>INFBOND,<span class="at">order.max=</span><span class="dv">1</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>preds10<span class="ot">=</span><span class="fu">predict</span>(infBond_ar,<span class="at">n.ahead =</span> <span class="dv">10</span>)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>forecast10<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">N.Ahead=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">Low=</span>preds10<span class="sc">$</span>pred<span class="dv">-2</span><span class="sc">*</span>preds10<span class="sc">$</span>se,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">Intermediate=</span>preds10<span class="sc">$</span>pred,</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">High=</span>preds10<span class="sc">$</span>pred<span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>preds10<span class="sc">$</span>se) <span class="sc">%&gt;%</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(Low<span class="sc">:</span>High,<span class="at">names_to=</span><span class="st">"type"</span>,<span class="at">values_to=</span><span class="st">"value"</span>)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>cb_palette <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"#000000"</span>, <span class="st">"#E69F00"</span>, <span class="st">"#56B4E9"</span>, <span class="st">"#009E73"</span>, <span class="st">"#F0E442"</span>, <span class="st">"#0072B2"</span>, <span class="st">"#D55E00"</span>, <span class="st">"#CC79A7"</span>)</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>forecast10 <span class="sc">|&gt;</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>N.Ahead,<span class="at">y=</span>value,<span class="at">color=</span>type))<span class="sc">+</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span>cb_palette[<span class="fu">c</span>(<span class="dv">7</span>,<span class="dv">1</span>,<span class="dv">4</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>unemployment <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(observation_date<span class="sc">&lt;</span><span class="st">"2026-01-01"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>test<span class="ot">=</span>unemployment <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(observation_date<span class="sc">&gt;=</span><span class="st">"2026-01-01"</span><span class="sc">&amp;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>           observation_date<span class="sc">&lt;=</span><span class="st">"2026-10-01"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Now we fit the AR(1) model and look at the predictions</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ur_ar<span class="ot">=</span><span class="fu">ar</span>(unemployment<span class="sc">$</span>UNRATE,<span class="at">order.max=</span><span class="dv">1</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>preds10<span class="ot">=</span><span class="fu">predict</span>(ur_ar,<span class="at">n.ahead =</span> <span class="dv">10</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>forecast10<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">N.Ahead=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">Actual=</span>test<span class="sc">$</span>UNRATE,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">Low=</span>preds10<span class="sc">$</span>pred<span class="dv">-2</span><span class="sc">*</span>preds10<span class="sc">$</span>se,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">Intermediate=</span>preds10<span class="sc">$</span>pred,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>                  <span class="at">High=</span>preds10<span class="sc">$</span>pred<span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>preds10<span class="sc">$</span>se) <span class="sc">%&gt;%</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(Actual<span class="sc">:</span>High,<span class="at">names_to=</span><span class="st">"type"</span>,<span class="at">values_to=</span><span class="st">"value"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>cb_palette <span class="ot">=</span> </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"#000000"</span>, <span class="st">"#E69F00"</span>, <span class="st">"#56B4E9"</span>, <span class="st">"#009E73"</span>, <span class="st">"#F0E442"</span>, <span class="st">"#0072B2"</span>, <span class="st">"#D55E00"</span>, <span class="st">"#CC79A7"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>forecast10 <span class="sc">|&gt;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>N.Ahead,<span class="at">y=</span>value,<span class="at">color=</span>type))<span class="sc">+</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span>cb_palette[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">4</span>,<span class="dv">7</span>,<span class="dv">6</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes2_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes2_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -575,28 +565,9 @@ SE_n=Var(Y_{t+n} - \hat{Y}_{t+n}) = \sigma^2 \sum_{j=0}^{n-1} \beta_1^{2j}
 Y_t = \beta_0 + \beta_1 Y_{t-1} + \cdots + \beta_k Y_{t-k} + \varepsilon_t.
 \]</span> The question then becomes: how do we distinguish between AR(k) models?</p>
 <p>The autocorrelation function does not do a good job of this because even in the AR(1) case, the correlation of <span class="math inline">\(y_t\)</span> and the n-lag <span class="math inline">\(y_{t-n}\)</span> is greater than 0 for all <span class="math inline">\(n\geq 1\)</span> even though the model only specifies that <span class="math inline">\(y_t\)</span> depends on <span class="math inline">\(y_{t-1}\)</span> because by the “chain rule”, <span class="math inline">\(y_t\)</span> will depend on <span class="math inline">\(y_s\)</span> for all <span class="math inline">\(s &lt; t\)</span>. What we need is some type of conditional correlation function which looks at how <span class="math inline">\(y_t\)</span> depends on <span class="math inline">\(y_{t-n}\)</span> after already accounting for its dependence on <span class="math inline">\(y_{t-1}\)</span> or <span class="math inline">\(y_{t-2}\)</span> or any other “intervening” values of the time-series. Ideally, we would like this function to be close to 0 for <span class="math inline">\(n&gt;1\)</span> if the time series follows an AR(1) model and in general, close to 0 for <span class="math inline">\(n &gt; k\)</span> if the time series follows an AR(k) model. Thus is born the partial autocorrelation function.</p>
-<p>Although we will not get into the details of how to calculate partial correlation coefficients here<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>, let’s look at the result for our inflation bond data</p>
+<p>Although we will not get into the details of how to calculate partial correlation coefficients here<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>, let’s look at the result for our inflation bond data</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>prhoIB<span class="ot">=</span><span class="fu">pacf</span>(inflationBond<span class="sc">$</span>INFBOND,<span class="at">lag.max =</span> <span class="dv">24</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="notes2_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Notice that only the lag-1 partial correlation lies outside of the error bars expected under white noise and hence, an AR(1) model is indeed a good candidate for this data.</p>
-<p>To give an example of a time-series with longer lag, let’s look at a dataset of number of quakes per year with magnitude greater than 7 (note: read.delim reads a txt file):</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="fu">url</span>(<span class="st">'https://online.stat.psu.edu/stat462/sites/onlinecourses.science.psu.edu.stat462/files/data/earthquakes/index.txt'</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>quakes<span class="ot">=</span><span class="fu">read.delim</span>(df_url)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>cbar<span class="ot">=</span><span class="fu">mean</span>(quakes<span class="sc">$</span>Quakes)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>c_sd<span class="ot">=</span><span class="fu">sd</span>(quakes<span class="sc">$</span>Quakes)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(quakes,<span class="fu">aes</span>(<span class="at">x=</span>Year,<span class="at">y=</span>Quakes))<span class="sc">+</span><span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span><span class="fu">geom_line</span>()<span class="sc">+</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar)<span class="sc">+</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar<span class="dv">-3</span><span class="sc">*</span>c_sd,<span class="at">linetype =</span> <span class="st">"dashed"</span>)<span class="sc">+</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar<span class="sc">+</span><span class="dv">3</span><span class="sc">*</span>c_sd,<span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ur_pacf<span class="ot">=</span><span class="fu">pacf</span>(unemployment<span class="sc">$</span>UNRATE,<span class="at">lag.max =</span> <span class="dv">24</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -605,9 +576,17 @@ Y_t = \beta_0 + \beta_1 Y_{t-1} + \cdots + \beta_k Y_{t-k} + \varepsilon_t.
 </div>
 </div>
 </div>
-<p>Yeah, passes the control chart eyeball test for stationary. Let’s look at the acf and pcf:</p>
+<p>Notice that only the lag-1 partial correlation lies outside of the error bars expected under white noise and hence, an AR(1) model is indeed a good candidate for this data.</p>
+<p>To give an example of a time-series with longer lag, let’s look at a dataset of number of quakes per year with magnitude greater than 7:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(quakes<span class="sc">$</span>Quakes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="fu">url</span>(<span class="st">"https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/quakes.csv"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>quakes<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>cbar<span class="ot">=</span><span class="fu">mean</span>(quakes<span class="sc">$</span>Quakes)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>c_sd<span class="ot">=</span><span class="fu">sd</span>(quakes<span class="sc">$</span>Quakes)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(quakes,<span class="fu">aes</span>(<span class="at">x=</span>Year,<span class="at">y=</span>Quakes))<span class="sc">+</span><span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span><span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar)<span class="sc">+</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar<span class="dv">-3</span><span class="sc">*</span>c_sd,<span class="at">linetype =</span> <span class="st">"dashed"</span>)<span class="sc">+</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> cbar<span class="sc">+</span><span class="dv">3</span><span class="sc">*</span>c_sd,<span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -615,19 +594,30 @@ Y_t = \beta_0 + \beta_1 Y_{t-1} + \cdots + \beta_k Y_{t-k} + \varepsilon_t.
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(quakes<span class="sc">$</span>Quakes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Yeah, passes the control chart eyeball test for stationary. Let’s look at the acf and pcf:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(quakes<span class="sc">$</span>Quakes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="notes2_files/figure-html/unnamed-chunk-10-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="notes2_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">pacf</span>(quakes<span class="sc">$</span>Quakes)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes2_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>It looks like it might have spikes up until lag-3. You can check by letting R choose a “best” value of lag based on AIC<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> by leaving out the order.max argument in your call to ar:</p>
+<p>It looks like it might have spikes up until lag-3. You can check by letting R choose a “best” value of lag based on AIC<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> by leaving out the order.max argument in your call to <code>ar</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>quakes_ar<span class="ot">=</span><span class="fu">ar</span>(quakes<span class="sc">$</span>Quakes)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>quakes_ar</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>quakes_ar<span class="ot">=</span><span class="fu">ar</span>(quakes<span class="sc">$</span>Quakes)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>quakes_ar</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -640,29 +630,9 @@ Coefficients:
 Order selected 3  sigma^2 estimated as  16.05</code></pre>
 </div>
 </div>
-<p>Yep, order 3 was best! You can plot the aic values to see how much of a min it is</p>
+<p>Yep, order 3 was best! You can also plot the aic values to see how much of a min it is</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">20</span>,quakes_ar<span class="sc">$</span>aic)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="notes2_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Looking at this, I would say the choice of 3 is pretty convincing. Here are the predictions for the next 10 years (note the dataset ends in 2015):</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>preds10<span class="ot">=</span><span class="fu">predict</span>(quakes_ar,<span class="at">n.ahead =</span> <span class="dv">10</span>)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>forecast10<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">Year=</span><span class="dv">2016</span><span class="sc">:</span><span class="dv">2025</span>,</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Low=</span>preds10<span class="sc">$</span>pred<span class="dv">-2</span><span class="sc">*</span>preds10<span class="sc">$</span>se,</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Intermediate=</span>preds10<span class="sc">$</span>pred,</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">High=</span>preds10<span class="sc">$</span>pred<span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>preds10<span class="sc">$</span>se) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(Low<span class="sc">:</span>High,<span class="at">names_to=</span><span class="st">"type"</span>,<span class="at">values_to=</span><span class="st">"value"</span>)</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>forecast10 <span class="sc">|&gt;</span></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Year,<span class="at">y=</span>value,<span class="at">color=</span>type))<span class="sc">+</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span><span class="fu">geom_line</span>()<span class="sc">+</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span>cb_palette[<span class="fu">c</span>(<span class="dv">7</span>,<span class="dv">1</span>,<span class="dv">4</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">20</span>,quakes_ar<span class="sc">$</span>aic)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -671,32 +641,56 @@ Order selected 3  sigma^2 estimated as  16.05</code></pre>
 </div>
 </div>
 </div>
+<p>Looking at this, I would say the choice of 3 is pretty convincing. Here are the predictions for the next 10 years (note the dataset ends in 2015):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>preds10<span class="ot">=</span><span class="fu">predict</span>(quakes_ar,<span class="at">n.ahead =</span> <span class="dv">10</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>forecast10<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">Year=</span><span class="dv">2016</span><span class="sc">:</span><span class="dv">2025</span>,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Low=</span>preds10<span class="sc">$</span>pred<span class="dv">-2</span><span class="sc">*</span>preds10<span class="sc">$</span>se,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">Intermediate=</span>preds10<span class="sc">$</span>pred,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>                      <span class="at">High=</span>preds10<span class="sc">$</span>pred<span class="sc">+</span><span class="dv">2</span><span class="sc">*</span>preds10<span class="sc">$</span>se) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(Low<span class="sc">:</span>High,<span class="at">names_to=</span><span class="st">"type"</span>,<span class="at">values_to=</span><span class="st">"value"</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>forecast10 <span class="sc">|&gt;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Year,<span class="at">y=</span>value,<span class="at">color=</span>type))<span class="sc">+</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">shape=</span><span class="dv">1</span>)<span class="sc">+</span><span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span>cb_palette[<span class="fu">c</span>(<span class="dv">4</span>,<span class="dv">7</span>,<span class="dv">6</span>)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes2_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 <p>According to the usgs.gov site, the number of 7+ quakes in 2016-2020 were: 16,7,17,10, and 9, all of which appear to be within the error bounds. The 2016 prediction is spot on and the model does oddly predict a dip in 2017. Creepy.</p>
-<p>Next notes will discuss moving average (MA) and then finally ARIMA models which combine both AR and MA models into one master class.</p>
 </section>
 <section id="exercise" class="level2">
 <h2 class="anchored" data-anchor-id="exercise">Exercise</h2>
-<p>The same website cited above for the infbond data also has a dataset on EuroExchange rates with the us dollar (the variable “exeuus”). You can load the variable and convert the dates into proper format using the commands below:</p>
+<p>The FRED database tracks the exchange rates between the US dollar and foreign currencies. For example, the commands below will load the daily exchange rates going back to 2020</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lubridate)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>df_url<span class="ot">=</span><span class="fu">url</span>(<span class="st">'https://instruction.bus.wisc.edu/jfrees/jfreesbooks/Regression%20Modeling/BookWebDec2010/CSVData/EuroExchange.csv'</span>)</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>euroExchange<span class="ot">=</span><span class="fu">read.csv</span>(df_url)</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>euroExchange<span class="sc">$</span>date<span class="ot">=</span><span class="fu">mdy</span>(euroExchange<span class="sc">$</span>date)</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(euroExchange)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>url <span class="ot">=</span> <span class="st">"https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXUSEU"</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>exchange_rates <span class="ot">=</span> <span class="fu">read_csv</span>(url)<span class="sc">|&gt;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">observation_date =</span> <span class="fu">as.Date</span>(observation_date)) <span class="sc">|&gt;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(observation_date <span class="sc">&gt;=</span> <span class="st">"2020-01-02"</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(exchange_rates)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>        date exhkus exeuus
-1 2005-04-01 7.7989 0.7754
-2 2005-04-04 7.7991 0.7789
-3 2005-04-05 7.7995 0.7787
-4 2005-04-06 7.7993 0.7771
-5 2005-04-07 7.7990 0.7748
-6 2005-04-08 7.7989 0.7745</code></pre>
+<pre><code># A tibble: 6 × 2
+  observation_date DEXUSEU
+  &lt;date&gt;             &lt;dbl&gt;
+1 2020-01-02          1.12
+2 2020-01-03          1.12
+3 2020-01-06          1.12
+4 2020-01-07          1.11
+5 2020-01-08          1.11
+6 2020-01-09          1.11</code></pre>
 </div>
 </div>
 <ol type="1">
 <li>Do the exchange rates appear to form a stationary process?</li>
-<li>Calculate the first differences (changes between successive values) of the exchange rates. Does the differenced series appear to be stationary?</li>
+<li>Calculate the first differences (change scores between successive values) of the exchange rates. Does the differenced series appear to be stationary?</li>
 <li>Examine the ACF and PACF plots for the differenced series. Does an autoregressive (AR) model seem appropriate? If so, what order would you recommend?</li>
 <li>Use the ar() command to determine the optimal AR order for modeling the differenced series. How does it match up with your suggestion in 3?</li>
 </ol>
@@ -708,10 +702,17 @@ Order selected 3  sigma^2 estimated as  16.05</code></pre>
 <div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>Technically we should say “asymptotically stationary” depending on what we assume in regard to the initial conditions.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>Not to be confused with Dr.&nbsp;Chain’s rule in calculus.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>As an example, here’s how you would compute the lag-2 partial correlation. First, regress <span class="math inline">\(Y_t\)</span> on <span class="math inline">\(Y_{t-1}\)</span> and get residuals <span class="math inline">\(e_t\)</span>. Second, regress <span class="math inline">\(Y_{t-2}\)</span> on <span class="math inline">\(Y_{t-1}\)</span> and get the residuals <span class="math inline">\(e_{t-2}\)</span>. Finally, calculate the correlation between <span class="math inline">\(e_t\)</span> and <span class="math inline">\(e_{t-2}\)</span>. Since both residuals have the effect of <span class="math inline">\(Y_{t-1}\)</span> removed, we are now looking at a more direct correlation between <span class="math inline">\(Y_t\)</span> and <span class="math inline">\(Y_{t-2}\)</span> <a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>One could also use other complexity metrics or cross-validation.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>Again, author bias. That’s when I was born and the years before then just don’t matter.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>See Module 8 Theory Supplement for details<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Not to be confused with Dr.&nbsp;Chain’s rule in calculus.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>To save you needing AI, the answer is <span class="math display">\[
+\hat{y}_{t+n} = \beta_0 \sum_{j=0}^{n-1}  \beta_1^j + \beta_1^k y_t.
+\]</span><a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p> <span class="math display">\[
+SE_n=Var(Y_{t+n} - \hat{Y}_{t+n}) = \sigma^2 \sum_{j=0}^{n-1} \beta_1^{2j}.
+\]</span> where the the white noise variance <span class="math inline">\(\sigma^2\)</span> can be estimated using the sample residual variance from the fitted AR(1) model. Maybe I’ll put a calculation in the supplement someday when I am really bored. Like, REALLY bored.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>As an example, here’s how you would compute the lag-2 partial correlation. First, regress <span class="math inline">\(Y_t\)</span> on <span class="math inline">\(Y_{t-1}\)</span> and get residuals <span class="math inline">\(e_t\)</span>. Second, regress <span class="math inline">\(Y_{t-2}\)</span> on <span class="math inline">\(Y_{t-1}\)</span> and get the residuals <span class="math inline">\(e_{t-2}\)</span>. Finally, calculate the correlation between <span class="math inline">\(e_t\)</span> and <span class="math inline">\(e_{t-2}\)</span>. Since both residuals have the effect of <span class="math inline">\(Y_{t-1}\)</span> removed, we are now looking at a more direct correlation between <span class="math inline">\(Y_t\)</span> and <span class="math inline">\(Y_{t-2}\)</span> <a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>One could also use other complexity metrics or cross-validation.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

@@ -1,0 +1,54 @@
+---
+title: "Module 8 Theory Supplement"
+format: html
+---
+
+## Autoregressive Facts
+
+Some facts about `em:
+
+1. An AR(1) model is stationary^[Technically we should say "asymptotically stationary" depending on what we assume in regard to the initial conditions.] for $|\beta_1| < 1$ with mean
+$$
+\mu = E(Y_t) = \beta_0/(1-\beta_1) 
+$$
+and autocorrelation
+$$
+\rho_k = \beta_1^k
+$$
+2. The coefficients $\beta_0,\beta_1$ can be estimated in a manner similar to OLS, but (assuming stationarity) the answers are easy to guess. Since 
+$$
+Cov(Y_t,Y_{t-1}) = \beta_1 Var(Y_{t-1})
+$$
+we can solve for $\beta_1$ to get 
+$$
+\beta_1  =  Cov(Y_t,Y_{t-1})/Var(Y_{t-1}) = Corr(Y_t,Y_{t-1}).
+$$
+Therefore, $\hat{\beta}_1 \approx \rho_1$. Meanwhile, 
+$$
+\beta_0 = (1-\beta_1) E(Y_t)
+$$
+so $\hat{\beta_0} \approx (1-\hat{\beta}_1)\bar{y}$. We can verify these observations using `lm` to directly fit a model of $y_t ~ y_{t-1}$ to the unemployment data. 
+
+```{r}
+url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=UNRATE"
+
+unemployment = read_csv(url) |>
+  mutate(observation_date = as.Date(observation_date)) |>
+  filter(observation_date>="1980-01-01") |>
+  drop_na()
+rho_ur=acf(unemployment$UNRATE)
+```
+
+```{r}
+rho1=rho_ur$acf[2]
+ybar=mean(unemployment$UNRATE)
+
+T=length(unemployment$UNRATE)
+x=unemployment$UNRATE[1:(T-1)]
+y=unemployment$UNRATE[2:T]
+
+ur_lm=lm(y~x)
+cat("Coefficients from lm:", coef(ur_lm))
+
+cat("\nCoefficients from theory:",c((1-rho1)*ybar,rho1))
+```

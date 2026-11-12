@@ -82,28 +82,37 @@ rho=acf(na.omit(tuition$PrivateDiff),
 
 This plot shows that the sample correlation between $y_t$ and $y_{t-k}$ is close to 0 for all values of $k \geq 1$ as it should be for a sequence of iid random variables. The blue lines show 95% confidence intervals for where you would expect the autocorrelation values to lie if the time series consists of white noise and in our case, we can see that all the autocorrelations do indeed lie within this band. This lends further credence to our use of a random walk model for tuition.
 
-In contrast, lets look at another example taken from the book "Regression Modeling with Actuarial and Financial Applications". The INFBOND variable shows some kind of bond index issued by the treasury department whose meaning I don't understand. In the code below, the lubridate package converts the date measurements from a factor to an object of type "date". Here is the control chart for the values of the bond over time. 
+In contrast, lets look at a time series of US unemployment going back to 1980^[Again, author bias. That's when I was born and the years before then just don't matter.]. These can be loaded from the publicly available FRED (Federal Reserve Bank) database as follows:
 
 ```{r}
-library(lubridate)
-df_url=url('https://instruction.bus.wisc.edu/jfrees/jfreesbooks/Regression%20Modeling/BookWebDec2010/CSVData/InflationBond.csv')
-inflationBond=read.csv(df_url)
-inflationBond$date=dmy(inflationBond$date)
-cbar=mean(inflationBond$INFBOND)
-c_sd=sd(inflationBond$INFBOND)
-ggplot(inflationBond,aes(x=date,y=INFBOND))+
+url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=UNRATE"
+
+unemployment = read_csv(url) |>
+  mutate(observation_date = as.Date(observation_date)) |>
+  filter(observation_date>="1980-01-01") |>
+  drop_na()
+
+head(unemployment)
+```
+
+Here is the control chart for the values of the unemployment over this time 
+
+```{r}
+cbar=mean(unemployment$UNRATE)
+c_sd=sd(unemployment$UNRATE)
+unemployment |>
+  ggplot(aes(x=observation_date,y=UNRATE))+
   geom_point(shape=1)+geom_line()+
   geom_hline(yintercept = cbar)+
   geom_hline(yintercept = cbar-3*c_sd,linetype = "dashed")+
   geom_hline(yintercept = cbar+3*c_sd,linetype = "dashed")
 ```
 
-The series itself seems to pass the control chart test for stationarity in this case so let's look at its acf
+Well COVID kind of fucked up stationary (amongst other things). But it otherwise looks pretty good. Let's proceed to check out the acf:
 
 ```{r}
-rhoIB=acf(inflationBond$INFBOND)
+rho_ur=acf(unemployment$UNRATE)
 ```
-
 
 That is definitely not a white noice process! It looks like the correlations between lagged values decay as the size of the lag increases. This means this process has some "memory" of its past. Autoregressive models represent one class of possibilities for modeling such relationships. 
 
@@ -115,52 +124,16 @@ Y_t = \beta_0 + \beta_1 Y_{t-1} + \varepsilon_t
 $$
 for some constants $\beta_0,\beta_1$ where $\varepsilon_t$ is a white noise process with mean 0 and variance $\sigma^2$. Thus if $\beta_1 = 1$, AR(1) is a random walk while if $\beta_1 = 0$, then AR(1) is a sequence of iid random variables. Note that in order for the above process to make sense when $t=1$, one must assume something about an initial distribution of possible values $y_0$ (although this is more of a theoretical issue as you usually just start ticking at $t=2$ in practice). 
 
-A couple properties of AR(1) models worth working out for those with some Math 131 background:
-
-1. An AR(1) model is stationary^[Technically we should say "asymptotically stationary" depending on what we assume in regard to the initial conditions.] for $|\beta_1| < 1$ with mean
-$$
-\mu = E(Y_t) = \beta_0/(1-\beta_1) 
-$$
-and autocorrelation
-$$
-\rho_k = \beta_1^k
-$$
-2. The coefficients $\beta_0,\beta_1$ can be estimated in a manner similar to OLS, but (assuming stationarity) the answers are easy to guess. Since 
-$$
-Cov(Y_t,Y_{t-1}) = \beta_1 Var(Y_{t-1})
-$$
-we can solve for $\beta_1$ to get 
-$$
-\beta_1  =  Cov(Y_t,Y_{t-1})/Var(Y_{t-1}) = Corr(Y_t,Y_{t-1}).
-$$
-Therefore, $\hat{\beta}_1 \approx \rho_1$. Meanwhile, 
-$$
-\beta_0 = (1-\beta_1) E(Y_t)
-$$
-so $\hat{\beta_0} \approx (1-\hat{\beta}_1)\bar{y}$. We can verify these observations using lm to directly fit a model of $y_t ~ y_{t-1}$: 
+One way to check whether an AR(1) model is appropriate is to compare the autocorrelation function with $\rho_1^k$, the $k$th power of the one-step autocorrelation^[See Module 8 Theory Supplement for details]. Here is what this looks like for the unemployment data:
 
 ```{r}
-rho1=rhoIB$acf[2]
-ybar=mean(inflationBond$INFBOND)
-
-T=length(inflationBond$INFBOND)
-x=inflationBond$INFBOND[1:(T-1)]
-y=inflationBond$INFBOND[2:T]
-
-infbond_lm=lm(y~x)
-cat("Coefficients from lm:", coef(infbond_lm))
-
-cat("\nCoefficients from theory:",c((1-rho1)*ybar,rho1))
-```
-
-Combining the above observations, one way to check whether an AR(1) model is appropriate is to compare the autocorrelation function with $\beta_1^k \approx \rho_1^k$. Here is what this looks like for the inflationBond data:
-
-```{r}
-rhoIB=acf(inflationBond$INFBOND)
+rho_ur=acf(unemployment$UNRATE)
+rho1=rho_ur$acf[2]
 curve(rho1^x,add=TRUE,col="#e35209")
 ```
+That looks pretty good! Gaining more confidence in an AR(1) here. 
 
-The observations above can also be used to obtain forecasts for future values using the heuristic 
+We can also be apply standard formulas for AR(1) process to obtain forecasts for future values using the heuristic
 $$
 \hat{y} \pm 2*SE
 $$
@@ -172,38 +145,44 @@ and then use the result to predict
 $$
 \hat{y}_{t+2} = \hat{\beta}_0 + \hat{\beta}_1 \hat{y}_{t+1}   
 $$
-and so on. If you want an algebra challenge, you can show that for an AR(1) process, the chain rule results in the $n$-step forecast formula:
+and so on. If you want an algebra challenge, you can work out a formula for this by hand^[To save you needing AI, the answer is 
 $$
 \hat{y}_{t+n} = \beta_0 \sum_{j=0}^{n-1}  \beta_1^j + \beta_1^k y_t. 
 $$
+]. There is also a not-too-bad but not worth memorizing formula for the $n$-step error variance^[ 
+$$
+SE_n=Var(Y_{t+n} - \hat{Y}_{t+n}) = \sigma^2 \sum_{j=0}^{n-1} \beta_1^{2j}.
+$$
+where the the white noise variance $\sigma^2$ can be estimated using the sample residual variance from the fitted AR(1) model. Maybe I'll put a calculation in the supplement someday when I am really bored. Like, REALLY bored.]. As usual, `predict` will do all this for you after you fit a model with the `ar` function. 
 
-To get the SE, we start by estimating the one-step prediction error variance by 
-$$
-SE_1 = Var(Y_{t+1} - \hat{Y}_t) = Var(\varepsilon_t) = \sigma^2 
-$$
-By an iterative procedure and some algebra, we can generalize this to obtain an $n$-step error variance 
-$$
-SE_n=Var(Y_{t+n} - \hat{Y}_{t+n}) = \sigma^2 \sum_{j=0}^{n-1} \beta_1^{2j}
-$$
-where the second equality here requires some not so fun algebra to work out. The white noise variance $\sigma^2$ can be estimated using the sample residual variance from the fitted AR(1) model. In the case where $\beta_1=1$ (random walk), the formula for $SE_n$ simplifies to $\sigma\sqrt{n} $ as before, but in other scenarios, this formula is probably too complicated for me to convince you its worth programming by hand. 
-
-The "ar" function in R allows for easier computation and calculation of predictions. Here is what the 10-year forecast for inflation bonds looks like based on an AR(1) model.
+Let's see how all this looks for the unemployment data. We'll train an AR(1) model using everything up until 2025 and then see how the predictions compare up to October, 2026. 
 
 ```{r}
-infBond_ar=ar(inflationBond$INFBOND,order.max=1)
-preds10=predict(infBond_ar,n.ahead = 10)
+train=unemployment |>
+  filter(observation_date<"2026-01-01")
+test=unemployment |>
+  filter(observation_date>="2026-01-01"&
+           observation_date<="2026-10-01")
+```
+
+Now we fit the AR(1) model and look at the predictions
+
+```{r}
+ur_ar=ar(unemployment$UNRATE,order.max=1)
+preds10=predict(ur_ar,n.ahead = 10)
 forecast10=data.frame(N.Ahead=1:10,
+                  Actual=test$UNRATE,
                   Low=preds10$pred-2*preds10$se,
                   Intermediate=preds10$pred,
                   High=preds10$pred+2*preds10$se) %>%
-  pivot_longer(Low:High,names_to="type",values_to="value")
-cb_palette = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+  pivot_longer(Actual:High,names_to="type",values_to="value")
+cb_palette = 
+  c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 forecast10 |>
   ggplot(aes(x=N.Ahead,y=value,color=type))+
   geom_point(shape=1)+
   geom_line()+
-  scale_color_manual(values=cb_palette[c(7,1,4)])
-
+  scale_color_manual(values=cb_palette[c(1,4,7,6)])
 ```
 
 ## AR(K) and Partial Autocorrelation functions
@@ -219,15 +198,15 @@ The autocorrelation function does not do a good job of this because even in the 
 Although we will not get into the details of how to calculate partial correlation coefficients here^[As an example, here's how you would compute the lag-2 partial correlation. First, regress $Y_t$ on $Y_{t-1}$ and get residuals $e_t$. Second, regress $Y_{t-2}$ on $Y_{t-1}$ and get the residuals $e_{t-2}$. Finally, calculate the correlation between $e_t$ and $e_{t-2}$. Since both residuals have the effect of $Y_{t-1}$ removed, we are now looking at a more direct correlation between $Y_t$ and $Y_{t-2}$ ], let's look at the result for our inflation bond data
 
 ```{r}
-prhoIB=pacf(inflationBond$INFBOND,lag.max = 24)
+ur_pacf=pacf(unemployment$UNRATE,lag.max = 24)
 ```
 Notice that only the lag-1 partial correlation lies outside of the error bars expected under white noise and hence, an AR(1) model is indeed a good candidate for this data. 
 
-To give an example of a time-series with longer lag, let's look at a dataset of number of quakes per year with magnitude greater than 7 (note: read.delim reads a txt file):
+To give an example of a time-series with longer lag, let's look at a dataset of number of quakes per year with magnitude greater than 7:
 
 ```{r}
-df_url=url('https://online.stat.psu.edu/stat462/sites/onlinecourses.science.psu.edu.stat462/files/data/earthquakes/index.txt')
-quakes=read.delim(df_url)
+df_url=url("https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/quakes.csv")
+quakes=read.csv(df_url)
 cbar=mean(quakes$Quakes)
 c_sd=sd(quakes$Quakes)
 ggplot(quakes,aes(x=Year,y=Quakes))+geom_point(shape=1)+geom_line()+
@@ -243,14 +222,14 @@ acf(quakes$Quakes)
 pacf(quakes$Quakes)
 ```
 
-It looks like it might have spikes up until lag-3. You can check by letting R choose a "best" value of lag based on AIC^[One could also use other complexity metrics or cross-validation.] by leaving out the order.max argument in your call to ar:
+It looks like it might have spikes up until lag-3. You can check by letting R choose a "best" value of lag based on AIC^[One could also use other complexity metrics or cross-validation.] by leaving out the order.max argument in your call to `ar`:
 
 ```{r}
 quakes_ar=ar(quakes$Quakes)
 quakes_ar
 ```
 
-Yep, order 3 was best! You can plot the aic values to see how much of a min it is
+Yep, order 3 was best! You can also plot the aic values to see how much of a min it is
 
 ```{r}
 
@@ -270,29 +249,29 @@ forecast10=data.frame(Year=2016:2025,
 forecast10 |>
   ggplot(aes(x=Year,y=value,color=type))+
   geom_point(shape=1)+geom_line()+
-  scale_color_manual(values=cb_palette[c(7,1,4)])
+  scale_color_manual(values=cb_palette[c(4,7,6)])
 
 ```
 
 According to the usgs.gov site, the number of 7+ quakes in 2016-2020 were: 16,7,17,10, and 9, all of which appear to be within the error bounds. The 2016 prediction is spot on and the model does oddly predict a dip in 2017. Creepy. 
 
-Next notes will discuss moving average (MA) and then finally ARIMA models which combine both AR and MA models into one master class. 
-
 ## Exercise
 
-The same website cited above for the infbond data also has a dataset on EuroExchange rates with the us dollar (the variable "exeuus"). You can load the variable and convert the dates into proper format using the commands below:
+The FRED database tracks the exchange rates between the US dollar and foreign currencies. For example, the commands below will load the daily exchange rates going back to 2020
 
 ```{r}
 library(tidyverse)
-library(lubridate)
-df_url=url('https://instruction.bus.wisc.edu/jfrees/jfreesbooks/Regression%20Modeling/BookWebDec2010/CSVData/EuroExchange.csv')
-euroExchange=read.csv(df_url)
-euroExchange$date=mdy(euroExchange$date)
-head(euroExchange)
 
+url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXUSEU"
+
+exchange_rates = read_csv(url)|>
+  mutate(observation_date = as.Date(observation_date)) |>
+  filter(observation_date >= "2020-01-02")
+
+head(exchange_rates)
 ```
 
 1. Do the exchange rates appear to form a stationary process?
-2. Calculate the first differences (changes between successive values) of the exchange rates. Does the differenced series appear to be stationary?
+2. Calculate the first differences (change scores between successive values) of the exchange rates. Does the differenced series appear to be stationary?
 3. Examine the ACF and PACF plots for the differenced series. Does an autoregressive (AR) model seem appropriate? If so, what order would you recommend?
 4. Use the ar() command to determine the optimal AR order for modeling the differenced series. How does it match up with your suggestion in 3? 
