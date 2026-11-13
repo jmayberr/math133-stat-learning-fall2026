@@ -1,0 +1,84 @@
+---
+title: "Class Notes 11-13"
+format: html
+  html: 
+    embed-resources: true
+    self-contained: true
+---
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/nba2026.csv"
+nba2026 =read.csv(df_url)
+head(nba2026)
+```
+
+```{r}
+player_name="Shai Gilgeous-Alexander"
+
+player_series=nba2026 |>
+  dplyr::filter(player==player_name)
+
+head(player_series)
+```
+
+Time series
+
+```{r}
+library(tidyverse)
+player_series = player_series |>
+  mutate(fantasy_csum=cumsum(fantasy_points),
+         game_date=as.Date(game_date))
+
+player_series |>
+  ggplot(aes(x=game_date,y=fantasy_csum))+
+  geom_line()+
+  geom_point(shape=2)
+```
+
+Change scores
+
+```{r}
+player_series |>
+  ggplot(aes(game_date,fantasy_points))+
+  geom_line()+
+  geom_point()
+```
+
+Train/Test Set
+
+```{r}
+train=player_series |>
+  dplyr::filter(game_date<"2026-02-15")
+test=player_series |>
+  dplyr::filter(game_date>"2026-02-15")
+```
+
+Calculate predictions
+
+Mean/SD of Change Scores
+
+```{r}
+cbar=mean(train$fantasy_points)
+c_sd=sd(train$fantasy_points)
+c(cbar,c_sd)
+```
+
+```{r}
+intermediate=train$fantasy_csum[49]+cbar*(1:19)
+low=intermediate-2*c_sd*sqrt(1:19)
+high=intermediate+2*c_sd*sqrt(1:19)
+pred_df=data.frame(game=1:19,
+          actual=test$fantasy_csum,
+          intermediate=intermediate,
+          low=low,
+          high=high
+           )|>
+  pivot_longer(actual:high,
+             names_to="type",
+             values_to="values")
+
+pred_df |>
+  ggplot(aes(x=game,y=values,col=type))+
+  geom_line()+
+  geom_point()
+```
