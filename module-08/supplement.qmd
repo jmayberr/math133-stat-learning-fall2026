@@ -52,3 +52,5 @@ cat("Coefficients from lm:", coef(ur_lm))
 
 cat("\nCoefficients from theory:",c((1-rho1)*ybar,rho1))
 ```
+
+

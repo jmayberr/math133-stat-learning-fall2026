@@ -26,9 +26,10 @@ ggplot(tuition,aes(x=Year,y=Private.nonprofit.four.year))+
 
 The golden egg of time series is forecasting: predicting future values from the past. As such, we would like to develop statistical models for describing how the present value $Y_T$ of a time series depends on various predictors (yeah, we've done lots of that type of stuff), but more uniquely to time series, how the value of $Y_T$ depends on past values of $Y_t$ for $t < T$. In fact, this latter is really the fundamental difference between times series and the regression models considered thus far in the course.
 
-Time series modeling requires a bit of background in random variables, but nothing too far beyond Math 37 knowledge. There are really just three facts to recall:
+Time series modeling requires a bit of background in random variables, but nothing too far beyond intro to stats knowledge. There are really just four facts to recall:
 
-- Expected value is the weighted average of the possible values of a random variable
+- Expected value is the weighted mean of the possible values of a random variable.
+- Variance is the standard deviation squared. 
 - Expected value distributes across sums of random variables
 - Variance distributes across sums of random variables, **but** only if those random variables are independent.
 
@@ -36,7 +37,7 @@ To illustrate and motivate some of the core models of time series, let's look at
 
 ## Spinning Wheel
 
-In (American) roulette, a ball is dropped into a spinning wheel with 38 slots, 18 of which are colored red, 18 black, and 2 green^[just to fuck with you and make sure the casino wins money. That's how the real world works kids. European roulette is more fair because there is only one green slot.]. The red and black slots are labelled with the numbers 1-36 in alternating values while the green slots are labelled 0 and 00. You can place various bets with various payouts on where the ball will land when it stops spinning^[All of which are bad ideas.]. One is that the ball will land on a red slot. The payoff for this bet is 1:1 meaning if you bet \$1 on red and the ball lands on red, you get your \$1 back plus 1. Otherwise, you lose your dollar.
+In (American) roulette, a ball is dropped into a spinning wheel with 38 slots, 18 of which are colored red, 18 black, and 2 green^[just to fuck with you and make sure the casino wins money. That's how we do it in America. European roulette is a little more fair because there is only one green slot. It will still screw you over but it won't be as obvious.]. The red and black slots are labelled with the numbers 1-36 in alternating values while the green slots are labelled 0 and 00. You can place various bets with various payouts on where the ball will land when it stops spinning^[All of which are bad ideas.]. One is that the ball will land on a red slot. The payoff for this bet is 1:1 meaning if you bet \$1 on red and the ball lands on red, you get your \$1 back plus 1. Otherwise, you lose your dollar.
 
 To model this with random variables, let $\varepsilon_t$ be the amount won on the $t$th play of roulette. Then $\varepsilon_t$ will be either 1 or -1 with respective probabilities 18/38 and 20/38. The expected value for this bet is thus
 $$(1)(18/38) + (-1)(20/38) = -1/19 \approx -0.0526.$$
@@ -62,7 +63,7 @@ ggplot(game,aes(x=Round,y=Winnings))+
   geom_line()
 ```
 
-Notice that your net winnings go steadily down throughout the night. In fact, one can show that there is a very small probability (less than 5%) of being ahead after 100 rounds.
+Notice that your net winnings go steadily down throughout the night. In fact, one can show^[By counting paths which lead to positive gains and using binomial probabilities or the Central Limit Theorem to approximate.] that there is a very small probability (less than 5%) of being ahead after 100 rounds.
 
 Let's compare the above plot, which tracks your cumulative winnings, with a plot of the actual results from each round:
 $$
@@ -76,7 +77,11 @@ ggplot(game,aes(x=Round,y=Result))+
 
 ```
 
-This is called the change^[Or innovation or first difference] process for the time series. For roulette, the results just jump randomly between 1 and -1 with no distinguishable pattern whereas the cumulative winnings themselves showed a downward trend. This is the fundamental difference between a random walk ($y_t$ = the cumulative winnings) and its corresponding change process ($\varepsilon_t$ = the results of individual rounds).
+This is called the change^[Or innovation or first difference] process for the time series. For roulette, the results just jump randomly between 1 and -1 with no distinguishable pattern whereas the cumulative winnings themselves showed a downward trend. This is the fundamental difference between a random walk ($y_t$ = the cumulative winnings) and its corresponding change process ($\varepsilon_t$ = the results of individual rounds) and its an important partnership to keep in mind as you study time series:
+
+- The change process of a time series can be obtained by differencing.
+- A time series can be obtained from a change process by summing. 
+
 
 ## Forecasting
 
@@ -104,9 +109,14 @@ ggplot(game,aes(x=Round,y=Winnings))+
   geom_smooth(method="lm")
 ```
 
-and in the long run, might provide some good predictions, but in the short run it is going to be shit because it is trying to capture the overall trend in all observations and not weighting the recent points more heavily. For example, the line predicts our net winnings will be less than -20 at round 101 which is impossible given we are at `r game$Winnings[100]` after round 100 due to a recent string of good fortune and we can only lose \$1 per round. Thinking of this process as a random walk provides a much better, but still roughly linear way of approximating future values.
+and in the long run, might provide some good predictions, but in the short run it is going to be shit because it is trying to capture the overall trend in all observations and not weighing the recent points more heavily. For example, the line predicts our net winnings will be less than -20 at round 101 which is impossible given we are at `r game$Winnings[100]` after round 100 due to a recent string of good fortune and we can only lose \$1 per round. Thinking of this process as a random walk provides a much better, but still roughly linear way of approximating future values.
 
-To see how, we recall two facts stated in the introduction about distributing expected value and variance. With these in mind, suppose that the current value of our winnings is $y_T$ and we wish to predict the value of our winnings after $n$ additional rounds. Since our net winnings in the next $n$ rounds is a sum of $n$ iid random variables with mean $\mu = -1/19$, this means that the expected value of our winnings after $n$ more rounds will be
+To see how, recall the two facts stated in the introduction about distributing expected value and variance across sums of independent random variable. 
+
+- Expected value distributes across sums of random variables
+- Variance distributes across sums of random variables, **but** only if those random variables are independent.
+
+With these in mind, suppose that the current value of our winnings is $y_T$ and we wish to predict the value of our winnings after $n$ additional rounds. Since our net winnings in the next $n$ rounds is a sum of $n$ iid random variables with mean $\mu = -1/19$, this means that the expected value of our winnings after $n$ more rounds will be
 $$
 y_T-n/19.
 $$
@@ -119,7 +129,7 @@ mu=-1/19
 
 so the variance of our additional winnings after $n$ rounds will be $n\sigma^2  \approx n$. We can use this to form not just predictions, but prediction intervals via the "$\pm 2*SD$" heuristic: we will predict that our new winnings after $n$ additional rounds will be in the interval
 $$
-y_T -n/19 \pm 2\sqrt{n}
+(y_T -n/19) \pm 2\sqrt{n}
 $$
 with 95% probability (or we could use some other factor times the SD if we wanted a different prediction probability).
 
@@ -172,7 +182,7 @@ proj_all |>
   geom_line()+
   facet_grid(.~model)+
   ylab("Winnings")+
-  scale_color_manual(values=cb_palette[c(7,1,4)])+
+  scale_color_manual(values=cb_palette[c(4,7,6)])+
   scale_x_continuous(breaks=c(100,105,110))
 
 ```
@@ -181,7 +191,7 @@ Notice the random walk model at least provides some realistic forecasts and also
 
 ## Is tuition a random walk?
 
-The example from the last section was unrealistic for most real world forecasting problems because we knew the exact distribution of the noise^[Sometimes you'll see the notation $c_t$ instead of $\varepsilon_t$ to remind you that these are "change scores"; we'll use that in R because c is easier to type than epsilon.] $\varepsilon_t$. For most time series, we don't know this information, but instead have to estimate the mean and variance of the noise from past data. The tuition data, for example, looks like it has an upward linear trend which is what we would expect from a random walk model with positive drift, but how can we use this observation to make forecasts about what will happen in the next ten years?
+The example from the last section was unrealistic for most real world forecasting problems because we knew the exact distribution of the noise $\varepsilon_t$. For most time series, we don't know this information, but instead have to estimate the mean and variance of the noise from past data. The tuition data, for example, looks like it has an upward linear trend which is what we would expect from a random walk model with positive drift, but how can we use this observation to make forecasts about what will happen in the next ten years?
 
 The key is to look at sample statistics for the year-to-year change scores of tuition. The "diff" command can be used to calculate them. The NA is needed because there is no difference from the first point. This is important to remember in working with change scores: in a sample of size $n$, there are only $n-1$ changes.
 
@@ -198,6 +208,7 @@ tuition |>
 After the first few years (we could remove these if you're worried), this essentially looks like a sequence of iid random variables which makes it reasonable to use a random walk to model tuition prices. To do so, we need to compute the sample mean and sample SD for the differences which will take the place of $\mu =-1/19$ and $\sigma \approx 1$ in the last example
 
 ```{r}
+# Using c for change scores instead of epsilon because its easier to type. 
 cbar=mean(tuition$Private.Diff,na.rm=TRUE)
 c_sd=sd(tuition$Private.Diff,na.rm=TRUE)
 cat("Mean=",cbar,"\nStd Dev =", c_sd)

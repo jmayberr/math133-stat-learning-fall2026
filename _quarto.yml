@@ -95,3 +95,5 @@ website:
         menu:
           - href: module-08/notes1.qmd
             text: "Module 8.1: Intro to Time Series"
+          - href: module-08/notes2.qmd
+            text: "Module 8.2: Autoregressive Models and Autocorrelation Functions"
