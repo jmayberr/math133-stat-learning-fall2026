@@ -421,7 +421,7 @@ $$
 y_T+ t \mu \pm 2 \sigma\sqrt{t}. 
 $$
 
-Next time we will discuss autocorrelation functions and how to deal with situations where a random walk model is not reasonable.
+Next time we will discuss autocorrelation functions and how to deal with some situations where a random walk model is not reasonable.
 
 ## Practice Problems
 

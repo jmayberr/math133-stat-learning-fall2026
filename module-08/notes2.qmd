@@ -58,21 +58,17 @@ Well, we have to come clean about that.
 Stationarity involves more than just mean and variance. It also concerns how values in the process relate to one another over time. Specifically, a process is said to be weakly stationary (or second-order stationary) if:
 
 1. Its mean is constant over time, and
-2. The covariance between $Y_t$ and $Y_s$ depends only on the time lag $|t - s|$, not on the specific times $t$ and $s$ themselves. 
+2. The correlation^[Usually stated in terms of covariance which is the unstandardized version of correlation but we don't talk about such things here.] between $Y_t$ and $Y_s$ depends only on the time lag $|t - s|$, not on the specific times $t$ and $s$ themselves. 
 
-In other words, the relationship between two observations depends only on how much time has passed between them, not when they occurred. For example, the covariance between $Y_2$ and $Y_4$ should be the same as the covariance between $Y_4$ and $Y_6$, but may be different than the covariance between $Y_4$ and $Y_7$ since the latter are three time units apart. 
+In other words, the relationship between two observations depends only on how much time has passed between them, not when they occurred. For example, the correlation between $Y_2$ and $Y_4$ should be the same as the correlation between $Y_4$ and $Y_6$, but may be different than the correlation between $Y_4$ and $Y_7$ since the latter are three time units apart. 
 
-This idea is often formalized with the __autocovariance function__: 
-$$
-R_k = cov(Y_t,Y_{t-k}) 
-$$
-or the more commonly used __autocorrelation function__:
+This idea is often formalized with the __autocorrelation function__:
 $$
 \rho_k = corr(Y_t,Y_{t-k})
 $$
-which has the advantage of being independent of units. This makes it easier to interpret and compare across different time series. We'll mainly be focusing on the latter in these notes. 
+An autocorrelation function only makes sense if a process is stationary. Therefore, it doesn't make sense to talk about the autocorrelation function of tuition, but it does make sense to talk about the autocorrelation of the year-to-year incremental changes in tuition (first order differences).  
 
-Two comments before we proceed. First, an autocorrelation function only makes sense if a process is stationary. Therefore, it doesn't make sense to talk about the autocorrelation function of tuition, but it does make sense to talk about the autocorrelation of the year-to-year incremental changes in tuition (first order differences).  Second, what one typically does is compute the autocorrelation function $\rho$ for several different lags and then plot $\rho_k$ vs $k$. The `acf` function in R accomplishes this task. Let's look at the acf for private tuition change scores. 
+To visualize the autocorrelation function of a (stationary) series, we compute the autocorrelation function $\rho$ for several different lags and then plot $\rho_k$ vs $k$. The `acf` function in R accomplishes this task. Let's look at the acf for private tuition change scores. 
 
 ```{r}
 

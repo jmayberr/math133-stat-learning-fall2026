@@ -1,0 +1,82 @@
+---
+title: "Class Notes 11-13"
+format: html
+  html: 
+    embed-resources: true
+    self-contained: true
+---
+
+```{r}
+df_url="https://raw.githubusercontent.com/jmayberr/math133-stat-learning-fall2026/refs/heads/main/Datasets/nba2026.csv"
+nba2026 =read.csv(df_url)
+head(nba2026)
+```
+
+```{r}
+player_name="Shai Gilgeous-Alexander"
+
+player_series=nba2026 |>
+  dplyr::filter(player==player_name)
+
+head(player_series)
+```
+
+Time series
+
+```{r}
+library(tidyverse)
+player_series = player_series |>
+  mutate(fantasy_csum=cumsum(fantasy_points),
+         game_date=as.Date(game_date))
+
+player_series |>
+  ggplot(aes(x=game_date,y=fantasy_csum))+
+  geom_line()+
+  geom_point(shape=2)
+```
+
+Mean/SD of Change Scores
+
+```{r}
+cbar=mean(player_series$fantasy_points)
+c_sd=sd(player_series$fantasy_points)
+c(cbar,c_sd)
+```
+
+Control Chart:
+
+```{r}
+player_series |>
+  ggplot(aes(game_date,fantasy_points))+
+  geom_line()+
+  geom_point()+
+  geom_hline(yintercept=cbar) + # Mean Line
+  geom_hline(yintercept=cbar-3*c_sd,linetype = "dashed")+ 
+  geom_hline(yintercept=cbar+3*c_sd,linetype = "dashed")
+```
+
+Runs test
+
+```{r}
+player_series$above_avg=ifelse(
+  player_series$fantasy_points>cbar,
+  1,
+  0
+)
+table(
+  rle(
+    player_series$above_avg
+    )$lengths
+  )
+```
+
+```{r}
+library(tseries)
+runs.test(factor(player_series$above_avg))
+```
+
+Autocorrelation Function
+
+```{r}
+acf(player_series$fantasy_points)
+```
