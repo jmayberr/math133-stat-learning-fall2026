@@ -5,17 +5,26 @@ format: html
 
 ## Autoregressive Facts
 
-Some facts about `em:
+An AR(1) model is stationary in mean and variance if and only if $|\beta_1| < 1$. This can be proved by iterating the definition
+$$
+Y_t = \beta_0 + \beta_1 Y_{t-1} + \varepsilon_t = \beta_0 + \beta_1\beta_0+ \beta_1^2  Y_{t-2} + \varepsilon_t+\beta_1 \varepsilon_{t-1} = ...
+$$
+$n$ times until we get
 
-1. An AR(1) model is stationary^[Technically we should say "asymptotically stationary" depending on what we assume in regard to the initial conditions.] for $|\beta_1| < 1$ with mean
+$$
+Y_t = \beta_0 \sum_{k=0}^{n-1} \beta_1^k + \beta_1^n Y_{t-n} + \sum_{k=0}^{n-1} \beta_1^k \varepsilon_{t-k}
+$$
+
+In this case, its mean is given by
 $$
 \mu = E(Y_t) = \beta_0/(1-\beta_1) 
 $$
-and autocorrelation
+and its autocorrelation is 
 $$
 \rho_k = \beta_1^k
 $$
-2. The coefficients $\beta_0,\beta_1$ can be estimated in a manner similar to OLS, but (assuming stationarity) the answers are easy to guess. Since 
+
+The coefficients $\beta_0,\beta_1$ can be estimated in a manner similar to OLS, but (assuming stationarity) the answers are easy to guess. Since 
 $$
 Cov(Y_t,Y_{t-1}) = \beta_1 Var(Y_{t-1})
 $$

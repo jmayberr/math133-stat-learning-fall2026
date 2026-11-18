@@ -41,7 +41,7 @@ tuition |>
 
 ```
 
-There may be other situations, however, where the dependence of $y_t$ on its lagged value $y_{t-1}$ are linear, but with a "regressive" slope of $|\beta_1| < 1$ or where $y_t$ may depend on other past values like $y_{t-2},y_{t-3}$, etc. Such modifications lead to the definition of autocorrelation functions and autoregressive models. 
+There may be other situations, however, where the dependence of $y_t$ on its lagged value $y_{t-1}$ are linear, but with a slope $\beta_1 \neq 1$ or where $y_t$ may depend on other past values like $y_{t-2},y_{t-3}$, etc. Such modifications lead to the definition of autocorrelation functions and autoregressive models. 
 
 __Quick Note on $Y$ vs $y$:__
 
@@ -120,7 +120,11 @@ Y_t = \beta_0 + \beta_1 Y_{t-1} + \varepsilon_t
 $$
 for some constants $\beta_0,\beta_1$ where $\varepsilon_t$ is a white noise process with mean 0 and variance $\sigma^2$. Thus if $\beta_1 = 1$, AR(1) is a random walk while if $\beta_1 = 0$, then AR(1) is a sequence of iid random variables. Note that in order for the above process to make sense when $t=1$, one must assume something about an initial distribution of possible values $y_0$ (although this is more of a theoretical issue as you usually just start ticking at $t=2$ in practice). 
 
-One way to check whether an AR(1) model is appropriate is to compare the autocorrelation function with $\rho_1^k$, the $k$th power of the one-step autocorrelation^[See Module 8 Theory Supplement for details]. Here is what this looks like for the unemployment data:
+If $|beta_1 < 1$, then an AR(1) process is stationary and^[See Module 8 Theory Supplement for details]
+$$
+\rho_k = \rho_1^k
+$$
+is exponentially decreasing with the lag $k$. Therefore, one way to check whether an AR(1) model is appropriate is to compare the autocorrelation function with this theoretical formula. Here is what this looks like for the unemployment data:
 
 ```{r}
 rho_ur=acf(unemployment$UNRATE)
@@ -151,7 +155,7 @@ SE_n=Var(Y_{t+n} - \hat{Y}_{t+n}) = \sigma^2 \sum_{j=0}^{n-1} \beta_1^{2j}.
 $$
 where the the white noise variance $\sigma^2$ can be estimated using the sample residual variance from the fitted AR(1) model. Maybe I'll put a calculation in the supplement someday when I am really bored. Like, REALLY bored.]. As usual, `predict` will do all this for you after you fit a model with the `ar` function. 
 
-Let's see how all this looks for the unemployment data. We'll train an AR(1) model using everything up until 2025 and then see how the predictions compare up to October, 2026. 
+Let's see how all this plays out for the unemployment data. We'll train an AR(1) model using everything up until 2025 and then see how the predictions compare up to October, 2026. 
 
 ```{r}
 train=unemployment |>
@@ -191,7 +195,7 @@ The question then becomes: how do we distinguish between AR(k) models?
 
 The autocorrelation function does not do a good job of this because even in the AR(1) case, the correlation of $y_t$ and the n-lag $y_{t-n}$ is greater than 0 for all $n\geq 1$ even though the model only specifies that $y_t$ depends on $y_{t-1}$ because by the "chain rule", $y_t$ will depend on $y_s$ for all $s < t$. What we need is some type of conditional correlation function which looks at how $y_t$ depends on $y_{t-n}$ after already accounting for its dependence on $y_{t-1}$ or $y_{t-2}$ or any other "intervening" values of the time-series. Ideally, we would like this function to be close to 0 for $n>1$ if the time series follows an AR(1) model and in general, close to 0 for $n > k$ if the time series follows an AR(k) model. Thus is born the partial autocorrelation function.  
 
-Although we will not get into the details of how to calculate partial correlation coefficients here^[As an example, here's how you would compute the lag-2 partial correlation. First, regress $Y_t$ on $Y_{t-1}$ and get residuals $e_t$. Second, regress $Y_{t-2}$ on $Y_{t-1}$ and get the residuals $e_{t-2}$. Finally, calculate the correlation between $e_t$ and $e_{t-2}$. Since both residuals have the effect of $Y_{t-1}$ removed, we are now looking at a more direct correlation between $Y_t$ and $Y_{t-2}$ ], let's look at the result for our inflation bond data
+Although we will not get into the details of how to calculate partial correlation coefficients here^[As an example, here's how you would compute the lag-2 partial correlation. First, regress $Y_t$ on $Y_{t-1}$ and get residuals $e_t$. Second, regress $Y_{t-2}$ on $Y_{t-1}$ and get the residuals $e_{t-2}$. Finally, calculate the correlation between $e_t$ and $e_{t-2}$. Since both residuals have the effect of $Y_{t-1}$ removed, we are now looking at a more direct correlation between $Y_t$ and $Y_{t-2}$ ], we will illustrate what the result for our unemployment data
 
 ```{r}
 ur_pacf=pacf(unemployment$UNRATE,lag.max = 24)
@@ -232,7 +236,7 @@ Yep, order 3 was best! You can also plot the aic values to see how much of a min
 plot(0:20,quakes_ar$aic)
 ```
 
-Looking at this, I would say the choice of 3 is pretty convincing. Here are the predictions for the next 10 years (note the dataset ends in 2015):
+Looking at this, I would say the choice of 3 is pretty convincing. Here are the 10 year forecasts (note the dataset ends in 2015):
 
 ```{r}
 
@@ -253,7 +257,7 @@ According to the usgs.gov site, the number of 7+ quakes in 2016-2020 were: 16,7,
 
 ## Exercise
 
-The FRED database tracks the exchange rates between the US dollar and foreign currencies. For example, the commands below will load the daily exchange rates going back to 2020
+The FRED database also tracks the exchange rates between the US dollar and foreign currencies. For example, the commands below will load the daily exchange rates going back to 2020
 
 ```{r}
 library(tidyverse)
