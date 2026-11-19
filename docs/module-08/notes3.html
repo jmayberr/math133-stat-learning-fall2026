@@ -1176,10 +1176,71 @@ U    -0.8164 -0.1173  0.2857  1.0000</code></pre>
 </div>
 <p>They all look good except <code>prod</code>. I don’t know what’s going on with there, but I think we can probably blame Trump<a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a>.</p>
 </section>
+<section id="time-series-and-neural-networks" class="level2">
+<h2 class="anchored" data-anchor-id="time-series-and-neural-networks">Time Series and Neural Networks</h2>
+<p>To wrap up this section, we’ll tie in our study of time series with neural networks from Module 7 by considering two additional models:</p>
+<ul>
+<li>Autoregressive Neural networks (ARNN)</li>
+<li>Recurrent Neural Networks (RNN)</li>
+</ul>
+<p>The former is simple to describe. Instead of fitting a linear model to the present value <span class="math inline">\(Y_t\)</span> of a time series using the <span class="math inline">\(p\)</span> lagged values <span class="math inline">\(Y_{t-1},...Y_{t-p}\)</span> as predictors, we fit a neural network. This can be done with either <code>nnet</code> or <code>torch</code>. As a simple example, let’s fit an ARNN(2) model to the gistemp data using a single four-unit hidden layer</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nnet)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>gistemp <span class="ot">=</span> gistemp <span class="sc">|&gt;</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">m1=</span><span class="fu">lag</span>(Mean),</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">m2=</span><span class="fu">lag</span>(Mean,<span class="dv">2</span>),</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">m3=</span><span class="fu">lag</span>(Mean,<span class="dv">3</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>train <span class="ot">=</span> gistemp <span class="sc">|&gt;</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Date <span class="sc">&lt;=</span> <span class="st">"2015-12-31"</span>)</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>test <span class="ot">=</span> gistemp <span class="sc">|&gt;</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Date <span class="sc">&gt;</span> <span class="st">"2015-12-31"</span>)</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>arnn<span class="ot">=</span><span class="fu">nnet</span>(Mean<span class="sc">~</span>m1<span class="sc">+</span>m2<span class="sc">+</span>m3,</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>          <span class="at">data=</span>train,</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>          <span class="at">size=</span><span class="dv">4</span>,</span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>          <span class="at">linout=</span><span class="cn">TRUE</span>,</span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>          <span class="at">trace=</span><span class="cn">FALSE</span></span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>          )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Here’s a look at the fit and the RMSE:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>yhat<span class="ot">=</span><span class="fu">predict</span>(arnn, <span class="at">newdata =</span> test)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>df<span class="ot">=</span><span class="fu">data.frame</span>(</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">date=</span>test<span class="sc">$</span>Date,</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">actual=</span>test<span class="sc">$</span>Mean,</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">preds =</span> yhat</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(actual<span class="sc">:</span>preds,</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to=</span><span class="st">"value"</span>,</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to=</span><span class="st">"type"</span>)</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span></span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>date,<span class="at">y=</span>value,<span class="at">col=</span>type))<span class="sc">+</span></span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb49-14"><a href="#cb49-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
+<span id="cb49-15"><a href="#cb49-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"actual"</span><span class="ot">=</span><span class="st">"#004080"</span>,</span>
+<span id="cb49-16"><a href="#cb49-16" aria-hidden="true" tabindex="-1"></a>                              <span class="st">"preds"</span><span class="ot">=</span><span class="st">"#E35205"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="notes3_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"RMSE="</span>,<span class="fu">sqrt</span>(<span class="fu">mean</span>((yhat<span class="sc">-</span>test<span class="sc">$</span>Mean)<span class="sc">^</span><span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>RMSE= 0.1528751</code></pre>
+</div>
+</div>
+<p>Well I am out of time for now, but I will come back the RNN when I can ;)</p>
+</section>
 <section id="a-closing-haiku" class="level2">
 <h2 class="anchored" data-anchor-id="a-closing-haiku">A closing haiku</h2>
-<p>lm to ma You have come to love them all Now go and use them!</p>
-<p>Write your own destiny.</p>
+<p>My story is done</p>
+<p>But your work has just begun</p>
+<p>Go forth and model</p>
 
 
 </section>

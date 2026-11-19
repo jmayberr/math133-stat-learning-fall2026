@@ -2468,6 +2468,13 @@
     "href": "module-08/notes3.html#a-closing-haiku",
     "title": "Module 8.3: Time is not on our side",
     "section": "A closing haiku",
-    "text": "A closing haiku\nlm to ma You have come to love them all Now go and use them!\nWrite your own destiny."
+    "text": "A closing haiku\nMy story is done\nBut your work has just begun\nGo forth and model"
+  },
+  {
+    "objectID": "module-08/notes3.html#time-series-and-neural-networks",
+    "href": "module-08/notes3.html#time-series-and-neural-networks",
+    "title": "Module 8.3: Time is not on our side",
+    "section": "Time Series and Neural Networks",
+    "text": "Time Series and Neural Networks\nTo wrap up this section, we’ll tie in our study of time series with neural networks from Module 7 by considering two additional models:\n\nAutoregressive Neural networks (ARNN)\nRecurrent Neural Networks (RNN)\n\nThe former is simple to describe. Instead of fitting a linear model to the present value \\(Y_t\\) of a time series using the \\(p\\) lagged values \\(Y_{t-1},...Y_{t-p}\\) as predictors, we fit a neural network. This can be done with either nnet or torch. As a simple example, let’s fit an ARNN(2) model to the gistemp data using a single four-unit hidden layer\n\nlibrary(nnet)\ngistemp = gistemp |&gt;\n  mutate(m1=lag(Mean),\n         m2=lag(Mean,2),\n         m3=lag(Mean,3)) |&gt;\n  drop_na()\ntrain = gistemp |&gt;\n  filter(Date &lt;= \"2015-12-31\")\ntest = gistemp |&gt;\n  filter(Date &gt; \"2015-12-31\")\narnn=nnet(Mean~m1+m2+m3,\n          data=train,\n          size=4,\n          linout=TRUE,\n          trace=FALSE\n          )\n\nHere’s a look at the fit and the RMSE:\n\nyhat=predict(arnn, newdata = test)\ndf=data.frame(\n  date=test$Date,\n  actual=test$Mean,\n  preds = yhat\n) |&gt;\n  pivot_longer(actual:preds,\n               values_to=\"value\",\n               names_to=\"type\")\n\ndf |&gt;\n  ggplot(aes(x=date,y=value,col=type))+\n  geom_point()+\n  geom_line()+\n  scale_color_manual(values=c(\"actual\"=\"#004080\",\n                              \"preds\"=\"#E35205\"))\n\n\n\n\n\n\n\n\n\ncat(\"RMSE=\",sqrt(mean((yhat-test$Mean)^2)))\n\nRMSE= 0.1528751\n\n\nWell I am out of time for now, but I will come back the RNN when I can ;)"
   }
 ]

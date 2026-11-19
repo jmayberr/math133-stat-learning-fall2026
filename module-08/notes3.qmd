@@ -527,10 +527,68 @@ They all look good except `prod`. I don't know what's going on with there, but I
 
 [^9]: Although its going up when the predictions say it should go down so "blame" wouldn't be right and also this is pre-Trump, but I am going with the statement anyways. There is a more detailed description of this dataset [here](https://www.pfaffikus.de/rpacks/vars/files/vignette-vars.pdf)
 
+## Time Series and Neural Networks
+
+To wrap up this section, we'll tie in our study of time series with neural networks from Module 7 by considering two additional models:
+
+* Autoregressive Neural networks (ARNN)
+* Recurrent Neural Networks (RNN)
+
+The former is simple to describe. Instead of fitting a linear model to the present value $Y_t$ of a time series using the $p$ lagged values $Y_{t-1},...Y_{t-p}$ as predictors, we fit a neural network. This can be done with either `nnet` or `torch`. As a simple example, let's fit an ARNN(2) model to the gistemp data using a single four-unit hidden layer
+
+```{r}
+library(nnet)
+gistemp = gistemp |>
+  mutate(m1=lag(Mean),
+         m2=lag(Mean,2),
+         m3=lag(Mean,3)) |>
+  drop_na()
+train = gistemp |>
+  filter(Date <= "2015-12-31")
+test = gistemp |>
+  filter(Date > "2015-12-31")
+arnn=nnet(Mean~m1+m2+m3,
+          data=train,
+          size=4,
+          linout=TRUE,
+          trace=FALSE
+          )
+
+
+```
+
+Here's a look at the fit and the RMSE:
+
+```{r}
+yhat=predict(arnn, newdata = test)
+df=data.frame(
+  date=test$Date,
+  actual=test$Mean,
+  preds = yhat
+) |>
+  pivot_longer(actual:preds,
+               values_to="value",
+               names_to="type")
+
+df |>
+  ggplot(aes(x=date,y=value,col=type))+
+  geom_point()+
+  geom_line()+
+  scale_color_manual(values=c("actual"="#004080",
+                              "preds"="#E35205"))
+```
+
+```{r}
+cat("RMSE=",sqrt(mean((yhat-test$Mean)^2)))
+```
+
+Well I am out of time for now, but I will come back the RNN when I can ;) 
+
 ## A closing haiku
 
-lm to ma
-You have come to love them all
-Now go and use them! 
 
-Write your own destiny. 
+My story is done 
+
+But your work has just begun 
+
+Go forth and model

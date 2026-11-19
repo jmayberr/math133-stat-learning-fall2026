@@ -185,15 +185,15 @@ forecast10 |>
   scale_color_manual(values=cb_palette[c(1,4,7,6)])
 ```
 
-## AR(K) and Partial Autocorrelation functions
+## AR(p) and Partial Autocorrelation functions
 
-An autoregressive model of order $k$ (AR(k)) is similar to AR(1) except now we allow dependence on the $k$ most recent observations of the time series. This can be formulated mathematically as
+An autoregressive model of order $p$ (AR(p)) is similar to AR(1) except now we allow dependence on the $k$ most recent observations of the time series. This can be formulated mathematically as
 $$
-Y_t = \beta_0 + \beta_1 Y_{t-1} + \cdots + \beta_k Y_{t-k} + \varepsilon_t.
+Y_t = \beta_0 + \beta_1 Y_{t-1} + \cdots + \beta_p Y_{t-p} + \varepsilon_t.
 $$
-The question then becomes: how do we distinguish between AR(k) models? 
+The question then becomes: how do we distinguish between AR(p) models? 
 
-The autocorrelation function does not do a good job of this because even in the AR(1) case, the correlation of $y_t$ and the n-lag $y_{t-n}$ is greater than 0 for all $n\geq 1$ even though the model only specifies that $y_t$ depends on $y_{t-1}$ because by the "chain rule", $y_t$ will depend on $y_s$ for all $s < t$. What we need is some type of conditional correlation function which looks at how $y_t$ depends on $y_{t-n}$ after already accounting for its dependence on $y_{t-1}$ or $y_{t-2}$ or any other "intervening" values of the time-series. Ideally, we would like this function to be close to 0 for $n>1$ if the time series follows an AR(1) model and in general, close to 0 for $n > k$ if the time series follows an AR(k) model. Thus is born the partial autocorrelation function.  
+The autocorrelation function does not do a good job of this because even in the AR(1) case, the correlation of $y_t$ and the n-lag $y_{t-n}$ is greater than 0 for all $n\geq 1$ even though the model only specifies that $y_t$ depends on $y_{t-1}$ because by the "chain rule", $y_t$ will depend on $y_s$ for all $s < t$. What we need is some type of conditional correlation function which looks at how $y_t$ depends on $y_{t-n}$ after already accounting for its dependence on $y_{t-1}$ or $y_{t-2}$ or any other "intervening" values of the time-series. Ideally, we would like this function to be close to 0 for $n>1$ if the time series follows an AR(1) model and in general, close to 0 for $n > p$ if the time series follows an AR(k) model. Thus is born the partial autocorrelation function.  
 
 Although we will not get into the details of how to calculate partial correlation coefficients here^[As an example, here's how you would compute the lag-2 partial correlation. First, regress $Y_t$ on $Y_{t-1}$ and get residuals $e_t$. Second, regress $Y_{t-2}$ on $Y_{t-1}$ and get the residuals $e_{t-2}$. Finally, calculate the correlation between $e_t$ and $e_{t-2}$. Since both residuals have the effect of $Y_{t-1}$ removed, we are now looking at a more direct correlation between $Y_t$ and $Y_{t-2}$ ], we will illustrate what the result for our unemployment data
 
