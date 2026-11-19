@@ -97,3 +97,5 @@ website:
             text: "Module 8.1: Intro to Time Series"
           - href: module-08/notes2.qmd
             text: "Module 8.2: Autoregressive Models and Autocorrelation Functions"
+          - href: module-08/notes3.qmd
+            text: "Module 8.3: Moving beyond simple AR Models"

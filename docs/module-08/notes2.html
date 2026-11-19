@@ -341,6 +341,14 @@ window.Quarto = {
     <a class="dropdown-item" href="../module-08/notes1.html">
  <span class="dropdown-text">Module 8.1: Intro to Time Series</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../module-08/notes2.html">
+ <span class="dropdown-text">Module 8.2: Autoregressive Models and Autocorrelation Functions</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../module-08/notes3.html">
+ <span class="dropdown-text">Module 8.3: Moving beyond simple AR Models</span></a>
+  </li>  
     </ul>
   </li>
 </ul>
@@ -413,7 +421,7 @@ Y_t = \beta_0 + Y_{t-1} + \varepsilon_t
 </div>
 </div>
 </div>
-<p>There may be other situations, however, where the dependence of <span class="math inline">\(y_t\)</span> on its lagged value <span class="math inline">\(y_{t-1}\)</span> are linear, but with a “regressive” slope of <span class="math inline">\(|\beta_1| &lt; 1\)</span> or where <span class="math inline">\(y_t\)</span> may depend on other past values like <span class="math inline">\(y_{t-2},y_{t-3}\)</span>, etc. Such modifications lead to the definition of autocorrelation functions and autoregressive models.</p>
+<p>There may be other situations, however, where the dependence of <span class="math inline">\(y_t\)</span> on its lagged value <span class="math inline">\(y_{t-1}\)</span> are linear, but with a slope <span class="math inline">\(\beta_1 \neq 1\)</span> or where <span class="math inline">\(y_t\)</span> may depend on other past values like <span class="math inline">\(y_{t-2},y_{t-3}\)</span>, etc. Such modifications lead to the definition of autocorrelation functions and autoregressive models.</p>
 <p><strong>Quick Note on <span class="math inline">\(Y\)</span> vs <span class="math inline">\(y\)</span>:</strong></p>
 <p>Probabilists typically use capital letters (like <span class="math inline">\(Y\)</span>) to denote random variables and lowercase letters (like <span class="math inline">\(y\)</span>) for observed values of those variables. In statistics, though, that distinction often gets blurred, especially in applied contexts.</p>
 <p>I’ll try to use <span class="math inline">\(Y_t\)</span> when referring to the underlying stochastic model behind a time series, and <span class="math inline">\(y_t\)</span> when referring to the actual observed values. That said, there may be times when the notation flips, depending on context or convention. Many textbooks don’t worry about it and just stick with <span class="math inline">\(y_t\)</span> throughout, even when describing models like a random walk. But my probabilist training makes it hard not to reach for <span class="math inline">\(Y_t\)</span> when talking about a stochastic process.</p>
@@ -425,15 +433,13 @@ Y_t = \beta_0 + Y_{t-1} + \varepsilon_t
 <p>Stationarity involves more than just mean and variance. It also concerns how values in the process relate to one another over time. Specifically, a process is said to be weakly stationary (or second-order stationary) if:</p>
 <ol type="1">
 <li>Its mean is constant over time, and</li>
-<li>The covariance between <span class="math inline">\(Y_t\)</span> and <span class="math inline">\(Y_s\)</span> depends only on the time lag <span class="math inline">\(|t - s|\)</span>, not on the specific times <span class="math inline">\(t\)</span> and <span class="math inline">\(s\)</span> themselves.</li>
+<li>The correlation<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> between <span class="math inline">\(Y_t\)</span> and <span class="math inline">\(Y_s\)</span> depends only on the time lag <span class="math inline">\(|t - s|\)</span>, not on the specific times <span class="math inline">\(t\)</span> and <span class="math inline">\(s\)</span> themselves.</li>
 </ol>
-<p>In other words, the relationship between two observations depends only on how much time has passed between them, not when they occurred. For example, the covariance between <span class="math inline">\(Y_2\)</span> and <span class="math inline">\(Y_4\)</span> should be the same as the covariance between <span class="math inline">\(Y_4\)</span> and <span class="math inline">\(Y_6\)</span>, but may be different than the covariance between <span class="math inline">\(Y_4\)</span> and <span class="math inline">\(Y_7\)</span> since the latter are three time units apart.</p>
-<p>This idea is often formalized with the <strong>autocovariance function</strong>: <span class="math display">\[
-R_k = cov(Y_t,Y_{t-k})
-\]</span> or the more commonly used <strong>autocorrelation function</strong>: <span class="math display">\[
+<p>In other words, the relationship between two observations depends only on how much time has passed between them, not when they occurred. For example, the correlation between <span class="math inline">\(Y_2\)</span> and <span class="math inline">\(Y_4\)</span> should be the same as the correlation between <span class="math inline">\(Y_4\)</span> and <span class="math inline">\(Y_6\)</span>, but may be different than the correlation between <span class="math inline">\(Y_4\)</span> and <span class="math inline">\(Y_7\)</span> since the latter are three time units apart.</p>
+<p>This idea is often formalized with the <strong>autocorrelation function</strong>: <span class="math display">\[
 \rho_k = corr(Y_t,Y_{t-k})
-\]</span> which has the advantage of being independent of units. This makes it easier to interpret and compare across different time series. We’ll mainly be focusing on the latter in these notes.</p>
-<p>Two comments before we proceed. First, an autocorrelation function only makes sense if a process is stationary. Therefore, it doesn’t make sense to talk about the autocorrelation function of tuition, but it does make sense to talk about the autocorrelation of the year-to-year incremental changes in tuition (first order differences). Second, what one typically does is compute the autocorrelation function <span class="math inline">\(\rho\)</span> for several different lags and then plot <span class="math inline">\(\rho_k\)</span> vs <span class="math inline">\(k\)</span>. The <code>acf</code> function in R accomplishes this task. Let’s look at the acf for private tuition change scores.</p>
+\]</span> An autocorrelation function only makes sense if a process is stationary. Therefore, it doesn’t make sense to talk about the autocorrelation function of tuition, but it does make sense to talk about the autocorrelation of the year-to-year incremental changes in tuition (first order differences).</p>
+<p>To visualize the autocorrelation function of a (stationary) series, we compute the autocorrelation function <span class="math inline">\(\rho\)</span> for several different lags and then plot <span class="math inline">\(\rho_k\)</span> vs <span class="math inline">\(k\)</span>. The <code>acf</code> function in R accomplishes this task. Let’s look at the acf for private tuition change scores.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>rho<span class="ot">=</span><span class="fu">acf</span>(<span class="fu">na.omit</span>(tuition<span class="sc">$</span>PrivateDiff),</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">main=</span><span class="st">"ACF for Increment Changes in Private Tuition"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -446,7 +452,7 @@ R_k = cov(Y_t,Y_{t-k})
 </div>
 </div>
 <p>This plot shows that the sample correlation between <span class="math inline">\(y_t\)</span> and <span class="math inline">\(y_{t-k}\)</span> is close to 0 for all values of <span class="math inline">\(k \geq 1\)</span> as it should be for a sequence of iid random variables. The blue lines show 95% confidence intervals for where you would expect the autocorrelation values to lie if the time series consists of white noise and in our case, we can see that all the autocorrelations do indeed lie within this band. This lends further credence to our use of a random walk model for tuition.</p>
-<p>In contrast, lets look at a time series of US unemployment going back to 1980<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. These can be loaded from the publicly available FRED (Federal Reserve Bank) database as follows:</p>
+<p>In contrast, lets look at a time series of US unemployment going back to 1980<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. These can be loaded from the publicly available FRED (Federal Reserve Bank) database as follows:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>url <span class="ot">=</span> <span class="st">"https://fred.stlouisfed.org/graph/fredgraph.csv?id=UNRATE"</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -504,7 +510,9 @@ R_k = cov(Y_t,Y_{t-k})
 <p>An autoregressive model of order 1 (referred to as an AR(1) model) is a generalization of both iid sequences and random walks in which we assume that <span class="math display">\[
 Y_t = \beta_0 + \beta_1 Y_{t-1} + \varepsilon_t
 \]</span> for some constants <span class="math inline">\(\beta_0,\beta_1\)</span> where <span class="math inline">\(\varepsilon_t\)</span> is a white noise process with mean 0 and variance <span class="math inline">\(\sigma^2\)</span>. Thus if <span class="math inline">\(\beta_1 = 1\)</span>, AR(1) is a random walk while if <span class="math inline">\(\beta_1 = 0\)</span>, then AR(1) is a sequence of iid random variables. Note that in order for the above process to make sense when <span class="math inline">\(t=1\)</span>, one must assume something about an initial distribution of possible values <span class="math inline">\(y_0\)</span> (although this is more of a theoretical issue as you usually just start ticking at <span class="math inline">\(t=2\)</span> in practice).</p>
-<p>One way to check whether an AR(1) model is appropriate is to compare the autocorrelation function with <span class="math inline">\(\rho_1^k\)</span>, the <span class="math inline">\(k\)</span>th power of the one-step autocorrelation<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. Here is what this looks like for the unemployment data:</p>
+<p>If <span class="math inline">\(|beta_1 &lt; 1\)</span>, then an AR(1) process is stationary and<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> <span class="math display">\[
+\rho_k = \rho_1^k
+\]</span> is exponentially decreasing with the lag <span class="math inline">\(k\)</span>. Therefore, one way to check whether an AR(1) model is appropriate is to compare the autocorrelation function with this theoretical formula. Here is what this looks like for the unemployment data:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>rho_ur<span class="ot">=</span><span class="fu">acf</span>(unemployment<span class="sc">$</span>UNRATE)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>rho1<span class="ot">=</span>rho_ur<span class="sc">$</span>acf[<span class="dv">2</span>]</span>
@@ -520,12 +528,12 @@ Y_t = \beta_0 + \beta_1 Y_{t-1} + \varepsilon_t
 <p>That looks pretty good! Gaining more confidence in an AR(1) here.</p>
 <p>We can also be apply standard formulas for AR(1) process to obtain forecasts for future values using the heuristic <span class="math display">\[
 \hat{y} \pm 2*SE
-\]</span> where <span class="math inline">\(SE\)</span> means the standard deviation of the prediction error (i.e.&nbsp;<span class="math inline">\(SD(y-\hat{y})\)</span>). With an AR model, this is usually done using the “chain rule of forecasting<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>”, a fancy way of saying that given a current value of <span class="math inline">\(y_t\)</span>, we predict <span class="math display">\[
+\]</span> where <span class="math inline">\(SE\)</span> means the standard deviation of the prediction error (i.e.&nbsp;<span class="math inline">\(SD(y-\hat{y})\)</span>). With an AR model, this is usually done using the “chain rule of forecasting<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>”, a fancy way of saying that given a current value of <span class="math inline">\(y_t\)</span>, we predict <span class="math display">\[
 \hat{y}_{t+1} = \hat{\beta}_0 + \hat{\beta}_1 y_t  
 \]</span> and then use the result to predict <span class="math display">\[
 \hat{y}_{t+2} = \hat{\beta}_0 + \hat{\beta}_1 \hat{y}_{t+1}   
-\]</span> and so on. If you want an algebra challenge, you can work out a formula for this by hand<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. There is also a not-too-bad but not worth memorizing formula for the <span class="math inline">\(n\)</span>-step error variance<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. As usual, <code>predict</code> will do all this for you after you fit a model with the <code>ar</code> function.</p>
-<p>Let’s see how all this looks for the unemployment data. We’ll train an AR(1) model using everything up until 2025 and then see how the predictions compare up to October, 2026.</p>
+\]</span> and so on. If you want an algebra challenge, you can work out a formula for this by hand<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. There is also a not-too-bad but not worth memorizing formula for the <span class="math inline">\(n\)</span>-step error variance<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>. As usual, <code>predict</code> will do all this for you after you fit a model with the <code>ar</code> function.</p>
+<p>Let’s see how all this plays out for the unemployment data. We’ll train an AR(1) model using everything up until 2025 and then see how the predictions compare up to October, 2026.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>train<span class="ot">=</span>unemployment <span class="sc">|&gt;</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(observation_date<span class="sc">&lt;</span><span class="st">"2026-01-01"</span>)</span>
@@ -565,7 +573,7 @@ Y_t = \beta_0 + \beta_1 Y_{t-1} + \varepsilon_t
 Y_t = \beta_0 + \beta_1 Y_{t-1} + \cdots + \beta_k Y_{t-k} + \varepsilon_t.
 \]</span> The question then becomes: how do we distinguish between AR(k) models?</p>
 <p>The autocorrelation function does not do a good job of this because even in the AR(1) case, the correlation of <span class="math inline">\(y_t\)</span> and the n-lag <span class="math inline">\(y_{t-n}\)</span> is greater than 0 for all <span class="math inline">\(n\geq 1\)</span> even though the model only specifies that <span class="math inline">\(y_t\)</span> depends on <span class="math inline">\(y_{t-1}\)</span> because by the “chain rule”, <span class="math inline">\(y_t\)</span> will depend on <span class="math inline">\(y_s\)</span> for all <span class="math inline">\(s &lt; t\)</span>. What we need is some type of conditional correlation function which looks at how <span class="math inline">\(y_t\)</span> depends on <span class="math inline">\(y_{t-n}\)</span> after already accounting for its dependence on <span class="math inline">\(y_{t-1}\)</span> or <span class="math inline">\(y_{t-2}\)</span> or any other “intervening” values of the time-series. Ideally, we would like this function to be close to 0 for <span class="math inline">\(n&gt;1\)</span> if the time series follows an AR(1) model and in general, close to 0 for <span class="math inline">\(n &gt; k\)</span> if the time series follows an AR(k) model. Thus is born the partial autocorrelation function.</p>
-<p>Although we will not get into the details of how to calculate partial correlation coefficients here<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>, let’s look at the result for our inflation bond data</p>
+<p>Although we will not get into the details of how to calculate partial correlation coefficients here<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>, we will illustrate what the result for our unemployment data</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ur_pacf<span class="ot">=</span><span class="fu">pacf</span>(unemployment<span class="sc">$</span>UNRATE,<span class="at">lag.max =</span> <span class="dv">24</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
@@ -614,7 +622,7 @@ Y_t = \beta_0 + \beta_1 Y_{t-1} + \cdots + \beta_k Y_{t-k} + \varepsilon_t.
 </div>
 </div>
 </div>
-<p>It looks like it might have spikes up until lag-3. You can check by letting R choose a “best” value of lag based on AIC<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> by leaving out the order.max argument in your call to <code>ar</code>:</p>
+<p>It looks like it might have spikes up until lag-3. You can check by letting R choose a “best” value of lag based on AIC<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a> by leaving out the order.max argument in your call to <code>ar</code>:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>quakes_ar<span class="ot">=</span><span class="fu">ar</span>(quakes<span class="sc">$</span>Quakes)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>quakes_ar</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -641,7 +649,7 @@ Order selected 3  sigma^2 estimated as  16.05</code></pre>
 </div>
 </div>
 </div>
-<p>Looking at this, I would say the choice of 3 is pretty convincing. Here are the predictions for the next 10 years (note the dataset ends in 2015):</p>
+<p>Looking at this, I would say the choice of 3 is pretty convincing. Here are the 10 year forecasts (note the dataset ends in 2015):</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>preds10<span class="ot">=</span><span class="fu">predict</span>(quakes_ar,<span class="at">n.ahead =</span> <span class="dv">10</span>)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>forecast10<span class="ot">=</span><span class="fu">data.frame</span>(<span class="at">Year=</span><span class="dv">2016</span><span class="sc">:</span><span class="dv">2025</span>,</span>
@@ -665,7 +673,7 @@ Order selected 3  sigma^2 estimated as  16.05</code></pre>
 </section>
 <section id="exercise" class="level2">
 <h2 class="anchored" data-anchor-id="exercise">Exercise</h2>
-<p>The FRED database tracks the exchange rates between the US dollar and foreign currencies. For example, the commands below will load the daily exchange rates going back to 2020</p>
+<p>The FRED database also tracks the exchange rates between the US dollar and foreign currencies. For example, the commands below will load the daily exchange rates going back to 2020</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -702,17 +710,18 @@ Order selected 3  sigma^2 estimated as  16.05</code></pre>
 <div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
-<li id="fn1"><p>Again, author bias. That’s when I was born and the years before then just don’t matter.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>See Module 8 Theory Supplement for details<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>Not to be confused with Dr.&nbsp;Chain’s rule in calculus.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>To save you needing AI, the answer is <span class="math display">\[
+<li id="fn1"><p>Usually stated in terms of covariance which is the unstandardized version of correlation but we don’t talk about such things here.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Again, author bias. That’s when I was born and the years before then just don’t matter.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>See Module 8 Theory Supplement for details<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Not to be confused with Dr.&nbsp;Chain’s rule in calculus.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>To save you needing AI, the answer is <span class="math display">\[
 \hat{y}_{t+n} = \beta_0 \sum_{j=0}^{n-1}  \beta_1^j + \beta_1^k y_t.
-\]</span><a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn5"><p> <span class="math display">\[
+\]</span><a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p> <span class="math display">\[
 SE_n=Var(Y_{t+n} - \hat{Y}_{t+n}) = \sigma^2 \sum_{j=0}^{n-1} \beta_1^{2j}.
-\]</span> where the the white noise variance <span class="math inline">\(\sigma^2\)</span> can be estimated using the sample residual variance from the fitted AR(1) model. Maybe I’ll put a calculation in the supplement someday when I am really bored. Like, REALLY bored.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>As an example, here’s how you would compute the lag-2 partial correlation. First, regress <span class="math inline">\(Y_t\)</span> on <span class="math inline">\(Y_{t-1}\)</span> and get residuals <span class="math inline">\(e_t\)</span>. Second, regress <span class="math inline">\(Y_{t-2}\)</span> on <span class="math inline">\(Y_{t-1}\)</span> and get the residuals <span class="math inline">\(e_{t-2}\)</span>. Finally, calculate the correlation between <span class="math inline">\(e_t\)</span> and <span class="math inline">\(e_{t-2}\)</span>. Since both residuals have the effect of <span class="math inline">\(Y_{t-1}\)</span> removed, we are now looking at a more direct correlation between <span class="math inline">\(Y_t\)</span> and <span class="math inline">\(Y_{t-2}\)</span> <a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn7"><p>One could also use other complexity metrics or cross-validation.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+\]</span> where the the white noise variance <span class="math inline">\(\sigma^2\)</span> can be estimated using the sample residual variance from the fitted AR(1) model. Maybe I’ll put a calculation in the supplement someday when I am really bored. Like, REALLY bored.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>As an example, here’s how you would compute the lag-2 partial correlation. First, regress <span class="math inline">\(Y_t\)</span> on <span class="math inline">\(Y_{t-1}\)</span> and get residuals <span class="math inline">\(e_t\)</span>. Second, regress <span class="math inline">\(Y_{t-2}\)</span> on <span class="math inline">\(Y_{t-1}\)</span> and get the residuals <span class="math inline">\(e_{t-2}\)</span>. Finally, calculate the correlation between <span class="math inline">\(e_t\)</span> and <span class="math inline">\(e_{t-2}\)</span>. Since both residuals have the effect of <span class="math inline">\(Y_{t-1}\)</span> removed, we are now looking at a more direct correlation between <span class="math inline">\(Y_t\)</span> and <span class="math inline">\(Y_{t-2}\)</span> <a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>One could also use other complexity metrics or cross-validation.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

@@ -430,3 +430,4 @@ Use the [Tuition](https://raw.githubusercontent.com/jmayberr/math133-stat-learni
 1. Calculate the predicted cost of four-year public institutions over the next 10 years using both a simple linear model and random walk model. 
 2. Create a control chart to see if the differences form a roughly stationary process.
 3. Perform a runs test to see if the independence assumption is violated. 
+
